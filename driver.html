@@ -183,6 +183,63 @@
             padding: 2.5rem 1rem;
             color: var(--abu);
         }
+
+        /* Tombol Mode Otomatis */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.7rem 1rem;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        input:checked + .slider {
+            background-color: var(--hijau);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
     </style>
 </head>
 <body>
@@ -209,7 +266,7 @@
                     <label class="form-label">Nomor HP Terdaftar</label>
                     <input type="tel" id="inputHpDriver" class="form-control" placeholder="Contoh: 08123456789" required>
                 </div>
-                <button onclick="loginDriver()" class="btn btn-hijau w-100">Masuk</button>
+                <button onclick="loginDriver()" class="btn btn-success w-100">Masuk</button>
             </div>
         </div>
     </div>
@@ -223,8 +280,21 @@
             </div>
             <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
+
+        <!-- ✅ Tombol Aktifkan/Mati Terima Otomatis -->
+        <div class="switch-container">
+            <div>
+                <strong>Terima Pesanan Otomatis</strong>
+                <div class="text-muted small">Mencari pesanan terdekat</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="modeOtomatis" onchange="ubahModeOtomatis()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
         <div class="card">
-            <h5><i class="bi bi-bell"></i> Pesanan Masuk</h5>
+            <h5><i class="bi bi-bell"></i> Pesanan Tersedia</h5>
             <div id="daftarPesananMasuk"></div>
         </div>
     </div>
@@ -284,8 +354,10 @@ let peta;
 let penandaDriver;
 let lokasiDriver = { lat: -5.1477, lon: 119.4327 };
 let dataDriverSaatIni = null;
+let modeOtomatisAktif = false;
+let intervalCariPesanan = null;
 
-// ✅ Login Driver - Data dikelola Admin
+// ✅ Login & Cek Otomatis - DIKEMBALIKAN SEPERTI AWAL
 function loginDriver() {
     const hp = document.getElementById("inputHpDriver").value.trim();
     if (!hp) return alert("Masukkan nomor HP!");
@@ -309,6 +381,7 @@ function cekLoginDriver() {
         dataDriverSaatIni = JSON.parse(data);
         bukaHalamanDriver("pesanan");
     } else {
+        document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
         document.getElementById("halaman-login").classList.add("aktif");
     }
 }
@@ -317,6 +390,8 @@ function logoutDriver() {
     if (!confirm("Yakin ingin keluar?")) return;
     localStorage.removeItem("DRIVER_SAAT_INI");
     dataDriverSaatIni = null;
+    modeOtomatisAktif = false;
+    if (intervalCariPesanan) clearInterval(intervalCariPesanan);
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
     document.getElementById("halaman-login").classList.add("aktif");
 }
@@ -333,7 +408,7 @@ function bukaHalamanDriver(nama) {
     if (nama === "pesanan") {
         document.getElementById("halaman-pesanan").classList.add("aktif");
         document.querySelector(".nav-item:nth-child(1)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Pesanan Masuk";
+        document.getElementById("judulHalaman").textContent = "Pesanan Tersedia";
         document.getElementById("namaDriver").textContent = dataDriverSaatIni.nama;
         tampilkanPesananMasuk();
     } else if (nama === "riwayat") {
@@ -374,13 +449,66 @@ function inisialisasiPetaDriver() {
     }
 }
 
+// ✅ Hitung jarak untuk cari pesanan terdekat
+function hitungJarak(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+// ✅ Ubah Mode Otomatis
+function ubahModeOtomatis() {
+    const tombol = document.getElementById("modeOtomatis");
+    modeOtomatisAktif = tombol.checked;
+
+    if (modeOtomatisAktif) {
+        alert("Mode terima pesanan otomatis AKTIF - Mencari pesanan terdekat");
+        if (intervalCariPesanan) clearInterval(intervalCariPesanan);
+        intervalCariPesanan = setInterval(cariDanAmbilPesananTerdekat, 5000);
+    } else {
+        alert("Mode terima pesanan otomatis DIMATIKAN");
+        if (intervalCariPesanan) clearInterval(intervalCariPesanan);
+    }
+}
+
+// ✅ Cari pesanan terdekat
+function cariDanAmbilPesananTerdekat() {
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const pesananMenunggu = daftar.filter(p => !p.idDriver && p.status === "Menunggu" && p.lokasiTujuan);
+
+    if (pesananMenunggu.length === 0) return;
+
+    let pesananTerdekat = null;
+    let jarakTerdekat = 9999;
+
+    pesananMenunggu.forEach(pes => {
+        const jarak = hitungJarak(
+            lokasiDriver.lat, lokasiDriver.lon,
+            pes.lokasiTujuan.lat, pes.lokasiTujuan.lon
+        );
+        if (jarak < jarakTerdekat) {
+            jarakTerdekat = jarak;
+            pesananTerdekat = pes;
+        }
+    });
+
+    if (pesananTerdekat && jarakTerdekat <= 5) { // Maksimal 5 km
+        ambilPesanan(pesananTerdekat.resi);
+    }
+}
+
 function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
     const pesananBelumDiambil = daftar.filter(p => !p.idDriver && p.status === "Menunggu").reverse();
 
     if (pesananBelumDiambil.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan masuk</p></div>`;
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia</p></div>`;
         return;
     }
 
@@ -395,7 +523,7 @@ function tampilkanPesananMasuk() {
             <p><strong>HP:</strong> ${pes.hp}</p>
             <p><strong>Pesanan:</strong> ${pes.barang}</p>
             <p><strong>Alamat:</strong> ${pes.alamat}</p>
-            <button onclick="ambilPesanan('${pes.resi}')" class="btn btn-hijau w-100 mt-2">Ambil Pesanan</button>
+            <button onclick="ambilPesanan('${pes.resi}')" class="btn btn-success w-100 mt-2">Ambil Pesanan</button>
         </div>`;
     });
 }
@@ -409,8 +537,8 @@ function ambilPesanan(resi) {
         daftar[indeks].status = "Sudah Diambil";
         daftar[indeks].lokasiDriver = { ...lokasiDriver };
         localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
-        alert("Pesanan berhasil diambil!");
-        bukaHalamanDriver("pesanan");
+        if (!modeOtomatisAktif) alert("Pesanan berhasil diambil!");
+        tampilkanPesananMasuk();
     }
 }
 
@@ -459,6 +587,7 @@ function perbaruiPosisiDriverDiPesanan() {
 window.onload = function() {
     cekLoginDriver();
     setInterval(ambilLokasiDriver, 4000);
+    setInterval(tampilkanPesananMasuk, 3000);
 };
 </script>
 
