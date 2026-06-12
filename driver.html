@@ -14,7 +14,6 @@
             --hijau: #22C55E;
             --kuning: #F59E0B;
             --biru: #3B82F6;
-            --ungu: #7C3AED;
             --abu: #6B7280;
             --abu-terang: #F3F4F6;
             --putih: #FFFFFF;
@@ -34,6 +33,7 @@
             padding-bottom: 85px;
         }
 
+        /* ✅ HEADER DIPERBAIKI LEBIH KEREN */
         .header {
             background: linear-gradient(135deg, #0F4C5C 0%, #16657a 100%);
             color: white;
@@ -307,6 +307,7 @@
             color: #ef4444;
         }
 
+        /* ✅ Gaya untuk Popup Chat - DITAMBAH NAMA PENGIRIM */
         .overlay-chat {
             position: fixed;
             top: 0;
@@ -375,6 +376,7 @@
             background: #fafafa;
         }
 
+        /* ✅ Pesan Driver */
         .pesan-pengirim {
             background: var(--utama);
             color: white;
@@ -394,6 +396,7 @@
             display: block;
         }
 
+        /* ✅ Pesan Pelanggan / Costumer */
         .pesan-pelanggan {
             background: #e2e8f0;
             color: var(--teks);
@@ -455,6 +458,7 @@
             background: #0d3d4a;
         }
 
+        /* ✅ Info Lokasi Pelanggan */
         .info-pelanggan {
             margin-top: 1rem;
             padding: 0.8rem;
@@ -464,7 +468,7 @@
             font-size: 0.9rem;
         }
 
-        /* ✅ Pembeda Jelas Tipe Pesanan */
+        /* ✅ Tambahan Gaya untuk Pesanan Ojek Online */
         .tipe-pesanan {
             font-size: 0.75rem;
             font-weight: 600;
@@ -473,8 +477,8 @@
             margin-bottom: 0.5rem;
             display: inline-block;
         }
-        .tipe-ojek { background: var(--ungu); color: white; }
-        .tipe-barang { background: #0891b2; color: white; }
+        .tipe-ojek { background: #9333ea; color: white; }
+        .tipe-antar { background: #0891b2; color: white; }
         .info-jarak-harga {
             display: flex;
             justify-content: space-between;
@@ -536,7 +540,7 @@
         <div class="mode-switch">
             <div>
                 <strong>Terima Pesanan Otomatis</strong>
-                <div class="text-muted small">Menerima pesanan Ojek & Barang terdekat</div>
+                <div class="text-muted small">Mencari pesanan terdekat termasuk Ojek Online</div>
             </div>
             <label class="switch">
                 <input type="checkbox" id="modeOtomatis" onchange="ubahModeOtomatis()">
@@ -613,6 +617,7 @@
     </div>
 </div>
 
+<!-- ✅ POPUP CHAT BARU -->
 <div id="overlayChat" class="overlay-chat">
     <div class="popup-chat">
         <div class="header-chat">
@@ -627,10 +632,14 @@
     </div>
 </div>
 
+<!-- ✅ PUSTAKA FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
+// ==========================================
+// ✅ KONFIGURASI FIREBASE (SAMA DENGAN ADMIN)
+// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
   authDomain: "dok123-1bd6f.firebaseapp.com",
@@ -641,6 +650,7 @@ const firebaseConfig = {
   appId: "1:664523539322:web:61c0adedc67fee015dccc3"
 };
 
+// Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refData = db.ref("data");
@@ -656,6 +666,9 @@ let intervalCariPesanan = null;
 let resiChatAktif = null;
 let pesananAktifSekarang = null;
 
+// ==========================================
+// ✅ FUNGSI BACA & SIMPAN KE FIREBASE
+// ==========================================
 async function bacaData() {
     try {
         const snapshot = await refData.once("value");
@@ -677,32 +690,21 @@ async function simpanData(dataBaru) {
     }
 }
 
-// ✅ Fungsi untuk dapatkan nama alamat
-async function dapatkanNamaAlamat(lat, lon) {
-    try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
-        const data = await res.json();
-        return data.display_name || "Alamat tidak ditemukan";
-    } catch (err) {
-        console.warn("Gagal dapatkan nama alamat:", err);
-        return `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-    }
-}
-
+// ✅ LOKASI TIDAK DIPAKSA AKURAT - BISA BERJALAN DENGAN AKURASI APA SAJA
 function ambilLokasiDriver() {
     if (!navigator.geolocation) {
         alert("Perangkat tidak mendukung fitur lokasi!");
         return;
     }
     navigator.geolocation.getCurrentPosition(
-        async (pos) => {
+        (pos) => {
             lokasiDriver.lat = pos.coords.latitude;
             lokasiDriver.lon = pos.coords.longitude;
             lokasiDriver.akurasi = pos.coords.accuracy;
             
-            const namaAlamat = await dapatkanNamaAlamat(lokasiDriver.lat, lokasiDriver.lon);
             if (penandaDriver) penandaDriver.setLatLng([lokasiDriver.lat, lokasiDriver.lon]);
-            document.getElementById("lokasiDriverSekarang").textContent = namaAlamat;
+            document.getElementById("lokasiDriverSekarang").textContent = 
+                `${lokasiDriver.lat.toFixed(6)}, ${lokasiDriver.lon.toFixed(6)} (Akurasi: ${lokasiDriver.akurasi.toFixed(1)} m)`;
             
             perbaruiPosisiDriverDiPesanan();
             perbaruiLokasiPelangganRealTime();
@@ -843,16 +845,10 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ✅ Tarif berbeda sesuai jenis pesanan
-function hitungHarga(jarakKm, tipePesanan = "Antar Barang") {
-    let tarifDasar, tarifPerKm;
-    if (tipePesanan === "Ojek Online") {
-        tarifDasar = 3000;
-        tarifPerKm = 1500;
-    } else {
-        tarifDasar = 4000;
-        tarifPerKm = 2000;
-    }
+// ✅ Hitung Harga Berdasarkan Jarak
+function hitungHarga(jarakKm) {
+    const tarifDasar = 3000; // Rp 3.000 untuk km pertama
+    const tarifPerKm = 1500; // Rp 1.500 per km selanjutnya
     return jarakKm <= 1 ? tarifDasar : Math.round(tarifDasar + (jarakKm - 1) * tarifPerKm);
 }
 
@@ -868,6 +864,7 @@ function ubahModeOtomatis() {
     }
 }
 
+// ✅ DIPERBARUI: Mencari pesanan termasuk Ojek Online
 async function cariDanAmbilPesananTerdekat() {
     const semuaData = await bacaData();
     const daftar = semuaData.daftarPesanan || [];
@@ -896,13 +893,12 @@ function tampilkanNotif(pesanan) {
     const isi = document.getElementById("isiNotif");
     const jarakJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pesanan.lokasiJemput.lat, pesanan.lokasiJemput.lon);
     const jarakTotal = hitungJarak(pesanan.lokasiJemput.lat, pesanan.lokasiJemput.lon, pesanan.lokasiTujuan.lat, pesanan.lokasiTujuan.lon);
-    const harga = pesanan.harga || hitungHarga(jarakTotal, pesanan.tipePesanan);
     isi.innerHTML = `
         <p class="mb-1"><strong>Resi:</strong> ${pesanan.resi}</p>
         <p class="mb-1"><strong>Tipe:</strong> ${pesanan.tipePesanan || 'Antar Barang'}</p>
         <p class="mb-1"><strong>Pelanggan:</strong> ${pesanan.nama}</p>
         <p class="mb-1"><strong>Jarak Jemput:</strong> ${jarakJemput.toFixed(2)} km</p>
-        <p class="mb-0"><strong>Estimasi Harga:</strong> Rp ${harga.toLocaleString('id-ID')}</p>
+        <p class="mb-0"><strong>Estimasi Harga:</strong> Rp ${(pesanan.harga || hitungHarga(jarakTotal)).toLocaleString('id-ID')}</p>
     `;
     notif.classList.add("tampil");
     setTimeout(() => tutupNotif(), 8000);
@@ -912,6 +908,7 @@ function tutupNotif() {
     document.getElementById("popupNotif").classList.remove("tampil");
 }
 
+// ✅ DIPERBARUI: Tampilkan pesanan termasuk Ojek Online
 async function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
     const semuaData = await bacaData();
@@ -925,6 +922,7 @@ async function tampilkanPesananMasuk() {
         )
         .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
 
+    // Simpan pesanan yang sedang dikerjakan
     pesananAktifSekarang = pesananDiurut.find(p => p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai") || null;
 
     if (pesananDiurut.length === 0) {
@@ -938,12 +936,11 @@ async function tampilkanPesananMasuk() {
     }
 
     wadah.innerHTML = "";
-    for (const pes of pesananDiurut) {
+    pesananDiurut.forEach(pes => {
         const jarakJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pes.lokasiJemput.lat, pes.lokasiJemput.lon);
         const jarakTotal = hitungJarak(pes.lokasiJemput.lat, pes.lokasiJemput.lon, pes.lokasiTujuan.lat, pes.lokasiTujuan.lon);
-        const harga = pes.harga || hitungHarga(jarakTotal, pes.tipePesanan);
-        const tipe = pes.tipePesanan || "Antar Barang";
-        const tipeKelas = tipe === "Ojek Online" ? "tipe-ojek" : "tipe-barang";
+        const harga = pes.harga || hitungHarga(jarakTotal);
+        const tipeKelas = pes.tipePesanan === "Ojek Online" ? "tipe-ojek" : "tipe-antar";
 
         let warnaStatus, tombolAksi = "";
         switch(pes.status) {
@@ -970,7 +967,7 @@ async function tampilkanPesananMasuk() {
         }
 
         wadah.innerHTML += `<div class="pesanan-item">
-            <span class="tipe-pesanan ${tipeKelas}">${tipe}</span>
+            <span class="tipe-pesanan ${tipeKelas}">${pes.tipePesanan || 'Antar Barang'}</span>
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">Resi: ${pes.resi}</span>
                 <span class="status-badge" style="background:${warnaStatus}">${pes.status}</span>
@@ -989,9 +986,10 @@ async function tampilkanPesananMasuk() {
                 ${tombolAksi}
             </div>
         </div>`;
-    }
+    });
 }
 
+// ✅ Buka Popup Chat - Menampilkan Nama Pelanggan
 async function bukaPopupChat(resi, namaPelanggan) {
     resiChatAktif = resi;
     document.getElementById("judulChat").textContent = `Chat dengan ${namaPelanggan}`;
@@ -1006,6 +1004,7 @@ function tutupPopupChat() {
     document.getElementById("inputPesanChat").value = "";
 }
 
+// ✅ Muat Riwayat Pesan - Menampilkan Nama Pengirim
 async function muatRiwayatPesan() {
     if (!resiChatAktif) return;
     const semuaData = await bacaData();
@@ -1067,13 +1066,11 @@ async function ambilPesanan(resi) {
     const indeks = daftar.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
         const jarakTotal = hitungJarak(daftar[indeks].lokasiJemput.lat, daftar[indeks].lokasiJemput.lon, daftar[indeks].lokasiTujuan.lat, daftar[indeks].lokasiTujuan.lon);
-        const tipe = daftar[indeks].tipePesanan || "Antar Barang";
         daftar[indeks].idDriver = dataDriverSaatIni.hp;
         daftar[indeks].namaDriver = dataDriverSaatIni.nama;
         daftar[indeks].status = "Dalam Perjalanan ke Jemput";
         daftar[indeks].lokasiDriver = { ...lokasiDriver };
-        daftar[indeks].harga = daftar[indeks].harga || hitungHarga(jarakTotal, tipe);
-        daftar[indeks].waktuDiambil = new Date().toLocaleString('id-ID');
+        daftar[indeks].harga = daftar[indeks].harga || hitungHarga(jarakTotal);
         if (!daftar[indeks].pesanChat) daftar[indeks].pesanChat = [];
         semuaData.daftarPesanan = daftar;
         if (await simpanData(semuaData)) {
@@ -1084,15 +1081,11 @@ async function ambilPesanan(resi) {
 }
 
 async function ubahStatus(resi, statusBaru) {
-async function ubahStatus(resi, statusBaru) {
     const semuaData = await bacaData();
     const daftar = semuaData.daftarPesanan || [];
     const indeks = daftar.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
         daftar[indeks].status = statusBaru;
-        if (statusBaru === "Selesai") {
-            daftar[indeks].waktuSelesai = new Date().toLocaleString('id-ID');
-        }
         semuaData.daftarPesanan = daftar;
         if (await simpanData(semuaData)) {
             tampilkanPesananMasuk();
@@ -1100,7 +1093,6 @@ async function ubahStatus(resi, statusBaru) {
         }
     }
 }
-
 async function tampilkanRiwayatDriver() {
     const wadah = document.getElementById("daftarRiwayatDriver");
     const semuaData = await bacaData();
@@ -1115,11 +1107,10 @@ async function tampilkanRiwayatDriver() {
     }
 
     wadah.innerHTML = "";
-    for (const pes of riwayat) {
-        const tipe = pes.tipePesanan || "Antar Barang";
-        const tipeKelas = tipe === "Ojek Online" ? "tipe-ojek" : "tipe-barang";
+    riwayat.forEach(pes => {
+        const tipeKelas = pes.tipePesanan === "Ojek Online" ? "tipe-ojek" : "tipe-antar";
         wadah.innerHTML += `<div class="pesanan-item">
-            <span class="tipe-pesanan ${tipeKelas}">${tipe}</span>
+            <span class="tipe-pesanan ${tipeKelas}">${pes.tipePesanan || 'Antar Barang'}</span>
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">Resi: ${pes.resi}</span>
                 <span class="status-badge" style="background:#0F4C5C">Selesai</span>
@@ -1131,7 +1122,7 @@ async function tampilkanRiwayatDriver() {
             <p><strong>Waktu Selesai:</strong> ${pes.waktuSelesai || pes.waktuPesan || '-'}</p>
             <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-text"></i> Lihat Pesan</button>
         </div>`;
-    }
+    });
 }
 
 async function perbaruiPosisiDriverDiPesanan() {
@@ -1151,6 +1142,7 @@ async function perbaruiPosisiDriverDiPesanan() {
     }
 }
 
+// ✅ CEK LOKASI JEMPUT & TUJUAN SECARA REAL-TIME UNTUK OJEK ONLINE
 async function perbaruiLokasiPelangganRealTime() {
     if (!pesananAktifSekarang || !peta) return;
     
@@ -1175,9 +1167,7 @@ async function perbaruiLokasiPelangganRealTime() {
     const jarakKeJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, lokasiJemput.lat, lokasiJemput.lon);
     const jarakTotal = hitungJarak(lokasiJemput.lat, lokasiJemput.lon, lokasiTujuan.lat, lokasiTujuan.lon);
 
-    const namaJemput = pesanan.alamatJemput || await dapatkanNamaAlamat(lokasiJemput.lat, lokasiJemput.lon);
-    const namaTujuan = pesanan.alamatTujuan || await dapatkanNamaAlamat(lokasiTujuan.lat, lokasiTujuan.lon);
-
+    // Tampilkan penanda sesuai status pesanan
     if (pesanan.status === "Dalam Perjalanan ke Jemput") {
         penandaJemput.setLatLng([lokasiJemput.lat, lokasiJemput.lon]).setOpacity(1);
         penandaTujuan.setOpacity(0);
@@ -1190,8 +1180,10 @@ async function perbaruiLokasiPelangganRealTime() {
         document.getElementById("jarakKePelanggan").textContent = `${jarakTotal.toFixed(2)} km ke tujuan`;
     }
     
-    document.getElementById("lokasiJemputSekarang").textContent = namaJemput;
-    document.getElementById("lokasiPelangganSekarang").textContent = namaTujuan;
+    document.getElementById("lokasiJemputSekarang").textContent = 
+        `${lokasiJemput.lat.toFixed(6)}, ${lokasiJemput.lon.toFixed(6)}`;
+    document.getElementById("lokasiPelangganSekarang").textContent = 
+        `${lokasiTujuan.lat.toFixed(6)}, ${lokasiTujuan.lon.toFixed(6)}`;
 }
 
 window.onload = function() {
