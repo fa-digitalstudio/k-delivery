@@ -567,7 +567,7 @@ let pesananAktif = null;
 let kategoriTerpilih = "semua";
 let penggunaSaatIni = null;
 
-// ✅ Fungsi Login (diperbarui untuk menyimpan data ke admin)
+// ✅ LOGIN DIPERBARUI: Data terpusat berdasarkan nomor HP
 function login() {
     const nama = document.getElementById("inputNama").value.trim();
     const hp = document.getElementById("inputHp").value.trim();
@@ -576,18 +576,24 @@ function login() {
         return alert("Lengkapi nama dan nomor HP!");
     }
 
-    // Simpan ke daftar pengguna agar bisa dilihat admin
+    // Ambil data pengguna secara GLOBAL (bukan perangkat)
     const daftarPengguna = JSON.parse(localStorage.getItem("DAFTAR_PENGGUNA")) || [];
-    const sudahAda = daftarPengguna.some(p => p.hp === hp);
+    const indeksPengguna = daftarPengguna.findIndex(p => p.hp === hp);
 
-    if (!sudahAda) {
+    if (indeksPengguna === -1) {
+        // Pengguna baru: daftarkan ke daftar utama
         daftarPengguna.push({
             nama: nama,
             hp: hp,
             waktuDaftar: new Date().toLocaleString('id-ID')
         });
-        localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
+    } else {
+        // Jika nomor HP sudah ada, gunakan nama yang terdaftar
+        nama = daftarPengguna[indeksPengguna].nama;
     }
+
+    // Simpan perubahan ke daftar utama
+    localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
 
     // Simpan sesi login
     penggunaSaatIni = { nama, hp };
@@ -708,8 +714,8 @@ function tampilkanKategori() {
     const daftarKategori = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
     const wadah = document.getElementById("wadahKategori");
     wadah.innerHTML = `<button class="tombol-kategori aktif" onclick="pilihKategori('semua')">Semua</button>`;
-    daftarKategori.forEach((kat, idx) => {
-        wadah.innerHTML += `<button class="tombol-kategori" onclick="pilihKategori(${idx})">${kat.nama}</button>`;
+    daftarKategori.forEach((kat) => {
+        wadah.innerHTML += `<button class="tombol-kategori" onclick="pilihKategori(${kat.id})">${kat.nama}</button>`;
     });
 }
 
@@ -726,7 +732,7 @@ function tampilkanMenu() {
     const wadah = document.getElementById("daftarMenu");
     let menuTampil = daftarMenu;
     if (kategoriTerpilih !== "semua") {
-        menuTampil = daftarMenu.filter(m => m.id === daftarKategori[kategoriTerpilih]?.id);
+        menuTampil = daftarMenu.filter(m => m.idKategori == kategoriTerpilih);
     }
     if (menuTampil.length === 0) {
         wadah.innerHTML = `<div class="kosong p-4" style="grid-column: 1 / -1;"><i class="bi bi-clipboard-x"></i><p>Menu tidak tersedia</p></div>`;
@@ -734,7 +740,7 @@ function tampilkanMenu() {
     }
     wadah.innerHTML = "";
     menuTampil.forEach((item) => {
-        const namaKat = daftarKategori.find(k => k.id === item.id)?.nama || "Lainnya";
+        const namaKat = daftarKategori.find(k => k.id == item.idKategori)?.nama || "Lainnya";
         wadah.innerHTML += `<div class="kartu-menu" onclick="bukaPopup(${daftarMenu.indexOf(item)})">
             <img src="${item.gambar}" alt="${item.nama}" class="gambar-menu" loading="lazy">
             <div class="info-menu">
@@ -814,6 +820,7 @@ function perbaruiDataPeta() {
     }
 }
 
+// ✅ KIRIM PESANAN: Disimpan ke daftar GLOBAL agar bisa dibaca di mana saja
 function kirimPesanan() {
     const barang = document.getElementById("barang").value.trim();
     const alamat = document.getElementById("alamat").value.trim();
@@ -833,24 +840,31 @@ function kirimPesanan() {
         lon: lokasiSaya.lon,
         akurasi: lokasiSaya.akurasi,
         lokasiDriver: null,
-        status: "Menunggu"
+        status: "Menunggu",
+        waktuPesan: new Date().toLocaleString('id-ID')
     };
 
+    // Simpan ke daftar pesanan UTAMA (bukan perangkat)
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
     daftar.push(pesananBaru);
     localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+
     alert(`✅ Pesanan berhasil dikirim!\nNomor Resi: ${pesananBaru.resi}`);
     tutupPopup();
 }
 
+// ✅ TAMPILKAN RIWAYAT: Ambil dari daftar utama berdasarkan nomor HP
 function tampilkanRiwayat() {
     const wadah = document.getElementById("daftarRiwayat");
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    // Ambil SEMUA pesanan yang cocok dengan nomor HP pengguna
     const pesananSaya = daftar.filter(p => p.hp === penggunaSaatIni.hp).reverse();
+    
     if (pesananSaya.length === 0) {
         wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan</p></div>`;
         return;
     }
+
     wadah.innerHTML = "";
     pesananSaya.forEach(pes => {
         let warna = "#6B7280", teks = "Menunggu";
@@ -858,6 +872,7 @@ function tampilkanRiwayat() {
         else if (pes.status === "Sampai di Restoran") { warna = "#3B82F6"; teks = "Di Restoran"; }
         else if (pes.status === "Dalam Perjalanan") { warna = "#F59E0B"; teks = "Dalam Perjalanan"; }
         else if (pes.status === "Selesai") { warna = "#0F4C5C"; teks = "Selesai"; }
+
         wadah.innerHTML += `<div class="pesanan-item">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">${pes.resi}</span>
@@ -865,6 +880,7 @@ function tampilkanRiwayat() {
             </div>
             <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang}</p>
             <p class="mb-1 text-muted"><i class="bi bi-geo-alt"></i> ${pes.alamat}</p>
+            <p class="mb-1 small text-muted"><i class="bi bi-clock"></i> ${pes.waktuPesan || '-'}</p>
             ${pes.catatan ? `<p class="mb-0 small text-success"><i class="bi bi-chat-left-text"></i> ${pes.catatan}</p>` : ""}
         </div>`;
     });
