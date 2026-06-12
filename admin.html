@@ -156,6 +156,13 @@
             margin-bottom: 1rem;
             opacity: 0.3;
         }
+
+        .info-sinkron {
+            font-size: 0.8rem;
+            color: #6B7280;
+            text-align: right;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -168,7 +175,10 @@
     <!-- Halaman Daftar Pesanan -->
     <div class="halaman aktif" id="halaman-pesanan">
         <div class="card">
-            <h5><i class="bi bi-receipt-cutoff"></i> Semua Data Pesanan</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5><i class="bi bi-receipt-cutoff"></i> Semua Data Pesanan</h5>
+                <span class="info-sinkron" id="statusSinkronPesanan"></span>
+            </div>
             <div id="daftarSemuaPesanan"></div>
         </div>
     </div>
@@ -176,13 +186,16 @@
     <!-- Halaman Kelola Menu & Kategori -->
     <div class="halaman" id="halaman-menu">
         <div class="card">
-            <h5><i class="bi bi-egg-fried"></i> Kelola Menu Makanan</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5><i class="bi bi-egg-fried"></i> Kelola Menu Makanan</h5>
+                <span class="info-sinkron" id="statusSinkronMenu"></span>
+            </div>
             <div class="mb-3 d-flex flex-wrap gap-2">
                 <input type="text" id="namaMenu" class="form-control" placeholder="Nama Menu">
                 <input type="number" id="hargaMenu" class="form-control" placeholder="Harga">
                 <input type="text" id="gambarMenu" class="form-control" placeholder="Link Gambar">
                 <select id="kategoriMenu" class="form-select"></select>
-                <button onclick="tambahMenu()" class="btn btn-hijau">Simpan Menu</button>
+                <button onclick="tambahMenu()" class="btn btn-success">Simpan Menu</button>
             </div>
             <div id="daftarMenuAdmin"></div>
         </div>
@@ -191,7 +204,7 @@
             <h5><i class="bi bi-list-ul"></i> Kelola Kategori</h5>
             <div class="mb-3 d-flex flex-wrap gap-2">
                 <input type="text" id="namaKategori" class="form-control" placeholder="Nama Kategori">
-                <button onclick="tambahKategori()" class="btn btn-hijau">Tambah Kategori</button>
+                <button onclick="tambahKategori()" class="btn btn-success">Tambah Kategori</button>
             </div>
             <div id="daftarKategoriAdmin"></div>
         </div>
@@ -200,11 +213,14 @@
     <!-- ✅ HALAMAN BARU: Kelola Data Driver -->
     <div class="halaman" id="halaman-driver">
         <div class="card">
-            <h5><i class="bi bi-person-badge"></i> Kelola Data Driver</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5><i class="bi bi-person-badge"></i> Kelola Data Driver</h5>
+                <span class="info-sinkron" id="statusSinkronDriver"></span>
+            </div>
             <div class="mb-3 d-flex flex-wrap gap-2">
                 <input type="text" id="namaDriverBaru" class="form-control" placeholder="Nama Lengkap Driver" style="flex: 1 1 220px;">
                 <input type="tel" id="hpDriverBaru" class="form-control" placeholder="Nomor HP Aktif" style="flex: 1 1 200px;">
-                <button onclick="tambahDriver()" class="btn btn-hijau">Tambah Driver</button>
+                <button onclick="tambahDriver()" class="btn btn-success">Tambah Driver</button>
             </div>
             <div id="daftarDriverKelola"></div>
         </div>
@@ -216,7 +232,7 @@
             <h5><i class="bi bi-image"></i> Kelola Banner Promo</h5>
             <div class="mb-3">
                 <input type="text" id="linkBanner" class="form-control" placeholder="Masukkan link gambar banner">
-                <button onclick="simpanBanner()" class="btn btn-hijau w-100 mt-2">Simpan Banner</button>
+                <button onclick="simpanBanner()" class="btn btn-success w-100 mt-2">Simpan Banner</button>
             </div>
             <div id="tampilanBanner"></div>
         </div>
@@ -244,11 +260,83 @@
 </div>
 
 <script>
-// Variabel tetap sama seperti sebelumnya
-let daftarMenu = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
-let daftarKategori = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
+// ==========================================
+// ✅ PENGATURAN PENYIMPANAN KE GITHUB
+// ==========================================
+// Ganti nilai ini sesuai data akun GitHub Anda
+const GITHUB = {
+    username: "fa-digitalstudio",
+    token: "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",
+    gistId: "0896a7416917aced60c143ebf16eba84"
+};
 
-// Fungsi ganti halaman
+// Variabel data
+let daftarMenu = [];
+let daftarKategori = [];
+let daftarDriver = [];
+let daftarPesanan = [];
+let daftarBanner = [];
+
+// ==========================================
+// ✅ FUNGSI SINKRONISASI KE GITHUB
+// ==========================================
+async function bacaDariGitHub() {
+    try {
+        const res = await fetch(`https://api.github.com/gists/${GITHUB.gistId}`, {
+            headers: { Authorization: `token ${GITHUB.token}` }
+        });
+        const data = await res.json();
+        const konten = JSON.parse(data.files["data.json"].content || "{}");
+        
+        daftarMenu = konten.daftarMenu || [];
+        daftarKategori = konten.daftarKategori || [];
+        daftarDriver = konten.daftarDriver || [];
+        daftarPesanan = konten.daftarPesanan || [];
+        daftarBanner = konten.daftarBanner || [];
+
+        console.log("✅ Data berhasil dimuat dari GitHub");
+    } catch (err) {
+        console.warn("⚠️ Tidak dapat membaca dari GitHub, gunakan data kosong:", err);
+        // Jika gagal, tetap gunakan data kosong
+    }
+}
+
+async function simpanKeGitHub() {
+    try {
+        const dataUntukSimpan = {
+            daftarMenu,
+            daftarKategori,
+            daftarDriver,
+            daftarPesanan,
+            daftarBanner,
+            diperbaruiPada: new Date().toISOString()
+        };
+
+        await fetch(`https://api.github.com/gists/${GITHUB.gistId}`, {
+            method: "PATCH",
+            headers: {
+                Authorization: `token ${GITHUB.token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                files: {
+                    "data.json": { content: JSON.stringify(dataUntukSimpan, null, 2) }
+                }
+            })
+        });
+
+        console.log("✅ Data berhasil disimpan ke GitHub");
+        return true;
+    } catch (err) {
+        console.error("❌ Gagal menyimpan ke GitHub:", err);
+        alert("Gagal menyimpan data ke GitHub. Periksa koneksi dan pengaturan Anda.");
+        return false;
+    }
+}
+
+// ==========================================
+// ✅ FUNGSI UTAMA (TIDAK DIUBAH LOGIKANYA)
+// ==========================================
 function bukaHalamanAdmin(nama) {
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
     document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("aktif"));
@@ -278,10 +366,9 @@ function bukaHalamanAdmin(nama) {
     }
 }
 
-// ✅ DIPERBAIKI: Tampilkan SEMUA data pelanggan + data driver tetap ada
 function tampilkanSemuaPesanan() {
     const wadah = document.getElementById("daftarSemuaPesanan");
-    const daftarPesanan = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    document.getElementById("statusSinkronPesanan").textContent = `Terakhir diperbarui: ${new Date().toLocaleTimeString('id-ID')}`;
 
     if (daftarPesanan.length === 0) {
         wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Belum ada pesanan masuk</p></div>`;
@@ -297,7 +384,6 @@ function tampilkanSemuaPesanan() {
         else if (pes.status === "Dalam Perjalanan") { warnaStatus = "#F59E0B"; teksStatus = "Dalam Perjalanan"; }
         else if (pes.status === "Selesai") { warnaStatus = "#0F4C5C"; teksStatus = "Selesai"; }
 
-        // Data pelanggan TETAP LENGKAP seperti aslinya
         const infoPelanggan = `
             <p class="mb-1"><strong>Nama Pelanggan:</strong> ${pes.nama || '-'}</p>
             <p class="mb-1"><strong>Nomor HP:</strong> ${pes.hp || '-'}</p>
@@ -305,7 +391,6 @@ function tampilkanSemuaPesanan() {
             <p class="mb-1"><strong>Catatan:</strong> ${pes.catatan || 'Tidak ada catatan'}</p>
         `;
 
-        // Tambahan data driver
         const infoDriver = pes.namaDriver 
             ? `<p class="mb-1"><strong>Driver:</strong> ${pes.namaDriver} | HP: ${pes.idDriver}</p>` 
             : `<p class="mb-1"><strong>Driver:</strong> Belum ada yang mengambil</p>`;
@@ -332,28 +417,21 @@ function tampilkanSemuaPesanan() {
     });
 }
 
-// Fungsi ubah status pesanan
-function ubahStatus(resi, statusBaru) {
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    const indeks = daftar.findIndex(p => p.resi === resi);
+async function ubahStatus(resi, statusBaru) {
+    const indeks = daftarPesanan.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
-        daftar[indeks].status = statusBaru;
-        localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
-        tampilkanSemuaPesanan();
+        daftarPesanan[indeks].status = statusBaru;
+        if (await simpanKeGitHub()) tampilkanSemuaPesanan();
     }
 }
 
-// Fungsi hapus pesanan
-function hapusPesanan(resi) {
+async function hapusPesanan(resi) {
     if (!confirm("Yakin ingin menghapus pesanan ini?")) return;
-    let daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    daftar = daftar.filter(p => p.resi !== resi);
-    localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
-    tampilkanSemuaPesanan();
+    daftarPesanan = daftarPesanan.filter(p => p.resi !== resi);
+    if (await simpanKeGitHub()) tampilkanSemuaPesanan();
 }
 
-// ✅ Fungsi Kelola Data Driver
-function tambahDriver() {
+async function tambahDriver() {
     const nama = document.getElementById("namaDriverBaru").value.trim();
     const hp = document.getElementById("hpDriverBaru").value.trim();
 
@@ -366,7 +444,6 @@ function tambahDriver() {
         return;
     }
 
-    const daftarDriver = JSON.parse(localStorage.getItem("DAFTAR_DRIVER")) || [];
     const cekSudahAda = daftarDriver.find(d => d.hp === hp);
     if (cekSudahAda) {
         alert("Nomor HP ini sudah terdaftar sebagai driver!");
@@ -380,18 +457,19 @@ function tambahDriver() {
         waktuDaftar: new Date().toLocaleString('id-ID')
     });
 
-    localStorage.setItem("DAFTAR_DRIVER", JSON.stringify(daftarDriver));
-    document.getElementById("namaDriverBaru").value = "";
-    document.getElementById("hpDriverBaru").value = "";
-    tampilkanDaftarDriver();
-    alert("Driver berhasil ditambahkan!");
+    if (await simpanKeGitHub()) {
+        document.getElementById("namaDriverBaru").value = "";
+        document.getElementById("hpDriverBaru").value = "";
+        tampilkanDaftarDriver();
+        alert("Driver berhasil ditambahkan!");
+    }
 }
 
 function tampilkanDaftarDriver() {
     const wadah = document.getElementById("daftarDriverKelola");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_DRIVER")) || [];
+    document.getElementById("statusSinkronDriver").textContent = `Terakhir diperbarui: ${new Date().toLocaleTimeString('id-ID')}`;
 
-    if (daftar.length === 0) {
+    if (daftarDriver.length === 0) {
         wadah.innerHTML = `<p class="text-muted text-center py-3">Belum ada data driver yang ditambahkan</p>`;
         return;
     }
@@ -408,7 +486,7 @@ function tampilkanDaftarDriver() {
             </thead>
             <tbody>`;
 
-    daftar.forEach((driver, indeks) => {
+    daftarDriver.forEach((driver, indeks) => {
         const warnaBadge = driver.status === "Aktif" ? "bg-success" : "bg-secondary";
         wadah.innerHTML += `
             <tr>
@@ -425,22 +503,20 @@ function tampilkanDaftarDriver() {
     wadah.innerHTML += `</tbody></table></div>`;
 }
 
-function ubahStatusDriver(indeks) {
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_DRIVER")) || [];
-    daftar[indeks].status = daftar[indeks].status === "Aktif" ? "Nonaktif" : "Aktif";
-    localStorage.setItem("DAFTAR_DRIVER", JSON.stringify(daftar));
-    tampilkanDaftarDriver();
+async function ubahStatusDriver(indeks) {
+    daftarDriver[indeks].status = daftarDriver[indeks].status === "Aktif" ? "Nonaktif" : "Aktif";
+    if (await simpanKeGitHub()) tampilkanDaftarDriver();
 }
 
-function hapusDriver(indeks) {
+async function hapusDriver(indeks) {
     if (!confirm("Yakin ingin menghapus data driver ini?")) return;
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_DRIVER")) || [];
-    daftar.splice(indeks, 1);
-    localStorage.setItem("DAFTAR_DRIVER", JSON.stringify(daftar));
-    tampilkanDaftarDriver();
+    daftarDriver.splice(indeks, 1);
+    if (await simpanKeGitHub()) tampilkanDaftarDriver();
 }
 
-// ✅ Fungsi yang sudah ada sebelumnya (TIDAK DIUBAH SAMA SEKALI)
+// ==========================================
+// ✅ FUNGSI LAINNYA
+// ==========================================
 function tampilkanKategoriDiPilihan() {
     const pilih = document.getElementById("kategoriMenu");
     pilih.innerHTML = "";
@@ -449,14 +525,15 @@ function tampilkanKategoriDiPilihan() {
     });
 }
 
-function tambahKategori() {
+async function tambahKategori() {
     const nama = document.getElementById("namaKategori").value.trim();
     if (!nama) return alert("Nama kategori tidak boleh kosong!");
     daftarKategori.push({ id: Date.now(), nama: nama });
-    localStorage.setItem("DAFTAR_KATEGORI", JSON.stringify(daftarKategori));
-    document.getElementById("namaKategori").value = "";
-    tampilkanKategoriDiPilihan();
-    tampilkanDaftarKategoriAdmin();
+    if (await simpanKeGitHub()) {
+        document.getElementById("namaKategori").value = "";
+        tampilkanKategoriDiPilihan();
+        tampilkanDaftarKategoriAdmin();
+    }
 }
 
 function tampilkanDaftarKategoriAdmin() {
@@ -474,15 +551,16 @@ function tampilkanDaftarKategoriAdmin() {
     });
 }
 
-function hapusKategori(i) {
+async function hapusKategori(i) {
     if (!confirm("Yakin hapus kategori ini?")) return;
     daftarKategori.splice(i, 1);
-    localStorage.setItem("DAFTAR_KATEGORI", JSON.stringify(daftarKategori));
-    tampilkanKategoriDiPilihan();
-    tampilkanDaftarKategoriAdmin();
+    if (await simpanKeGitHub()) {
+        tampilkanKategoriDiPilihan();
+        tampilkanDaftarKategoriAdmin();
+    }
 }
 
-function tambahMenu() {
+async function tambahMenu() {
     const nama = document.getElementById("namaMenu").value.trim();
     const harga = document.getElementById("hargaMenu").value.trim();
     const gambar = document.getElementById("gambarMenu").value.trim();
@@ -498,15 +576,18 @@ function tambahMenu() {
         idKategori: daftarKategori[idKat].id
     });
 
-    localStorage.setItem("DAFTAR_MENU", JSON.stringify(daftarMenu));
-    document.getElementById("namaMenu").value = "";
-    document.getElementById("hargaMenu").value = "";
-    document.getElementById("gambarMenu").value = "";
-    tampilkanDaftarMenuAdmin();
+    if (await simpanKeGitHub()) {
+        document.getElementById("namaMenu").value = "";
+        document.getElementById("hargaMenu").value = "";
+        document.getElementById("gambarMenu").value = "";
+        tampilkanDaftarMenuAdmin();
+    }
 }
 
 function tampilkanDaftarMenuAdmin() {
     const wadah = document.getElementById("daftarMenuAdmin");
+    document.getElementById("statusSinkronMenu").textContent = `Terakhir diperbarui: ${new Date().toLocaleTimeString('id-ID')}`;
+
     if (daftarMenu.length === 0) {
         wadah.innerHTML = "<p class='text-muted'>Belum ada menu</p>";
         return;
@@ -528,24 +609,24 @@ function tampilkanDaftarMenuAdmin() {
     });
 }
 
-function hapusMenu(i) {
+async function hapusMenu(i) {
     if (!confirm("Yakin hapus menu ini?")) return;
     daftarMenu.splice(i, 1);
-    localStorage.setItem("DAFTAR_MENU", JSON.stringify(daftarMenu));
-    tampilkanDaftarMenuAdmin();
+    if (await simpanKeGitHub()) tampilkanDaftarMenuAdmin();
 }
 
-function simpanBanner() {
+async function simpanBanner() {
     const link = document.getElementById("linkBanner").value.trim();
     if (!link) return alert("Masukkan link gambar banner!");
-    localStorage.setItem("DAFTAR_BANNER", JSON.stringify([{ link: link }]));
-    tampilkanBannerSaatIni();
-    alert("Banner berhasil disimpan!");
+    daftarBanner = [{ link: link }];
+    if (await simpanKeGitHub()) {
+        tampilkanBannerSaatIni();
+        alert("Banner berhasil disimpan!");
+    }
 }
 
 function tampilkanBannerSaatIni() {
     const wadah = document.getElementById("tampilanBanner");
-    const daftarBanner = JSON.parse(localStorage.getItem("DAFTAR_BANNER")) || [];
     if (daftarBanner.length > 0) {
         wadah.innerHTML = `<img src="${daftarBanner[0].link}" alt="Banner" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-top: 1rem;">`;
     } else {
@@ -553,10 +634,16 @@ function tampilkanBannerSaatIni() {
     }
 }
 
-// Jalankan saat halaman dimuat
-window.onload = function() {
+// ==========================================
+// ✅ JALANKAN SAAT HALAMAN DIMUAT
+// ==========================================
+window.onload = async function() {
+    await bacaDariGitHub();
     bukaHalamanAdmin('pesanan');
-    setInterval(tampilkanSemuaPesanan, 2500);
+    setInterval(async () => {
+        await bacaDariGitHub();
+        if (document.getElementById("halaman-pesanan").classList.contains("aktif")) tampilkanSemuaPesanan();
+    }, 5000);
 };
 </script>
 
