@@ -596,12 +596,37 @@ let pesananAktif = null;
 let kategoriTerpilih = "semua";
 let penggunaSaatIni = null;
 
-// ✅ FUNGSI LOGIN DIPERBAIKI - Bisa berjalan normal
+// ✅ DETEKSI ROOT & FAKE GPS
+function cekKeamananPerangkat() {
+    const tandaFakeGPS = [
+        /fakegps/i, /mock/i, /emulator/i, /virtual/i, /genymotion/i, /nox/i, /bluestacks/i
+    ];
+    const lokasiAsli = lokasiSaya;
+
+    // Cek jika akurasi terlalu tinggi secara tidak wajar atau lonjakan jarak besar
+    if (lokasiSaya.akurasi < 1 && lokasiSaya.lat !== -5.1477) {
+        alert("❌ Perangkat terdeteksi menggunakan lokasi palsu / Fake GPS! Aplikasi tidak dapat digunakan.");
+        localStorage.removeItem("PENGGUNA_SAAT_INI");
+        location.reload();
+        return false;
+    }
+
+    // Cek indikasi perangkat di-root/emulator
+    if (navigator.userAgent.match(/root|su|superuser|emulator/i)) {
+        alert("❌ Perangkat terdeteksi sudah di-root atau menggunakan emulator! Aplikasi tidak dapat digunakan.");
+        localStorage.removeItem("PENGGUNA_SAAT_INI");
+        location.reload();
+        return false;
+    }
+
+    return true;
+}
+
+// ✅ FUNGSI LOGIN TETAP ASLI
 function login() {
     const nama = document.getElementById("inputNama").value.trim();
     const hp = document.getElementById("inputHp").value.trim();
     
-    // Validasi input
     if (!nama) {
         alert("⚠️ Nama lengkap tidak boleh kosong!");
         return;
@@ -615,12 +640,10 @@ function login() {
         return;
     }
 
-    // Ambil data pengguna
     const daftarPengguna = JSON.parse(localStorage.getItem("DAFTAR_PENGGUNA")) || [];
     const cariPengguna = daftarPengguna.find(p => p.hp === hp);
 
     if (!cariPengguna) {
-        // Pengguna baru
         const penggunaBaru = {
             nama: nama,
             hp: hp,
@@ -630,16 +653,13 @@ function login() {
         localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
         penggunaSaatIni = penggunaBaru;
     } else {
-        // Sudah terdaftar, gunakan data yang ada
         penggunaSaatIni = cariPengguna;
-        // Jika nama diubah, perbarui data
         if (cariPengguna.nama !== nama) {
             cariPengguna.nama = nama;
             localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
         }
     }
 
-    // Simpan sesi dan masuk ke halaman utama
     localStorage.setItem("PENGGUNA_SAAT_INI", JSON.stringify(penggunaSaatIni));
     bukaHalaman('beranda');
     ambilLokasiSaya();
@@ -663,9 +683,10 @@ function cekLogin() {
     }
 }
 
+// ✅ AMBIL LOKASI DIPAKSA AKURAT
 function ambilLokasiSaya() {
     if (!navigator.geolocation) {
-        alert("Perangkat Anda tidak mendukung fitur lokasi!");
+        alert("❌ Perangkat Anda tidak mendukung fitur lokasi!");
         return;
     }
 
@@ -675,6 +696,8 @@ function ambilLokasiSaya() {
             lokasiSaya.lon = pos.coords.longitude;
             lokasiSaya.akurasi = pos.coords.accuracy;
 
+            if (!cekKeamananPerangkat()) return;
+
             if (penandaSaya) penandaSaya.setLatLng([lokasiSaya.lat, lokasiSaya.lon]);
             document.getElementById("infoPosisiSaya").textContent = 
                 `${lokasiSaya.lat.toFixed(6)}, ${lokasiSaya.lon.toFixed(6)} (Akurasi: ${lokasiSaya.akurasi.toFixed(1)} m)`;
@@ -682,19 +705,15 @@ function ambilLokasiSaya() {
             cekStatusTombolPesan();
         },
         (err) => {
-            let pesan = "Gagal mendapatkan lokasi: ";
-            switch(err.code) {
-                case 1: pesan += "Izin lokasi ditolak"; break;
-                case 2: pesan += "Sinyal GPS lemah atau tidak tersedia"; break;
-                case 3: pesan += "Waktu permintaan lokasi habis"; break;
-                default: pesan += "Terjadi kesalahan tidak diketahui";
-            }
+            let pesan = "⚠️ Izin lokasi WAJIB diaktifkan untuk menggunakan aplikasi ini!";
             alert(pesan);
+            setTimeout(ambilLokasiSaya, 3000); // Ulangi terus sampai izin diberikan
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
 }
 
+// ✅ TOMBOL PESAN JADI ABU-ABU JIKA BELUM AKURAT
 function cekStatusTombolPesan() {
     const tombol = document.getElementById("tombolKirim");
     const info = document.getElementById("infoAkurasi");
@@ -865,6 +884,7 @@ function perbaruiDataPeta() {
     }
 }
 
+// ✅ KIRIM PESANAN + KIRIM POSISI KE DRIVER
 function kirimPesanan() {
     const barang = document.getElementById("barang").value.trim();
     const alamat = document.getElementById("alamat").value.trim();
@@ -872,6 +892,7 @@ function kirimPesanan() {
 
     if (!barang || !alamat) return alert("❌ Lengkapi semua data yang wajib diisi!");
     if (lokasiSaya.akurasi > 50) return alert("❌ Lokasi belum cukup akurat! Tunggu sampai di bawah 50 meter.");
+    if (!cekKeamananPerangkat()) return;
 
     const pesananBaru = {
         resi: "RESI-" + Math.floor(100000 + Math.random() * 900000),
@@ -880,8 +901,7 @@ function kirimPesanan() {
         hp: penggunaSaatIni.hp,
         alamat: alamat,
         catatan: catatan,
-        lat: lokasiSaya.lat,
-        lon: lokasiSaya.lon,
+        lokasiTujuan: { lat: lokasiSaya.lat, lon: lokasiSaya.lon }, // Bisa dilihat driver
         akurasi: lokasiSaya.akurasi,
         lokasiDriver: null,
         status: "Menunggu",
