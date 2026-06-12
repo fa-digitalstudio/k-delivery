@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tugas Pengiriman - Driver</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --utama: #0F4C5C;
+            --hijau: #22C55E;
+            --kuning: #F59E0B;
+            --biru: #3B82F6;
+            --abu: #6B7280;
+            --abu-terang: #F3F4F6;
+            --putih: #FFFFFF;
+            --teks: #111827;
+            --merah: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--abu-terang);
+            color: var(--teks);
+            padding-bottom: 85px;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--utama);
+            color: var(--putih);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        .toggle-auto {
+            border: none;
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .toggle-auto.aktif {
+            background-color: var(--hijau);
+            color: white;
+        }
+        .toggle-auto.nonaktif {
+            background-color: var(--abu);
+            color: white;
+        }
+        .info-lokasi {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            margin-top: 0.2rem;
+        }
+
+        /* Konten */
+        .konten {
+            padding: 1.5rem 1rem;
+            min-height: calc(100vh - 140px);
+        }
+        .kosong {
+            text-align: center;
+            margin-top: 6rem;
+            color: var(--abu);
+        }
+        .kosong i {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 1rem;
+        }
+
+        /* Kartu Pesanan */
+        .kartu-pesanan {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .header-pesanan {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .resi {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: white;
+        }
+        .jarak-info {
+            font-size: 0.8rem;
+            color: var(--biru);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .tombol-aksi {
+            display: flex;
+            gap: 0.7rem;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+        .tombol-aksi button {
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            flex: 1;
+            min-width: 120px;
+            color: white;
+        }
+
+        /* Peta */
+        #peta {
+            width: 100%;
+            height: 450px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+            z-index: 1;
+        }
+        .tombol-posisi-saya {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        .tombol-posisi-saya i {
+            font-size: 1.1rem;
+            color: var(--utama);
+        }
+        .info-peta {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        /* Nav Bawah */
+        .nav-bawah {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.8rem 0;
+            z-index: 99;
+        }
+        .nav-item {
+            text-align: center;
+            color: var(--abu);
+            font-size: 0.8rem;
+            position: relative;
+            cursor: pointer;
+            flex: 1;
+        }
+        .nav-item.aktif {
+            color: var(--utama);
+            font-weight: 500;
+        }
+        .nav-item i {
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+        .badge-jumlah {
+            position: absolute;
+            top: -5px;
+            right: 8px;
+            background: var(--merah);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 10px;
+            padding: 0.15rem 0.45rem;
+            display: none;
+        }
+
+        /* Halaman Konten */
+        .halaman {
+            display: none;
+        }
+        .halaman.aktif {
+            display: block;
+        }
+
+        /* ✅ Notifikasi Pop-Up Baru */
+        .popup-notif {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-150%);
+            width: 92%;
+            max-width: 380px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 1.2rem;
+            z-index: 9999;
+            border-left: 6px solid var(--hijau);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .popup-notif.muncul {
+            transform: translateX(-50%) translateY(0);
+        }
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+        .popup-header h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--teks);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .popup-header h5 i {
+            color: var(--hijau);
+            font-size: 1.2rem;
+        }
+        .tombol-tutup {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--abu);
+            cursor: pointer;
+            padding: 0 0.3rem;
+        }
+        .popup-body {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--teks);
+        }
+        .popup-footer {
+            margin-top: 1rem;
+            text-align: right;
+        }
+        .tombol-lihat {
+            background: var(--utama);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1 id="judulHalaman">Riwayat Transaksi</h1>
+        <div class="info-lokasi" id="lokasiDriver">Lokasi: Mendeteksi...</div>
+    </div>
+    <button class="toggle-auto aktif" id="tombolAuto" onclick="gantiStatusAuto()">
+        <span id="teksAuto">AUTO ON</span>
+        <i class="bi bi-check-circle-fill" id="ikonAuto"></i>
+    </button>
+</div>
+
+<div class="konten">
+    <!-- Halaman Riwayat -->
+    <div class="halaman aktif" id="halaman-riwayat">
+        <div class="kosong" id="tampilanKosong">
+            <i class="bi bi-receipt"></i>
+            <h3 id="teksKosong">Belum ada riwayat transaksi</h3>
+        </div>
+        <div id="daftarPesanan"></div>
+    </div>
+
+    <!-- Halaman Order -->
+    <div class="halaman" id="halaman-order">
+        <div class="kosong" id="tampilanKosongOrder">
+            <i class="bi bi-bag"></i>
+            <h3>Belum ada pesanan masuk untuk Anda</h3>
+        </div>
+        <div id="daftarOrder"></div>
+    </div>
+
+    <!-- Halaman Peta -->
+    <div class="halaman" id="halaman-peta">
+        <div style="position: relative;">
+            <div id="peta"></div>
+            <button class="tombol-posisi-saya" onclick="kembaliKePosisiSaya()">
+                <i class="bi bi-geo-alt-fill"></i> Posisi Saya
+            </button>
+        </div>
+        <div class="info-peta">
+            <h6 class="mb-2"><i class="bi bi-info-circle text-primary"></i> Informasi Lokasi</h6>
+            <p class="mb-1" id="infoDriver"><strong>Posisi Anda:</strong> -</p>
+            <p class="mb-1" id="infoPelanggan"><strong>Tujuan:</strong> -</p>
+            <p class="mb-0" id="infoJarak"><strong>Jarak:</strong> -</p>
+        </div>
+    </div>
+
+    <!-- Halaman Obrolan -->
+    <div class="halaman" id="halaman-obrolan">
+        <div class="kosong">
+            <i class="bi bi-chat"></i>
+            <h3>Fitur Obrolan</h3>
+            <p>Akan segera tersedia</p>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Pop-Up Notifikasi Baru -->
+<div class="popup-notif" id="popupNotif">
+    <div class="popup-header">
+        <h5><i class="bi bi-bell-fill"></i> Pesanan Baru Masuk!</h5>
+        <button class="tombol-tutup" onclick="tutupNotif()">&times;</button>
+    </div>
+    <div class="popup-body" id="isiNotif"></div>
+    <div class="popup-footer">
+        <button class="tombol-lihat" onclick="bukaHalaman('order'); tutupNotif()">Lihat Pesanan</button>
+    </div>
+</div>
+
+<div class="nav-bawah">
+    <div class="nav-item aktif" onclick="bukaHalaman('riwayat')">
+        <i class="bi bi-clipboard-check"></i>
+        <span>Riwayat</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('peta')">
+        <i class="bi bi-map"></i>
+        <span>Peta</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('order')">
+        <i class="bi bi-file-text"></i>
+        <span>Order</span>
+        <span class="badge-jumlah" id="badgeOrder">0</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('obrolan')">
+        <i class="bi bi-chat"></i>
+        <span>Obrolan</span>
+    </div>
+</div>
+
+<audio id="suaraNotif" preload="auto">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-software-interface-notification-2894.mp3" type="audio/mpeg">
+
+
+<script>
+let jumlahSebelum = 0;
+let halamanAktif = "riwayat";
+let lokasiDriver = { lat: -5.1477, lon: 119.4327 };
+const BATAS_JARAK = 15;
+let peta, penandaDriver, penandaPelanggan, garisRute;
+let pesananAktif = null;
+let autoAktif = true;
+let daftarResiDilihat = []; // ✅ Catat pesanan yang sudah muncul notifnya
+
+// Ganti status AUTO
+function gantiStatusAuto() {
+    const tombol = document.getElementById("tombolAuto");
+    const teks = document.getElementById("teksAuto");
+    const ikon = document.getElementById("ikonAuto");
+    autoAktif = !autoAktif;
+    if (autoAktif) {
+        tombol.classList.remove("nonaktif");
+        tombol.classList.add("aktif");
+        teks.textContent = "AUTO ON";
+        ikon.className = "bi bi-check-circle-fill";
+    } else {
+        tombol.classList.remove("aktif");
+        tombol.classList.add("nonaktif");
+        teks.textContent = "AUTO OFF";
+        ikon.className = "bi bi-power";
+    }
+}
+
+// Inisialisasi Peta
+function inisialisasiPeta() {
+    peta = L.map('peta').setView([lokasiDriver.lat, lokasiDriver.lon], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(peta);
+    const ikonDriver = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048315.png', iconSize: [35,35], iconAnchor: [17,35] });
+    const ikonPelanggan = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [30,30], iconAnchor: [15,30] });
+    penandaDriver = L.marker([lokasiDriver.lat, lokasiDriver.lon], {icon: ikonDriver}).addTo(peta).bindPopup("Posisi Anda");
+    penandaPelanggan = L.marker([0,0], {icon: ikonPelanggan, interactive: false}).addTo(peta).setOpacity(0);
+    garisRute = L.polyline([], {color: '#22C55E', weight:4}).addTo(peta);
+    ambilLokasiDriver();
+}
+
+function kembaliKePosisiSaya() {
+    if (peta && lokasiDriver.lat && lokasiDriver.lon) peta.setView([lokasiDriver.lat, lokasiDriver.lon], 16);
+}
+
+function ambilLokasiDriver() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                lokasiDriver.lat = pos.coords.latitude;
+                lokasiDriver.lon = pos.coords.longitude;
+                document.getElementById("lokasiDriver").textContent = `Lokasi: ${lokasiDriver.lat.toFixed(4)}, ${lokasiDriver.lon.toFixed(4)}`;
+                penandaDriver.setLatLng([lokasiDriver.lat, lokasiDriver.lon]);
+                if (pesananAktif) {
+                    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+                    const idx = daftar.findIndex(p => p.resi === pesananAktif.resi);
+                    if (idx !== -1) {
+                        daftar[idx].lokasiDriver = { lat: lokasiDriver.lat, lon: lokasiDriver.lon };
+                        localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+                    }
+                }
+                perbaruiInfoPeta();
+            },
+            () => document.getElementById("lokasiDriver").textContent = `Lokasi: Posisi default (Makassar)`,
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+        );
+    }
+}
+
+function hitungJarak(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function bukaHalaman(nama) {
+    halamanAktif = nama;
+    document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("aktif"));
+    if (nama === "riwayat") {
+        document.getElementById("halaman-riwayat").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Riwayat Transaksi";
+    } else if (nama === "peta") {
+        document.getElementById("halaman-peta").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Peta Lokasi";
+        setTimeout(() => { peta.invalidateSize(); kembaliKePosisiSaya(); }, 100);
+    } else if (nama === "order") {
+        document.getElementById("halaman-order").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Daftar Pesanan";
+    } else if (nama === "obrolan") {
+        document.getElementById("halaman-obrolan").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Obrolan";
+    }
+    tampilkanPesanan();
+}
+
+function perbaruiInfoPeta() {
+    document.getElementById("infoDriver").textContent = `Posisi Anda: ${lokasiDriver.lat.toFixed(6)}, ${lokasiDriver.lon.toFixed(6)}`;
+    if (pesananAktif && pesananAktif.lat && pesananAktif.lon) {
+        const posTujuan = [pesananAktif.lat, pesananAktif.lon];
+        penandaPelanggan.setLatLng(posTujuan).setOpacity(1);
+        const jarak = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pesananAktif.lat, pesananAktif.lon);
+        document.getElementById("infoPelanggan").textContent = `Tujuan: ${pesananAktif.alamat}`;
+        document.getElementById("infoJarak").textContent = `Jarak: ${jarak.toFixed(2)} km`;
+        garisRute.setLatLngs([[lokasiDriver.lat, lokasiDriver.lon], posTujuan]);
+    } else {
+        penandaPelanggan.setOpacity(0);
+        garisRute.setLatLngs([]);
+        document.getElementById("infoPelanggan").textContent = `Tujuan: Belum ada pesanan aktif`;
+        document.getElementById("infoJarak").textContent = `Jarak: -`;
+    }
+}
+
+function tampilkanPesanan() {
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const badge = document.getElementById("badgeOrder");
+
+    if (!autoAktif) {
+        jumlahSebelum = 0;
+        badge.textContent = "0";
+        badge.style.display = "none";
+        return;
+    }
+
+    const pesananUntukSaya = daftar.filter(p => {
+        if (!p.lat || !p.lon) return false;
+        p.jarak = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, p.lat, p.lon);
+        return p.jarak <= BATAS_JARAK;
+    });
+
+    const pesananBaru = pesananUntukSaya.filter(p => p.status === "Menunggu");
+    badge.textContent = pesananBaru.length;
+    badge.style.display = pesananBaru.length > 0 ? "inline-block" : "none";
+
+    // ✅ Hanya muncul notif untuk pesanan yang BELUM PERNAH muncul
+    pesananBaru.forEach(pes => {
+        if (!daftarResiDilihat.includes(pes.resi)) {
+            putarSuara();
+            tampilkanNotif(pes);
+            daftarResiDilihat.push(pes.resi); // Catat agar tidak muncul lagi
+        }
+    });
+
+    // Tampilkan Riwayat
+    if (halamanAktif === "riwayat") {
+        const selesai = pesananUntukSaya.filter(p => p.status === "Selesai");
+        const wadah = document.getElementById("daftarPesanan");
+        const kosong = document.getElementById("tampilanKosong");
+        if (selesai.length === 0) {
+            kosong.style.display = "block";
+            wadah.innerHTML = "";
+        } else {
+            kosong.style.display = "none";
+            wadah.innerHTML = selesai.map(p => `
+            <div class="kartu-pesanan">
+                <div class="header-pesanan">
+                    <div class="resi">${p.resi}</div>
+                    <span class="status" style="background:#0F4C5C">Selesai</span>
+                </div>
+                <p><strong>Pesanan:</strong> ${p.barang}</p>
+                <p><strong>Penerima:</strong> ${p.nama} | ${p.hp}</p>
+                <p><strong>Alamat:</strong> ${p.alamat}</p>
+            </div>`).join("");
+        }
+    }
+
+    // Tampilkan Order
+    if (halamanAktif === "order") {
+        const aktif = pesananUntukSaya.filter(p => p.status !== "Selesai");
+        const wadah = document.getElementById("daftarOrder");
+        const kosong = document.getElementById("tampilanKosongOrder");
+        if (aktif.length === 0) {
+            kosong.style.display = "block";
+            wadah.innerHTML = "";
+        } else {
+            kosong.style.display = "none";
+            wadah.innerHTML = aktif.map(p => {
+                const idx = daftar.findIndex(x => x.resi === p.resi);
+                let warna, teks, tombol;
+                switch(p.status) {
+                    case "Menunggu": warna = "#6B7280"; teks = "Menunggu"; tombol = `<button style="background:#22C55E" onclick="ambilPesanan(${idx}, ${JSON.stringify(p).replace(/"/g, '&quot;')})">Ambil</button>`; break;
+                    case "Sudah Diambil": warna = "#22C55E"; teks = "Sudah Diambil"; tombol = `<button style="background:#3B82F6" onclick="ubahStatus(${idx}, 'sampai_restoran')">Sampai Resto</button>`; break;
+                    case "Sampai di Restoran": warna = "#3B82F6"; teks = "Di Restoran"; tombol = `<button style="background:#F59E0B" onclick="ubahStatus(${idx}, 'dibawa')">Bawa Pesanan</button>`; break;
+                    case "Dalam Perjalanan": warna = "#F59E0B"; teks = "Dalam Perjalanan"; tombol = `<button style="background:#0F4C5C" onclick="ubahStatus(${idx}, 'selesai')">Selesai</button>`; break;
+                }
+                return `
+                <div class="kartu-pesanan">
+                    <div class="header-pesanan">
+                        <div class="resi">${p.resi}</div>
+                        <span class="status" style="background:${warna}">${teks}</span>
+                    </div>
+                    <div class="jarak-info">Jarak: ${p.jarak.toFixed(1)} km</div>
+                    <p><strong>Pesanan:</strong> ${p.barang}</p>
+                    <p><strong>Penerima:</strong> ${p.nama} | ${p.hp}</p>
+                    <p><strong>Alamat:</strong> ${p.alamat}</p>
+                    ${p.catatan ? `<p><strong>Catatan:</strong> ${p.catatan}</p>` : ""}
+                    <div class="tombol-aksi">${tombol}</div>
+                </div>`;
+            }).join("");
+        }
+    }
+}
+
+function ambilPesanan(idx, data) {
+    pesananAktif = data;
+    ubahStatus(idx, "ambil");
+    bukaHalaman("peta");
+    perbaruiInfoPeta();
+}
+
+function ubahStatus(idx, aksi) {
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    switch(aksi) {
+        case "ambil": daftar[idx].status = "Sudah Diambil"; break;
+        case "sampai_restoran": daftar[idx].status = "Sampai di Restoran"; break;
+        case "dibawa": daftar[idx].status = "Dalam Perjalanan"; break;
+        case "selesai": daftar[idx].status = "Selesai"; daftar[idx].lokasiDriver = null; pesananAktif = null; break;
+    }
+    localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+    tampilkanPesanan();
+    perbaruiInfoPeta();
+}
+
+function putarSuara() { document.getElementById("suaraNotif").play().catch(()=>{}); }
+
+// ✅ Tampilkan Notif Pop-Up
+function tampilkanNotif(pes) {
+    const isi = document.getElementById("isiNotif");
+    isi.innerHTML = `
+        <p class="mb-1"><strong>Resi:</strong> ${pes.resi}</p>
+        <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang}</p>
+        <p class="mb-1"><strong>Jarak:</strong> ${pes.jarak.toFixed(1)} km</p>
+        <p class="mb-0"><strong>Alamat:</strong> ${pes.alamat}</p>
+    `;
+    document.getElementById("popupNotif").classList.add("muncul");
+    setTimeout(tutupNotif, 7000); // Otomatis tertutup 7 detik
+}
+
+function tutupNotif() {
+    document.getElementById("popupNotif").classList.remove("muncul");
+}
+
+window.onload = function() {
+    inisialisasiPeta();
+    tampilkanPesanan();
+    setInterval(ambilLokasiDriver, 3000);
+    setInterval(tampilkanPesanan, 2000);
+};
+</script>
+
+</body>
+</html>
