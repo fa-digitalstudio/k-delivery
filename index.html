@@ -446,6 +446,41 @@
         .halaman.aktif {
             display: block;
         }
+
+        /* ✅ Gaya untuk fitur chat */
+        .wadah-chat {
+            margin-top: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #fafafa;
+        }
+        .pesan-chat {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        .form-kirim-pesan {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .input-pesan {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 0.5rem;
+        }
+        .btn-kirim-pesan {
+            background: var(--utama);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -732,7 +767,7 @@ function cekLogin() {
     }
 }
 
-// ✅ AMBIL LOKASI DIPAKSA AKURAT
+// ✅ AMBIL LOKASI DIPAKSA AKURAT & PERBAIKAN TOMBOL PESAN
 function ambilLokasiSaya() {
     if (!navigator.geolocation) {
         alert("❌ Perangkat Anda tidak mendukung fitur lokasi!");
@@ -751,22 +786,25 @@ function ambilLokasiSaya() {
             document.getElementById("infoPosisiSaya").textContent = 
                 `${lokasiSaya.lat.toFixed(6)}, ${lokasiSaya.lon.toFixed(6)} (Akurasi: ${lokasiSaya.akurasi.toFixed(1)} m)`;
 
+            // ✅ PERBAIKAN: Cek status tombol setiap kali lokasi diperbarui
             cekStatusTombolPesan();
         },
         (err) => {
             let pesan = "⚠️ Izin lokasi WAJIB diaktifkan untuk menggunakan aplikasi ini!";
             alert(pesan);
-            setTimeout(ambilLokasiSaya, 3000); // Ulangi terus sampai izin diberikan
+            setTimeout(ambilLokasiSaya, 3000);
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     );
 }
 
-// ✅ TOMBOL PESAN JADI ABU-ABU JIKA BELUM AKURAT
+// ✅ PERBAIKAN: Logika pengecekan tombol lebih jelas
 function cekStatusTombolPesan() {
     const tombol = document.getElementById("tombolKirim");
     const info = document.getElementById("infoAkurasi");
-    if (lokasiSaya.akurasi <= 50) {
+    
+    // Aktifkan jika akurasi <= 50 meter
+    if (lokasiSaya.akurasi > 0 && lokasiSaya.akurasi <= 50) {
         tombol.classList.remove("btn-abu");
         tombol.disabled = false;
         info.style.display = "none";
@@ -962,7 +1000,8 @@ async function kirimPesanan() {
         idDriver: null,
         namaDriver: null,
         status: "Menunggu",
-        waktuPesan: new Date().toLocaleString('id-ID')
+        waktuPesan: new Date().toLocaleString('id-ID'),
+        pesanChat: [] // ✅ Tambah kolom untuk riwayat pesan
     };
 
     daftarPesanan.push(pesananBaru);
@@ -974,6 +1013,7 @@ async function kirimPesanan() {
     }
 }
 
+// ✅ PERBAIKAN & TAMBAHAN: Tampilkan nama driver + fitur chat
 async function tampilkanRiwayat() {
     const wadah = document.getElementById("daftarRiwayat");
     const semuaData = await bacaSemuaData();
@@ -993,17 +1033,81 @@ async function tampilkanRiwayat() {
         else if (pes.status === "Dalam Perjalanan") { warna = "#F59E0B"; teks = "Dalam Perjalanan"; }
         else if (pes.status === "Selesai") { warna = "#0F4C5C"; teks = "Selesai"; }
 
-        wadah.innerHTML += `<div class="pesanan-item">
+        // ✅ Tampilkan nama driver jika sudah ada
+        const infoDriver = pes.namaDriver ? `<p class="mb-1 text-primary"><strong>Driver:</strong> ${pes.namaDriver}</p>` : "";
+
+        // ✅ Tampilkan tombol chat hanya jika ada driver yang bertugas
+        const tombolChat = pes.idDriver && pes.status !== "Selesai" 
+            ? `<button onclick="bukaChatDriver('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>` 
+            : "";
+
+        wadah.innerHTML += `<div class="pesanan-item" id="pesanan-${pes.resi}">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">${pes.resi}</span>
                 <span class="status-badge" style="background:${warna}">${teks}</span>
             </div>
             <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang}</p>
+            ${infoDriver}
             <p class="mb-1 text-muted"><i class="bi bi-geo-alt"></i> ${pes.alamat}</p>
             <p class="mb-1 small text-muted"><i class="bi bi-clock"></i> ${pes.waktuPesan || '-'}</p>
             ${pes.catatan ? `<p class="mb-0 small text-success"><i class="bi bi-chat-left-text"></i> ${pes.catatan}</p>` : ""}
+            ${tombolChat}
+            <div id="wadah-chat-${pes.resi}" class="wadah-chat" style="display:none;"></div>
         </div>`;
     });
+}
+
+// ✅ Fungsi buka dan tampilkan fitur chat
+async function bukaChatDriver(resi) {
+    const wadah = document.getElementById(`wadah-chat-${resi}`);
+    if (wadah.style.display === "block") {
+        wadah.style.display = "none";
+        return;
+    }
+
+    const semuaData = await bacaSemuaData();
+    const pesanan = semuaData.daftarPesanan.find(p => p.resi === resi);
+    if (!pesanan) return;
+
+    // Tampilkan riwayat pesan
+    const daftarPesan = pesanan.pesanChat || [];
+    let isiPesan = daftarPesan.map(p => `<div class="mb-1"><strong>${p.pengirim}:</strong> ${p.teks}</div>`).join("");
+
+    wadah.innerHTML = `
+        <h6 class="mb-2">Pesan ke ${pesanan.namaDriver}</h6>
+        <div class="pesan-chat" id="riwayat-chat-${resi}">${isiPesan || "<em>Belum ada pesan</em>"}</div>
+        <div class="form-kirim-pesan">
+            <input type="text" id="input-pesan-${resi}" class="input-pesan" placeholder="Ketik pesan...">
+            <button onclick="kirimPesanChat('${resi}')" class="btn-kirim-pesan">Kirim</button>
+        </div>
+    `;
+    wadah.style.display = "block";
+}
+
+// ✅ Fungsi kirim pesan ke driver
+async function kirimPesanChat(resi) {
+    const teks = document.getElementById(`input-pesan-${resi}`).value.trim();
+    if (!teks) return;
+
+    const semuaData = await bacaSemuaData();
+    const indeks = semuaData.daftarPesanan.findIndex(p => p.resi === resi);
+    if (indeks === -1) return;
+
+    const pesanBaru = {
+        pengirim: penggunaSaatIni.nama + " (Anda)",
+        teks: teks,
+        waktu: new Date().toLocaleString('id-ID')
+    };
+
+    if (!semuaData.daftarPesanan[indeks].pesanChat) {
+        semuaData.daftarPesanan[indeks].pesanChat = [];
+    }
+    semuaData.daftarPesanan[indeks].pesanChat.push(pesanBaru);
+
+    if (await simpanSemuaData(semuaData)) {
+        document.getElementById(`input-pesan-${resi}`).value = "";
+        bukaChatDriver(resi); // Perbarui tampilan
+    }
 }
 
 // Simpan daftar menu sementara untuk popup
