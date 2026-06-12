@@ -1217,8 +1217,7 @@ function pilihKategori(id) {
 async function tampilkanMenu() {
     const semuaData = await bacaSemuaData();
     const daftarMenu = semuaData.daftarMenu || [];
-    const daftarKategori
-    const daftarKategori = semuaData.daftarKategori || [];
+const daftarKategori = semuaData.daftarKategori || [];
     const wadah = document.getElementById("daftarMenu");
     let menuTampil = daftarMenu;
     if (kategoriTerpilih !== "semua") {
@@ -1665,6 +1664,5 @@ window.onload = function() {
     setInterval(cekPesanBaru, 3000); 
 };
 </script>
-
 </body>
 </html>
