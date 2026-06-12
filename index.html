@@ -587,7 +587,29 @@
     </div>
 </div>
 
+<!-- ✅ PUSTAKA FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 <script>
+// ==========================================
+// ✅ KONFIGURASI FIREBASE (SAMA DENGAN ADMIN & DRIVER)
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
+  authDomain: "dok123-1bd6f.firebaseapp.com",
+  databaseURL: "https://dok123-1bd6f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dok123-1bd6f",
+  storageBucket: "dok123-1bd6f.firebasestorage.app",
+  messagingSenderId: "664523539322",
+  appId: "1:664523539322:web:61c0adedc67fee015dccc3"
+};
+
+// Inisialisasi Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const refData = db.ref("data");
+
 let peta;
 let penandaSaya, penandaDriver;
 let garisRute;
@@ -595,6 +617,30 @@ let lokasiSaya = { lat: -5.1477, lon: 119.4327, akurasi: 9999 };
 let pesananAktif = null;
 let kategoriTerpilih = "semua";
 let penggunaSaatIni = null;
+
+// ==========================================
+// ✅ FUNGSI BACA & SIMPAN KE FIREBASE
+// ==========================================
+async function bacaSemuaData() {
+    try {
+        const snapshot = await refData.once("value");
+        return snapshot.val() || {};
+    } catch (err) {
+        console.warn("Gagal membaca data:", err);
+        return {};
+    }
+}
+
+async function simpanSemuaData(dataBaru) {
+    try {
+        await refData.set(dataBaru);
+        return true;
+    } catch (err) {
+        console.error("Gagal menyimpan data:", err);
+        alert("Gagal mengirim data! Cek koneksi internet.");
+        return false;
+    }
+}
 
 // ✅ DETEKSI ROOT & FAKE GPS
 function cekKeamananPerangkat() {
@@ -622,8 +668,8 @@ function cekKeamananPerangkat() {
     return true;
 }
 
-// ✅ FUNGSI LOGIN TETAP ASLI
-function login() {
+// ✅ FUNGSI LOGIN DIPERBARUI KE FIREBASE
+async function login() {
     const nama = document.getElementById("inputNama").value.trim();
     const hp = document.getElementById("inputHp").value.trim();
     
@@ -640,7 +686,8 @@ function login() {
         return;
     }
 
-    const daftarPengguna = JSON.parse(localStorage.getItem("DAFTAR_PENGGUNA")) || [];
+    const semuaData = await bacaSemuaData();
+    const daftarPengguna = semuaData.daftarPengguna || [];
     const cariPengguna = daftarPengguna.find(p => p.hp === hp);
 
     if (!cariPengguna) {
@@ -650,13 +697,15 @@ function login() {
             waktuDaftar: new Date().toLocaleString('id-ID')
         };
         daftarPengguna.push(penggunaBaru);
-        localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
+        semuaData.daftarPengguna = daftarPengguna;
+        await simpanSemuaData(semuaData);
         penggunaSaatIni = penggunaBaru;
     } else {
         penggunaSaatIni = cariPengguna;
         if (cariPengguna.nama !== nama) {
             cariPengguna.nama = nama;
-            localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
+            semuaData.daftarPengguna = daftarPengguna;
+            await simpanSemuaData(semuaData);
         }
     }
 
@@ -764,9 +813,10 @@ function bukaHalaman(nama) {
     }
 }
 
-function tampilkanBanner() {
+async function tampilkanBanner() {
     const wadah = document.getElementById("wadahBanner");
-    const daftarBanner = JSON.parse(localStorage.getItem("DAFTAR_BANNER")) || [];
+    const semuaData = await bacaSemuaData();
+    const daftarBanner = semuaData.daftarBanner || [];
     if (daftarBanner.length > 0) {
         wadah.innerHTML = `<img src="${daftarBanner[0].link}" alt="Banner Promo" class="banner-gambar" loading="lazy">`;
     } else {
@@ -774,8 +824,9 @@ function tampilkanBanner() {
     }
 }
 
-function tampilkanKategori() {
-    const daftarKategori = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
+async function tampilkanKategori() {
+    const semuaData = await bacaSemuaData();
+    const daftarKategori = semuaData.daftarKategori || [];
     const wadah = document.getElementById("wadahKategori");
     wadah.innerHTML = `<button class="tombol-kategori aktif" onclick="pilihKategori('semua')">Semua</button>`;
     daftarKategori.forEach((kat) => {
@@ -790,9 +841,10 @@ function pilihKategori(id) {
     tampilkanMenu();
 }
 
-function tampilkanMenu() {
-    const daftarMenu = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
-    const daftarKategori = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
+async function tampilkanMenu() {
+    const semuaData = await bacaSemuaData();
+    const daftarMenu = semuaData.daftarMenu || [];
+    const daftarKategori = semuaData.daftarKategori || [];
     const wadah = document.getElementById("daftarMenu");
     let menuTampil = daftarMenu;
     if (kategoriTerpilih !== "semua") {
@@ -817,9 +869,8 @@ function tampilkanMenu() {
 }
 
 function bukaPopup(indeks) {
-    const daftarMenu = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
-    const menu = daftarMenu[indeks];
-    document.getElementById("barang").value = `${menu.nama} - Rp ${Number(menu.harga).toLocaleString('id-ID')}`;
+    const daftarMenu = JSON.parse(localStorage.getItem("DAFTAR_MENU_SEMENTARA") || "[]");
+    document.getElementById("barang").value = `${daftarMenu[indeks].nama} - Rp ${Number(daftarMenu[indeks].harga).toLocaleString('id-ID')}`;
     document.getElementById("popupOverlay").style.display = "flex";
     setTimeout(() => document.getElementById("popupOverlay").classList.add("tampil"), 10);
     document.body.style.overflow = "hidden";
@@ -866,8 +917,9 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function perbaruiDataPeta() {
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+async function perbaruiDataPeta() {
+    const semuaData = await bacaSemuaData();
+    const daftar = semuaData.daftarPesanan || [];
     pesananAktif = daftar.find(p => p.hp === penggunaSaatIni.hp && p.status !== "Selesai");
     if (pesananAktif && pesananAktif.lokasiDriver) {
         const posDriver = [pesananAktif.lokasiDriver.lat, pesananAktif.lokasiDriver.lon];
@@ -884,8 +936,8 @@ function perbaruiDataPeta() {
     }
 }
 
-// ✅ KIRIM PESANAN + KIRIM POSISI KE DRIVER
-function kirimPesanan() {
+// ✅ KIRIM PESANAN KE FIREBASE
+async function kirimPesanan() {
     const barang = document.getElementById("barang").value.trim();
     const alamat = document.getElementById("alamat").value.trim();
     const catatan = document.getElementById("catatan").value.trim();
@@ -894,6 +946,9 @@ function kirimPesanan() {
     if (lokasiSaya.akurasi > 50) return alert("❌ Lokasi belum cukup akurat! Tunggu sampai di bawah 50 meter.");
     if (!cekKeamananPerangkat()) return;
 
+    const semuaData = await bacaSemuaData();
+    const daftarPesanan = semuaData.daftarPesanan || [];
+
     const pesananBaru = {
         resi: "RESI-" + Math.floor(100000 + Math.random() * 900000),
         barang: barang,
@@ -901,24 +956,28 @@ function kirimPesanan() {
         hp: penggunaSaatIni.hp,
         alamat: alamat,
         catatan: catatan,
-        lokasiTujuan: { lat: lokasiSaya.lat, lon: lokasiSaya.lon }, // Bisa dilihat driver
+        lokasiTujuan: { lat: lokasiSaya.lat, lon: lokasiSaya.lon },
         akurasi: lokasiSaya.akurasi,
         lokasiDriver: null,
+        idDriver: null,
+        namaDriver: null,
         status: "Menunggu",
         waktuPesan: new Date().toLocaleString('id-ID')
     };
 
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    daftar.push(pesananBaru);
-    localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+    daftarPesanan.push(pesananBaru);
+    semuaData.daftarPesanan = daftarPesanan;
 
-    alert(`✅ Pesanan berhasil dikirim!\nNomor Resi: ${pesananBaru.resi}`);
-    tutupPopup();
+    if (await simpanSemuaData(semuaData)) {
+        alert(`✅ Pesanan berhasil dikirim!\nNomor Resi: ${pesananBaru.resi}`);
+        tutupPopup();
+    }
 }
 
-function tampilkanRiwayat() {
+async function tampilkanRiwayat() {
     const wadah = document.getElementById("daftarRiwayat");
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const semuaData = await bacaSemuaData();
+    const daftar = semuaData.daftarPesanan || [];
     const pesananSaya = daftar.filter(p => p.hp === penggunaSaatIni.hp).reverse();
     
     if (pesananSaya.length === 0) {
@@ -947,14 +1006,21 @@ function tampilkanRiwayat() {
     });
 }
 
+// Simpan daftar menu sementara untuk popup
+async function perbaruiDaftarMenuSementara() {
+    const semuaData = await bacaSemuaData();
+    localStorage.setItem("DAFTAR_MENU_SEMENTARA", JSON.stringify(semuaData.daftarMenu || []));
+}
+
 window.onload = function() {
     cekLogin();
     inisialisasiPeta();
+    setInterval(perbaruiDaftarMenuSementara, 2000);
     setInterval(tampilkanBanner, 3000);
-    setInterval(tampilkanMenu, 2000);
+    setInterval(tampilkanMenu, 3000);
     setInterval(ambilLokasiSaya, 5000);
     setInterval(perbaruiDataPeta, 3000);
-    setInterval(tampilkanRiwayat, 2000);
+    setInterval(tampilkanRiwayat, 3000);
 };
 </script>
 
