@@ -98,7 +98,6 @@
             z-index: 1;
         }
 
-        /* ✅ Tombol posisi semula */
         .tombol-posisi-semula {
             position: absolute;
             top: 12px;
@@ -223,7 +222,6 @@
             transform: translateX(24px);
         }
 
-        /* ✅ Popup notifikasi pesanan masuk */
         .popup-notif {
             position: fixed;
             top: 20px;
@@ -266,7 +264,6 @@
             cursor: pointer;
         }
 
-        /* ✅ Responsif untuk semua perangkat */
         @media (min-width: 768px) {
             .container { padding: 1.5rem; }
             #peta { height: 450px; }
@@ -290,7 +287,6 @@
 </div>
 
 <div class="container">
-    <!-- HALAMAN LOGIN -->
     <div class="halaman" id="halaman-login">
         <div class="d-flex flex-column align-items-center justify-content-center min-vh-75 text-center">
             <div class="card w-100" style="max-width: 400px;">
@@ -307,7 +303,6 @@
         </div>
     </div>
 
-    <!-- HALAMAN PESANAN -->
     <div class="halaman" id="halaman-pesanan">
         <div class="info-pengguna">
             <div>
@@ -334,7 +329,6 @@
         </div>
     </div>
 
-    <!-- HALAMAN RIWAYAT -->
     <div class="halaman" id="halaman-riwayat">
         <div class="info-pengguna">
             <div>
@@ -349,7 +343,6 @@
         </div>
     </div>
 
-    <!-- HALAMAN PETA -->
     <div class="halaman" id="halaman-peta">
         <div class="info-pengguna">
             <div>
@@ -371,7 +364,6 @@
     </div>
 </div>
 
-<!-- NAVIGASI BAWAH -->
 <div class="nav-bawah">
     <div class="nav-item" onclick="bukaHalamanDriver('pesanan')">
         <i class="bi bi-list-task"></i>
@@ -387,7 +379,6 @@
     </div>
 </div>
 
-<!-- ✅ Popup Notifikasi Pesanan Masuk -->
 <div id="popupNotif" class="popup-notif">
     <div class="notif-header">
         <h6><i class="bi bi-bell-fill me-1"></i> Pesanan Masuk!</h6>
@@ -398,13 +389,59 @@
     </div>
 </div>
 
+<!-- ✅ PUSTAKA FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 <script>
+// ==========================================
+// ✅ KONFIGURASI FIREBASE (SAMA DENGAN ADMIN)
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
+  authDomain: "dok123-1bd6f.firebaseapp.com",
+  databaseURL: "https://dok123-1bd6f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dok123-1bd6f",
+  storageBucket: "dok123-1bd6f.firebasestorage.app",
+  messagingSenderId: "664523539322",
+  appId: "1:664523539322:web:61c0adedc67fee015dccc3"
+};
+
+// Inisialisasi Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const refData = db.ref("data");
+
 let peta;
 let penandaDriver;
 let lokasiDriver = { lat: -5.1477, lon: 119.4327 };
 let dataDriverSaatIni = null;
 let modeOtomatisAktif = false;
 let intervalCariPesanan = null;
+
+// ==========================================
+// ✅ FUNGSI BACA & SIMPAN KE FIREBASE
+// ==========================================
+async function bacaData() {
+    try {
+        const snapshot = await refData.once("value");
+        return snapshot.val() || {};
+    } catch (err) {
+        console.warn("Gagal baca data:", err);
+        return {};
+    }
+}
+
+async function simpanData(dataBaru) {
+    try {
+        await refData.set(dataBaru);
+        return true;
+    } catch (err) {
+        console.error("Gagal simpan data:", err);
+        alert("Gagal menyimpan perubahan!");
+        return false;
+    }
+}
 
 // ✅ Paksa lokasi akurat
 function ambilLokasiDriver() {
@@ -436,7 +473,6 @@ function inisialisasiPetaDriver() {
     }
 }
 
-// ✅ Tombol posisi semula
 function posisiPetaSemula() {
     if (peta && lokasiDriver.lat && lokasiDriver.lon) {
         peta.setView([lokasiDriver.lat, lokasiDriver.lon], 15);
@@ -448,7 +484,6 @@ function cekLoginDriver() {
     if (data) {
         dataDriverSaatIni = JSON.parse(data);
         bukaHalamanDriver("pesanan");
-        // ✅ Muat status mode otomatis dari penyimpanan
         const statusOtomatis = localStorage.getItem("MODE_OTOMATIS") === "aktif";
         document.getElementById("modeOtomatis").checked = statusOtomatis;
         ubahModeOtomatis();
@@ -458,13 +493,13 @@ function cekLoginDriver() {
     }
 }
 
-function loginDriver() {
+async function loginDriver() {
     const hp = document.getElementById("inputHpDriver").value.trim();
     if (!hp) return alert("Masukkan nomor HP!");
 
-    // ✅ DIPERBAIKI: Proses pencarian nomor HP agar cocok dan bisa terbaca di mode samaran
-    const daftarDriver = JSON.parse(localStorage.getItem("DAFTAR_DRIVER")) || [];
-    const hpBersih = hp.replace(/\D/g, ''); // Bersihkan karakter selain angka
+    const semuaData = await bacaData();
+    const daftarDriver = semuaData.daftarDriver || [];
+    const hpBersih = hp.replace(/\D/g, '');
     const cari = daftarDriver.find(d => {
         const hpDriverBersih = String(d.hp || '').replace(/\D/g, '');
         return hpDriverBersih === hpBersih && d.status === "Aktif";
@@ -529,7 +564,6 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
 
 function ubahModeOtomatis() {
     modeOtomatisAktif = document.getElementById("modeOtomatis").checked;
-    // ✅ Simpan status agar tidak hilang saat refresh
     localStorage.setItem("MODE_OTOMATIS", modeOtomatisAktif ? "aktif" : "mati");
     
     if (modeOtomatisAktif) {
@@ -540,8 +574,9 @@ function ubahModeOtomatis() {
     }
 }
 
-function cariDanAmbilPesananTerdekat() {
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+async function cariDanAmbilPesananTerdekat() {
+    const semuaData = await bacaData();
+    const daftar = semuaData.daftarPesanan || [];
     const pesananMenunggu = daftar.filter(p => !p.idDriver && p.status === "Menunggu" && p.lokasiTujuan);
     if (pesananMenunggu.length === 0) return;
 
@@ -553,12 +588,10 @@ function cariDanAmbilPesananTerdekat() {
 
     if (terdekat && jarakMin <= 5) {
         ambilPesanan(terdekat.resi);
-        // ✅ Tampilkan notifikasi keren
         tampilkanNotif(terdekat);
     }
 }
 
-// ✅ Fungsi tampilkan notifikasi pesanan masuk
 function tampilkanNotif(pesanan) {
     const notif = document.getElementById("popupNotif");
     const isi = document.getElementById("isiNotif");
@@ -575,21 +608,19 @@ function tutupNotif() {
     document.getElementById("popupNotif").classList.remove("tampil");
 }
 
-// ✅ DIPERBAIKI: Hanya tampilkan pesanan yang BELUM SELESAI di halaman Pesanan
-function tampilkanPesananMasuk() {
+async function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const semuaData = await bacaData();
+    const daftar = semuaData.daftarPesanan || [];
     
-    // Urutkan sesuai urutan proses & HANYA ambil yang belum selesai
     const urutanStatus = ["Menunggu", "Sudah Diambil", "Sampai di Restoran", "Dalam Perjalanan"];
     const pesananDiurut = daftar
         .filter(p => 
             (p.idDriver === dataDriverSaatIni.hp || !p.idDriver) 
-            && p.status !== "Selesai" // ❗ Tidak tampilkan yang sudah selesai
+            && p.status !== "Selesai"
         )
         .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
 
-    // ✅ Jika tidak ada pesanan, tampilkan tulisan kosong saja
     if (pesananDiurut.length === 0) {
         wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia atau sedang dikerjakan</p></div>`;
         return;
@@ -639,36 +670,41 @@ function bukaChat(nomorHp) {
     window.open(`https://wa.me/${nomor}`, '_blank');
 }
 
-function ambilPesanan(resi) {
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+async function ambilPesanan(resi) {
+    const semuaData = await bacaData();
+    const daftar = semuaData.daftarPesanan || [];
     const indeks = daftar.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
         daftar[indeks].idDriver = dataDriverSaatIni.hp;
         daftar[indeks].namaDriver = dataDriverSaatIni.nama;
         daftar[indeks].status = "Sudah Diambil";
         daftar[indeks].lokasiDriver = { ...lokasiDriver };
-        localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
-        tampilkanPesananMasuk();
-        tampilkanRiwayatDriver();
+        semuaData.daftarPesanan = daftar;
+        if (await simpanData(semuaData)) {
+            tampilkanPesananMasuk();
+            tampilkanRiwayatDriver();
+        }
     }
 }
 
-// ✅ Ubah status pesanan
-function ubahStatus(resi, statusBaru) {
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+async function ubahStatus(resi, statusBaru) {
+    const semuaData = await bacaData();
+    const daftar = semuaData.daftarPesanan || [];
     const indeks = daftar.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
         daftar[indeks].status = statusBaru;
-        localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
-        tampilkanPesananMasuk();
-        tampilkanRiwayatDriver();
+        semuaData.daftarPesanan = daftar;
+        if (await simpanData(semuaData)) {
+            tampilkanPesananMasuk();
+            tampilkanRiwayatDriver();
+        }
     }
 }
 
-// ✅ Riwayat hanya tampilkan yang sudah selesai
-function tampilkanRiwayatDriver() {
+async function tampilkanRiwayatDriver() {
     const wadah = document.getElementById("daftarRiwayatDriver");
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const semuaData = await bacaData();
+    const daftar = semuaData.daftarPesanan || [];
     const riwayat = daftar
         .filter(p => p.idDriver === dataDriverSaatIni.hp && p.status === "Selesai")
         .reverse();
@@ -695,9 +731,10 @@ function tampilkanRiwayatDriver() {
     });
 }
 
-function perbaruiPosisiDriverDiPesanan() {
+async function perbaruiPosisiDriverDiPesanan() {
     if (!dataDriverSaatIni) return;
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const semuaData = await bacaData();
+    const daftar = semuaData.daftarPesanan || [];
     let adaPerubahan = false;
     daftar.forEach(p => {
         if (p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai") {
@@ -705,7 +742,10 @@ function perbaruiPosisiDriverDiPesanan() {
             adaPerubahan = true;
         }
     });
-    if (adaPerubahan) localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+    if (adaPerubahan) {
+        semuaData.daftarPesanan = daftar;
+        await simpanData(semuaData);
+    }
 }
 
 window.onload = function() {
