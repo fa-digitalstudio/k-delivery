@@ -462,8 +462,13 @@ function loginDriver() {
     const hp = document.getElementById("inputHpDriver").value.trim();
     if (!hp) return alert("Masukkan nomor HP!");
 
+    // ✅ DIPERBAIKI: Proses pencarian nomor HP agar cocok dan bisa terbaca di mode samaran
     const daftarDriver = JSON.parse(localStorage.getItem("DAFTAR_DRIVER")) || [];
-    const cari = daftarDriver.find(d => d.hp === hp && d.status === "Aktif");
+    const hpBersih = hp.replace(/\D/g, ''); // Bersihkan karakter selain angka
+    const cari = daftarDriver.find(d => {
+        const hpDriverBersih = String(d.hp || '').replace(/\D/g, '');
+        return hpDriverBersih === hpBersih && d.status === "Aktif";
+    });
 
     if (!cari) return alert("Nomor HP tidak terdaftar atau belum diaktifkan Admin!");
 
