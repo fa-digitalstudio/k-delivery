@@ -9,9 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        /* ================================== */
-        /* CSS ASLI LENGKAP TANPA PERUBAHAN */
-        /* ================================== */
         :root {
             --utama: #0F4C5C;
             --hijau: #22C55E;
@@ -51,7 +48,7 @@
 
         .container {
             padding: 1rem;
-            max-width: 100%;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -94,11 +91,34 @@
 
         #peta {
             width: 100%;
-            height: 350px;
+            height: 380px;
             border-radius: 8px;
             border: 1px solid #e5e7eb;
             margin-bottom: 1rem;
             z-index: 1;
+        }
+
+        /* ✅ Tombol posisi semula */
+        .tombol-posisi-semula {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .tombol-posisi-semula i {
+            color: var(--utama);
         }
 
         .nav-bawah {
@@ -147,9 +167,6 @@
             color: var(--abu);
         }
 
-        /* ================================== */
-        /* TAMBAHAN SAJA - TIDAK MENGGANTI */
-        /* ================================== */
         .mode-switch {
             display: flex;
             align-items: center;
@@ -205,6 +222,21 @@
         input:checked + .slider:before {
             transform: translateX(24px);
         }
+
+        /* ✅ Responsif untuk semua perangkat */
+        @media (min-width: 768px) {
+            .container { padding: 1.5rem; }
+            #peta { height: 450px; }
+            .pesanan-item { padding: 1.2rem; }
+            .nav-item { font-size: 0.9rem; }
+            .nav-item i { font-size: 1.4rem; }
+        }
+
+        @media (min-width: 1024px) {
+            .container { padding: 2rem; max-width: 1100px; }
+            #peta { height: 500px; }
+            .grid-pesanan { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -241,7 +273,6 @@
             <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
 
-        <!-- TOMBOL OTOMATIS -->
         <div class="mode-switch">
             <div>
                 <strong>Terima Pesanan Otomatis</strong>
@@ -254,7 +285,7 @@
         </div>
 
         <div class="card">
-            <h5><i class="bi bi-bell"></i> Pesanan Tersedia</h5>
+            <h5><i class="bi bi-bell"></i> Pesanan Tersedia & Dalam Proses</h5>
             <div id="daftarPesananMasuk"></div>
         </div>
     </div>
@@ -283,8 +314,11 @@
             </div>
             <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
-        <div class="card">
+        <div class="card" style="position: relative;">
             <h5><i class="bi bi-map"></i> Peta Perjalanan</h5>
+            <button class="tombol-posisi-semula" onclick="posisiPetaSemula()">
+                <i class="bi bi-geo-alt"></i> Posisi Semula
+            </button>
             <div id="peta"></div>
             <div class="mt-2">
                 <p class="mb-1"><strong>Lokasi Anda:</strong> <span id="lokasiDriverSekarang">-</span></p>
@@ -310,9 +344,6 @@
 </div>
 
 <script>
-// ==================================
-// VARIABEL & FUNGSI ASLI LENGKAP
-// ==================================
 let peta;
 let penandaDriver;
 let lokasiDriver = { lat: -5.1477, lon: 119.4327 };
@@ -320,7 +351,7 @@ let dataDriverSaatIni = null;
 let modeOtomatisAktif = false;
 let intervalCariPesanan = null;
 
-// ✅ PAKSA IZIN LOKASI AKURAT
+// ✅ Paksa lokasi akurat
 function ambilLokasiDriver() {
     if (!navigator.geolocation) {
         alert("Perangkat tidak mendukung fitur lokasi!");
@@ -336,7 +367,7 @@ function ambilLokasiDriver() {
         },
         (err) => {
             alert("Aktifkan izin lokasi untuk bisa menerima pesanan!");
-            ambilLokasiDriver(); // Ulangi sampai izin diberikan
+            setTimeout(ambilLokasiDriver, 3000);
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
     );
@@ -347,12 +378,16 @@ function inisialisasiPetaDriver() {
         peta = L.map('peta').setView([lokasiDriver.lat, lokasiDriver.lon], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(peta);
         penandaDriver = L.marker([lokasiDriver.lat, lokasiDriver.lon]).addTo(peta).bindPopup("Posisi Anda");
-    } else {
+    }
+}
+
+// ✅ Tombol posisi semula
+function posisiPetaSemula() {
+    if (peta && lokasiDriver.lat && lokasiDriver.lon) {
         peta.setView([lokasiDriver.lat, lokasiDriver.lon], 15);
     }
 }
 
-// ✅ LOGIN & CEK OTOMATIS
 function cekLoginDriver() {
     const data = localStorage.getItem("DRIVER_SAAT_INI");
     if (data) {
@@ -419,7 +454,6 @@ function bukaHalamanDriver(nama) {
     }
 }
 
-// ✅ HITUNG JARAK
 function hitungJarak(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -428,7 +462,6 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ✅ MODE OTOMATIS
 function ubahModeOtomatis() {
     modeOtomatisAktif = document.getElementById("modeOtomatis").checked;
     if (modeOtomatisAktif) {
@@ -455,37 +488,65 @@ function cariDanAmbilPesananTerdekat() {
     if (terdekat && jarakMin <= 5) ambilPesanan(terdekat.resi);
 }
 
-// ✅ TAMPILKAN PESANAN + TOMBOL CHAT
+// ✅ Urutkan & tampilkan pesanan dengan status baru
 function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    const pesananBelumDiambil = daftar.filter(p => !p.idDriver && p.status === "Menunggu").reverse();
+    
+    // Urutkan sesuai urutan proses
+    const urutanStatus = ["Menunggu", "Sudah Diambil", "Sampai di Restoran", "Dalam Perjalanan", "Selesai"];
+    const pesananDiurut = daftar
+        .filter(p => p.idDriver === dataDriverSaatIni.hp || !p.idDriver)
+        .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
 
-    if (pesananBelumDiambil.length === 0) {
+    if (pesananDiurut.length === 0) {
         wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia</p></div>`;
         return;
     }
 
     wadah.innerHTML = "";
-    pesananBelumDiambil.forEach(pes => {
+    pesananDiurut.forEach(pes => {
+        let warnaStatus, tombolAksi = "";
+        switch(pes.status) {
+            case "Menunggu":
+                warnaStatus = "#6B7280";
+                tombolAksi = `<button onclick="ambilPesanan('${pes.resi}')" class="btn btn-success w-100">Ambil Pesanan</button>`;
+                break;
+            case "Sudah Diambil":
+                warnaStatus = "#22C55E";
+                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Sampai di Restoran')" class="btn btn-primary w-100">Sampai di Restoran</button>`;
+                break;
+            case "Sampai di Restoran":
+                warnaStatus = "#3B82F6";
+                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Dalam Perjalanan')" class="btn btn-warning w-100 text-white">Antar ke Pelanggan</button>`;
+                break;
+            case "Dalam Perjalanan":
+                warnaStatus = "#F59E0B";
+                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Selesai')" class="btn btn-dark w-100">Pesanan Selesai</button>`;
+                break;
+            case "Selesai":
+                warnaStatus = "#0F4C5C";
+                tombolAksi = `<span class="text-success">✅ Pesanan selesai</span>`;
+                break;
+        }
+
         wadah.innerHTML += `<div class="pesanan-item">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">Resi: ${pes.resi}</span>
-                <span class="status-badge" style="background:#6B7280">Menunggu</span>
+                <span class="status-badge" style="background:${warnaStatus}">${pes.status}</span>
             </div>
             <p><strong>Pelanggan:</strong> ${pes.nama}</p>
             <p><strong>HP:</strong> ${pes.hp}</p>
             <p><strong>Alamat:</strong> ${pes.alamat}</p>
             <p><strong>Pesanan:</strong> ${pes.barang}</p>
             <div class="d-flex gap-2 mt-3">
-                <button onclick="ambilPesanan('${pes.resi}')" class="btn btn-success flex-grow-1">Ambil Pesanan</button>
-                <button onclick="bukaChat('${pes.hp}')" class="btn btn-outline-primary"><i class="bi bi-chat-text"></i> Chat</button>
+                <button onclick="bukaChat('${pes.hp}')" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-chat-text"></i> Chat</button>
+                ${tombolAksi}
             </div>
         </div>`;
     });
 }
 
-// ✅ FUNGSI TOMBOL CHAT
 function bukaChat(nomorHp) {
     const nomor = nomorHp.replace(/\D/g, '');
     window.open(`https://wa.me/${nomor}`, '_blank');
@@ -499,6 +560,18 @@ function ambilPesanan(resi) {
         daftar[indeks].namaDriver = dataDriverSaatIni.nama;
         daftar[indeks].status = "Sudah Diambil";
         daftar[indeks].lokasiDriver = { ...lokasiDriver };
+        localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+        tampilkanPesananMasuk();
+        tampilkanRiwayatDriver();
+    }
+}
+
+// ✅ Ubah status pesanan
+function ubahStatus(resi, statusBaru) {
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const indeks = daftar.findIndex(p => p.resi === resi);
+    if (indeks !== -1) {
+        daftar[indeks].status = statusBaru;
         localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
         tampilkanPesananMasuk();
         tampilkanRiwayatDriver();
@@ -519,6 +592,7 @@ function tampilkanRiwayatDriver() {
     riwayat.forEach(pes => {
         let warna = "#6B7280";
         if (pes.status === "Sudah Diambil") warna = "#22C55E";
+        if (pes.status === "Sampai di Restoran") warna = "#3B82F6";
         if (pes.status === "Dalam Perjalanan") warna = "#F59E0B";
         if (pes.status === "Selesai") warna = "#0F4C5C";
 
@@ -548,7 +622,6 @@ function perbaruiPosisiDriverDiPesanan() {
     if (adaPerubahan) localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
 }
 
-// ✅ JALANKAN SAAT DIBUKA
 window.onload = function() {
     cekLoginDriver();
     setInterval(ambilLokasiDriver, 4000);
