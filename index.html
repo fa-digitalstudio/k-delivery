@@ -71,6 +71,23 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
 
+        /* ✅ Tambahan gaya untuk daftar di halaman login */
+        .info-login {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 1.2rem;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #075985;
+        }
+
+        .info-login ul {
+            margin: 0.5rem 0 0 1.2rem;
+            padding: 0;
+        }
+
         /* Banner */
         .banner-wadah {
             width: 100%;
@@ -442,7 +459,19 @@
     <div class="halaman aktif" id="halaman-login">
         <div class="halaman-login">
             <div class="card-login">
-                <h4 class="mb-4">Masuk Sebagai Pelanggan</h4>
+                <h4 class="mb-3">Masuk Sebagai Pelanggan</h4>
+                
+                <!-- ✅ Tambahan daftar/info di bagian login -->
+                <div class="info-login">
+                    <strong>📝 Ketentuan Masuk:</strong>
+                    <ul>
+                        <li>Gunakan nama lengkap Anda</li>
+                        <li>Nomor HP yang aktif dan benar</li>
+                        <li>Riwayat pesanan akan tersimpan sesuai nomor HP</li>
+                        <li>Bisa masuk di perangkat lain dengan data yang sama</li>
+                    </ul>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Nama Lengkap</label>
                     <input type="text" id="inputNama" class="form-control" placeholder="Contoh: Budi Santoso" required>
@@ -567,44 +596,57 @@ let pesananAktif = null;
 let kategoriTerpilih = "semua";
 let penggunaSaatIni = null;
 
-// ✅ LOGIN DIPERBARUI: Data terpusat berdasarkan nomor HP
+// ✅ FUNGSI LOGIN DIPERBAIKI - Bisa berjalan normal
 function login() {
     const nama = document.getElementById("inputNama").value.trim();
     const hp = document.getElementById("inputHp").value.trim();
     
-    if (!nama || !hp) {
-        return alert("Lengkapi nama dan nomor HP!");
+    // Validasi input
+    if (!nama) {
+        alert("⚠️ Nama lengkap tidak boleh kosong!");
+        return;
+    }
+    if (!hp) {
+        alert("⚠️ Nomor HP tidak boleh kosong!");
+        return;
+    }
+    if (hp.length < 10 || hp.length > 14) {
+        alert("⚠️ Nomor HP tidak valid!");
+        return;
     }
 
-    // Ambil data pengguna secara GLOBAL (bukan perangkat)
+    // Ambil data pengguna
     const daftarPengguna = JSON.parse(localStorage.getItem("DAFTAR_PENGGUNA")) || [];
-    const indeksPengguna = daftarPengguna.findIndex(p => p.hp === hp);
+    const cariPengguna = daftarPengguna.find(p => p.hp === hp);
 
-    if (indeksPengguna === -1) {
-        // Pengguna baru: daftarkan ke daftar utama
-        daftarPengguna.push({
+    if (!cariPengguna) {
+        // Pengguna baru
+        const penggunaBaru = {
             nama: nama,
             hp: hp,
             waktuDaftar: new Date().toLocaleString('id-ID')
-        });
+        };
+        daftarPengguna.push(penggunaBaru);
+        localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
+        penggunaSaatIni = penggunaBaru;
     } else {
-        // Jika nomor HP sudah ada, gunakan nama yang terdaftar
-        nama = daftarPengguna[indeksPengguna].nama;
+        // Sudah terdaftar, gunakan data yang ada
+        penggunaSaatIni = cariPengguna;
+        // Jika nama diubah, perbarui data
+        if (cariPengguna.nama !== nama) {
+            cariPengguna.nama = nama;
+            localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
+        }
     }
 
-    // Simpan perubahan ke daftar utama
-    localStorage.setItem("DAFTAR_PENGGUNA", JSON.stringify(daftarPengguna));
-
-    // Simpan sesi login
-    penggunaSaatIni = { nama, hp };
+    // Simpan sesi dan masuk ke halaman utama
     localStorage.setItem("PENGGUNA_SAAT_INI", JSON.stringify(penggunaSaatIni));
-    
     bukaHalaman('beranda');
     ambilLokasiSaya();
 }
 
 function logout() {
-    if (!confirm("Yakin ingin keluar?")) return;
+    if (!confirm("Yakin ingin keluar dari akun?")) return;
     localStorage.removeItem("PENGGUNA_SAAT_INI");
     penggunaSaatIni = null;
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
@@ -623,7 +665,7 @@ function cekLogin() {
 
 function ambilLokasiSaya() {
     if (!navigator.geolocation) {
-        alert("Perangkat tidak mendukung GPS!");
+        alert("Perangkat Anda tidak mendukung fitur lokasi!");
         return;
     }
 
@@ -640,10 +682,13 @@ function ambilLokasiSaya() {
             cekStatusTombolPesan();
         },
         (err) => {
-            let pesan = "Gagal dapatkan lokasi: ";
-            if (err.code === 1) pesan += "Izin lokasi ditolak";
-            else if (err.code === 2) pesan += "Sinyal GPS lemah";
-            else if (err.code === 3) pesan += "Waktu habis";
+            let pesan = "Gagal mendapatkan lokasi: ";
+            switch(err.code) {
+                case 1: pesan += "Izin lokasi ditolak"; break;
+                case 2: pesan += "Sinyal GPS lemah atau tidak tersedia"; break;
+                case 3: pesan += "Waktu permintaan lokasi habis"; break;
+                default: pesan += "Terjadi kesalahan tidak diketahui";
+            }
             alert(pesan);
         },
         { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
@@ -820,7 +865,6 @@ function perbaruiDataPeta() {
     }
 }
 
-// ✅ KIRIM PESANAN: Disimpan ke daftar GLOBAL agar bisa dibaca di mana saja
 function kirimPesanan() {
     const barang = document.getElementById("barang").value.trim();
     const alamat = document.getElementById("alamat").value.trim();
@@ -844,7 +888,6 @@ function kirimPesanan() {
         waktuPesan: new Date().toLocaleString('id-ID')
     };
 
-    // Simpan ke daftar pesanan UTAMA (bukan perangkat)
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
     daftar.push(pesananBaru);
     localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
@@ -853,11 +896,9 @@ function kirimPesanan() {
     tutupPopup();
 }
 
-// ✅ TAMPILKAN RIWAYAT: Ambil dari daftar utama berdasarkan nomor HP
 function tampilkanRiwayat() {
     const wadah = document.getElementById("daftarRiwayat");
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    // Ambil SEMUA pesanan yang cocok dengan nomor HP pengguna
     const pesananSaya = daftar.filter(p => p.hp === penggunaSaatIni.hp).reverse();
     
     if (pesananSaya.length === 0) {
