@@ -223,6 +223,49 @@
             transform: translateX(24px);
         }
 
+        /* ✅ Popup notifikasi pesanan masuk */
+        .popup-notif {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 320px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            border-left: 5px solid var(--hijau);
+            padding: 1rem;
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .popup-notif.tampil {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .notif-header h6 {
+            margin: 0;
+            color: var(--hijau);
+            font-weight: 600;
+        }
+
+        .tombol-tutup-notif {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            color: var(--abu);
+            cursor: pointer;
+        }
+
         /* ✅ Responsif untuk semua perangkat */
         @media (min-width: 768px) {
             .container { padding: 1.5rem; }
@@ -230,6 +273,7 @@
             .pesanan-item { padding: 1.2rem; }
             .nav-item { font-size: 0.9rem; }
             .nav-item i { font-size: 1.4rem; }
+            .popup-notif { width: 360px; }
         }
 
         @media (min-width: 1024px) {
@@ -343,6 +387,17 @@
     </div>
 </div>
 
+<!-- ✅ Popup Notifikasi Pesanan Masuk -->
+<div id="popupNotif" class="popup-notif">
+    <div class="notif-header">
+        <h6><i class="bi bi-bell-fill me-1"></i> Pesanan Masuk!</h6>
+        <button class="tombol-tutup-notif" onclick="tutupNotif()">&times;</button>
+    </div>
+    <div id="isiNotif" class="small">
+        <p class="mb-1">Ada pesanan terdekat diterima otomatis</p>
+    </div>
+</div>
+
 <script>
 let peta;
 let penandaDriver;
@@ -393,6 +448,10 @@ function cekLoginDriver() {
     if (data) {
         dataDriverSaatIni = JSON.parse(data);
         bukaHalamanDriver("pesanan");
+        // ✅ Muat status mode otomatis dari penyimpanan
+        const statusOtomatis = localStorage.getItem("MODE_OTOMATIS") === "aktif";
+        document.getElementById("modeOtomatis").checked = statusOtomatis;
+        ubahModeOtomatis();
     } else {
         document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
         document.getElementById("halaman-login").classList.add("aktif");
@@ -417,6 +476,7 @@ function loginDriver() {
 function logoutDriver() {
     if (!confirm("Yakin ingin keluar?")) return;
     localStorage.removeItem("DRIVER_SAAT_INI");
+    localStorage.removeItem("MODE_OTOMATIS");
     dataDriverSaatIni = null;
     modeOtomatisAktif = false;
     if (intervalCariPesanan) clearInterval(intervalCariPesanan);
@@ -464,12 +524,13 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
 
 function ubahModeOtomatis() {
     modeOtomatisAktif = document.getElementById("modeOtomatis").checked;
+    // ✅ Simpan status agar tidak hilang saat refresh
+    localStorage.setItem("MODE_OTOMATIS", modeOtomatisAktif ? "aktif" : "mati");
+    
     if (modeOtomatisAktif) {
-        alert("Mode terima pesanan otomatis AKTIF");
         if (intervalCariPesanan) clearInterval(intervalCariPesanan);
         intervalCariPesanan = setInterval(cariDanAmbilPesananTerdekat, 5000);
     } else {
-        alert("Mode terima pesanan otomatis DIMATIKAN");
         if (intervalCariPesanan) clearInterval(intervalCariPesanan);
     }
 }
@@ -485,10 +546,31 @@ function cariDanAmbilPesananTerdekat() {
         if (jarak < jarakMin) { jarakMin = jarak; terdekat = pes; }
     });
 
-    if (terdekat && jarakMin <= 5) ambilPesanan(terdekat.resi);
+    if (terdekat && jarakMin <= 5) {
+        ambilPesanan(terdekat.resi);
+        // ✅ Tampilkan notifikasi keren
+        tampilkanNotif(terdekat);
+    }
 }
 
-// ✅ Urutkan & tampilkan pesanan dengan status baru
+// ✅ Fungsi tampilkan notifikasi pesanan masuk
+function tampilkanNotif(pesanan) {
+    const notif = document.getElementById("popupNotif");
+    const isi = document.getElementById("isiNotif");
+    isi.innerHTML = `
+        <p class="mb-1"><strong>Resi:</strong> ${pesanan.resi}</p>
+        <p class="mb-1"><strong>Pelanggan:</strong> ${pesanan.nama}</p>
+        <p class="mb-0"><strong>Jarak:</strong> ${hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pesanan.lokasiTujuan.lat, pesanan.lokasiTujuan.lon).toFixed(2)} km</p>
+    `;
+    notif.classList.add("tampil");
+    setTimeout(() => tutupNotif(), 8000);
+}
+
+function tutupNotif() {
+    document.getElementById("popupNotif").classList.remove("tampil");
+}
+
+// ✅ Urutkan & tampilkan pesanan - hanya tampilkan jika ada
 function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
@@ -499,6 +581,7 @@ function tampilkanPesananMasuk() {
         .filter(p => p.idDriver === dataDriverSaatIni.hp || !p.idDriver)
         .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
 
+    // ✅ Jika tidak ada pesanan, tampilkan tulisan kosong saja
     if (pesananDiurut.length === 0) {
         wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia</p></div>`;
         return;
