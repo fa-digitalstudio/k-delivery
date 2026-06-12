@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pesan Makanan - Pelanggan</title>
+    <title>K-Delivery - Pelanggan</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -33,17 +36,38 @@
             padding-bottom: 85px;
         }
 
+        /* ✅ PERBAIKAN HEADER ALA ANDROID */
         .header {
-            background-color: var(--utama);
+            background: linear-gradient(135deg, #0F4C5C, #18778C);
             color: white;
             padding: 1.2rem;
             text-align: center;
-            font-size: 1.25rem;
-            font-weight: 600;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .brand-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #judulHalaman {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin: 0;
         }
 
         .container {
@@ -71,7 +95,6 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
 
-        /* ✅ Tambahan gaya untuk daftar di halaman login */
         .info-login {
             background: #f0f9ff;
             border: 1px solid #bae6fd;
@@ -332,7 +355,6 @@
             cursor: not-allowed;
         }
 
-        /* ✅ Perbaikan desain tombol keluar */
         .btn-outline-danger {
             border: 1px solid #ef4444 !important;
             color: #ef4444 !important;
@@ -467,7 +489,7 @@
             display: block;
         }
 
-        /* ✅ GAYA POPUP CHAT DENGAN NAMA PENGIRIM */
+        /* GAYA POPUP CHAT */
         .popup-chat {
             background: white;
             width: 100%;
@@ -587,7 +609,6 @@
             background: #0d3d4a;
         }
 
-        /* ✅ Notifikasi pesan baru */
         .popup-notif-chat {
             position: fixed;
             top: 20px;
@@ -635,17 +656,16 @@
 <body>
 
 <div class="header">
-    <h1 id="judulHalaman">Pesan Makanan</h1>
+    <div class="brand-title"><i class="bi bi-box-seam-fill text-warning"></i> K-Delivery</div>
+    <p id="judulHalaman">Pesan Makanan</p>
 </div>
 
 <div class="container">
-    <!-- Halaman Login -->
     <div class="halaman aktif" id="halaman-login">
         <div class="halaman-login">
             <div class="card-login">
                 <h4 class="mb-3">Masuk Sebagai Pelanggan</h4>
                 
-                <!-- ✅ Tambahan daftar/info di bagian login -->
                 <div class="info-login">
                     <strong>📝 Ketentuan Masuk:</strong>
                     <ul>
@@ -669,7 +689,6 @@
         </div>
     </div>
 
-    <!-- Halaman Beranda -->
     <div class="halaman" id="halaman-beranda">
         <div class="info-pengguna">
             <div>
@@ -690,7 +709,6 @@
         </div>
     </div>
 
-    <!-- Halaman Riwayat -->
     <div class="halaman" id="halaman-riwayat">
         <div class="info-pengguna">
             <div>
@@ -705,7 +723,6 @@
         </div>
     </div>
 
-    <!-- Halaman Peta -->
     <div class="halaman" id="halaman-peta">
         <div class="info-pengguna">
             <div>
@@ -731,7 +748,6 @@
     </div>
 </div>
 
-<!-- Popup Form Pesanan -->
 <div class="overlay" id="popupOverlay">
     <div class="popup-form">
         <div class="popup-header">
@@ -744,17 +760,16 @@
         </div>
         <div class="mb-3">
             <label class="form-label">Alamat Lengkap</label>
-            <textarea id="alamat" class="form-control" rows="3" placeholder="Contoh: Jl. Mawar No.12, Makassar"></textarea>
+            <textarea id="alamat" class="form-control" rows="3" placeholder="Contoh: Jl. Mawar No.12"></textarea>
         </div>
         <div class="mb-3">
             <label class="form-label">Catatan (Opsional)</label>
             <input type="text" id="catatan" class="form-control" placeholder="Contoh: Jangan terlalu pedas">
         </div>
-        <div id="infoAkurasi" class="info-akurasi">⚠️ Lokasi belum cukup akurat! Tunggu sampai di bawah 50 meter</div>
-        <button onclick="kirimPesanan()" id="tombolKirim" class="btn btn-hijau">Kirim Pesanan Sekarang</button>
+        <div id="infoAkurasi" class="info-akurasi text-warning">Mencari lokasi perangkat Anda...</div>
+        <button onclick="kirimPesanan()" id="tombolKirim" class="btn btn-hijau btn-abu" disabled>Kirim Pesanan Sekarang</button>
     </div>
 
-    <!-- ✅ POPUP CHAT BARU -->
     <div class="popup-chat" id="popupChat">
         <div class="header-chat">
             <h6 id="judulChat">Chat dengan Driver</h6>
@@ -768,7 +783,6 @@
     </div>
 </div>
 
-<!-- ✅ Notifikasi Pesan Baru -->
 <div class="popup-notif-chat" id="notifPesanBaru" onclick="bukaChatDariNotif()">
     <div class="notif-chat-header">
         <h6><i class="bi bi-chat-dots"></i> Pesan Baru</h6>
@@ -777,7 +791,6 @@
     <p class="mb-0 small" id="teksNotifPesan">Ada pesan baru dari Driver</p>
 </div>
 
-<!-- Navigasi Bawah -->
 <div class="nav-bawah">
     <div class="nav-item" onclick="bukaHalaman('beranda')">
         <i class="bi bi-house"></i>
@@ -793,13 +806,12 @@
     </div>
 </div>
 
-<!-- ✅ PUSTAKA FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
 // ==========================================
-// ✅ KONFIGURASI FIREBASE (SAMA DENGAN ADMIN & DRIVER)
+// KONFIGURASI FIREBASE
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
@@ -826,9 +838,6 @@ let penggunaSaatIni = null;
 let resiChatAktif = null;
 let pesanTerakhirDilihat = {};
 
-// ==========================================
-// ✅ FUNGSI BACA & SIMPAN KE FIREBASE
-// ==========================================
 async function bacaSemuaData() {
     try {
         const snapshot = await refData.once("value");
@@ -850,49 +859,23 @@ async function simpanSemuaData(dataBaru) {
     }
 }
 
-// ✅ DETEKSI ROOT & FAKE GPS
 function cekKeamananPerangkat() {
-    const tandaFakeGPS = [
-        /fakegps/i, /mock/i, /emulator/i, /virtual/i, /genymotion/i, /nox/i, /bluestacks/i
-    ];
-    const lokasiAsli = lokasiSaya;
-
-    // Cek jika akurasi terlalu tinggi secara tidak wajar atau lonjakan jarak besar
-    if (lokasiSaya.akurasi < 1 && lokasiSaya.lat !== -5.1477) {
-        alert("❌ Perangkat terdeteksi menggunakan lokasi palsu / Fake GPS! Aplikasi tidak dapat digunakan.");
-        localStorage.removeItem("PENGGUNA_SAAT_INI");
-        location.reload();
-        return false;
-    }
-
-    // Cek indikasi perangkat di-root/emulator
     if (navigator.userAgent.match(/root|su|superuser|emulator/i)) {
         alert("❌ Perangkat terdeteksi sudah di-root atau menggunakan emulator! Aplikasi tidak dapat digunakan.");
         localStorage.removeItem("PENGGUNA_SAAT_INI");
         location.reload();
         return false;
     }
-
     return true;
 }
 
-// ✅ FUNGSI LOGIN DIPERBARUI KE FIREBASE
 async function login() {
     const nama = document.getElementById("inputNama").value.trim();
     const hp = document.getElementById("inputHp").value.trim();
     
-    if (!nama) {
-        alert("⚠️ Nama lengkap tidak boleh kosong!");
-        return;
-    }
-    if (!hp) {
-        alert("⚠️ Nomor HP tidak boleh kosong!");
-        return;
-    }
-    if (hp.length < 10 || hp.length > 14) {
-        alert("⚠️ Nomor HP tidak valid!");
-        return;
-    }
+    if (!nama) return alert("⚠️ Nama lengkap tidak boleh kosong!");
+    if (!hp) return alert("⚠️ Nomor HP tidak boleh kosong!");
+    if (hp.length < 10 || hp.length > 14) return alert("⚠️ Nomor HP tidak valid!");
 
     const semuaData = await bacaSemuaData();
     const daftarPengguna = semuaData.daftarPengguna || [];
@@ -940,7 +923,6 @@ function cekLogin() {
     }
 }
 
-// ✅ PERBAIKAN: JANGAN AMBIL LOKASI PAKSA TERUS-MENERUS
 function ambilLokasiSaya() {
     if (!navigator.geolocation) {
         alert("❌ Perangkat Anda tidak mendukung fitur lokasi!");
@@ -968,12 +950,13 @@ function ambilLokasiSaya() {
     );
 }
 
-// ✅ PERBAIKAN: Logika pengecekan tombol lebih jelas
+// ✅ KELONGGARAN AKURASI: Cukup ada kordinat GPS perangkat saja
 function cekStatusTombolPesan() {
     const tombol = document.getElementById("tombolKirim");
     const info = document.getElementById("infoAkurasi");
     
-    if (lokasiSaya.akurasi > 0 && lokasiSaya.akurasi <= 50) {
+    // Syarat cukup tidak menggunakan nilai default (-5.1477)
+    if (lokasiSaya.lat !== -5.1477) {
         tombol.classList.remove("btn-abu");
         tombol.disabled = false;
         info.style.display = "none";
@@ -1085,7 +1068,6 @@ function bukaPopup(indeks) {
     ambilLokasiSaya();
 }
 
-// ✅ Perbaikan fungsi tutup popup agar tidak ada layar hitam
 function tutupPopup() {
     document.getElementById("popupOverlay").classList.remove("tampil");
     setTimeout(() => {
@@ -1159,14 +1141,13 @@ async function perbaruiDataPeta() {
     }
 }
 
-// ✅ KIRIM PESANAN KE FIREBASE
 async function kirimPesanan() {
     const barang = document.getElementById("barang").value.trim();
     const alamat = document.getElementById("alamat").value.trim();
     const catatan = document.getElementById("catatan").value.trim();
 
     if (!barang || !alamat) return alert("❌ Lengkapi semua data yang wajib diisi!");
-    if (lokasiSaya.akurasi > 50) return alert("❌ Lokasi belum cukup akurat! Tunggu sampai di bawah 50 meter.");
+    // ✅ Validasi > 50m Dihapus. Lolos asalkan ada latitude dari GPS.
     if (!cekKeamananPerangkat()) return;
 
     const semuaData = await bacaSemuaData();
@@ -1186,6 +1167,7 @@ async function kirimPesanan() {
         namaDriver: null,
         status: "Menunggu",
         waktuPesan: new Date().toLocaleString('id-ID'),
+        timestampMs: Date.now(), // ✅ Disimpan mempermudah hitungan timer chat
         pesanChat: []
     };
 
@@ -1197,7 +1179,8 @@ async function kirimPesanan() {
         tutupPopup();
     }
 }
-// ✅ PERBAIKAN: Tampilkan tombol chat dan riwayat pesanan
+
+// ✅ FITUR CHAT SISA WAKTU 3 JAM DAN COUNTDOWN TIMER
 async function tampilkanRiwayat() {
     const wadah = document.getElementById("daftarRiwayat");
     const semuaData = await bacaSemuaData();
@@ -1219,9 +1202,24 @@ async function tampilkanRiwayat() {
 
         const infoDriver = pes.namaDriver ? `<p class="mb-1 text-primary"><strong>Driver:</strong> ${pes.namaDriver}</p>` : "";
 
-        const tombolChat = pes.idDriver && pes.status !== "Selesai" 
-            ? `<button onclick="bukaPopupChat('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>` 
-            : "";
+        let tombolChat = "";
+        let infoTimer = "";
+
+        // ✅ LOGIKA PENAMPILAN CHAT SELAMA 3 JAM SETELAH SELESAI
+        if (pes.idDriver) {
+            if (pes.status !== "Selesai") {
+                tombolChat = `<button onclick="bukaPopupChat('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>`;
+            } else if (pes.status === "Selesai") {
+                const batasWaktuMs = 3 * 60 * 60 * 1000; // 3 jam dalam milidetik
+                const waktuSelesaiMs = pes.timestampMs || Date.now(); 
+                const sisaWaktu = (waktuSelesaiMs + batasWaktuMs) - Date.now();
+                
+                if (sisaWaktu > 0) {
+                    tombolChat = `<button onclick="bukaPopupChat('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100 btn-chat-selesai"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>`;
+                    infoTimer = `<div class="text-center mt-1 small text-danger fw-bold timer-chat" data-expired="${waktuSelesaiMs + batasWaktuMs}">Batas chat: <span class="waktu-mundur">Menghitung...</span></div>`;
+                }
+            }
+        }
 
         wadah.innerHTML += `<div class="pesanan-item" id="pesanan-${pes.resi}">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -1234,16 +1232,36 @@ async function tampilkanRiwayat() {
             <p class="mb-1 small text-muted"><i class="bi bi-clock"></i> ${pes.waktuPesan || '-'}</p>
             ${pes.catatan ? `<p class="mb-0 small text-success"><i class="bi bi-chat-left-text"></i> ${pes.catatan}</p>` : ""}
             ${tombolChat}
+            ${infoTimer}
         </div>`;
 
-        // Simpan posisi pesan terakhir untuk cek pesan baru
         if (!pesanTerakhirDilihat[pes.resi]) {
             pesanTerakhirDilihat[pes.resi] = pes.pesanChat ? pes.pesanChat.length : 0;
         }
     });
 }
 
-// ✅ BUKA POPUP CHAT LENGKAP DENGAN NAMA PENGIRIM
+// ✅ GLOBAL INTERVAL UNTUK UPDATE HITUNG MUNDUR COUNTER TIMER CHAT
+setInterval(() => {
+    document.querySelectorAll(".timer-chat").forEach(el => {
+        const expired = parseInt(el.getAttribute("data-expired"));
+        const sisa = expired - Date.now();
+        
+        if (sisa <= 0) {
+            el.innerHTML = "Waktu chat telah habis";
+            el.classList.replace("text-danger", "text-muted");
+            const parent = el.closest(".pesanan-item");
+            const btn = parent.querySelector(".btn-chat-selesai");
+            if (btn) btn.style.display = "none";
+        } else {
+            const jam = Math.floor((sisa / (1000 * 60 * 60)) % 24);
+            const menit = Math.floor((sisa / 1000 / 60) % 60);
+            const detik = Math.floor((sisa / 1000) % 60);
+            el.querySelector(".waktu-mundur").textContent = `${jam}j ${menit}m ${detik}s`;
+        }
+    });
+}, 1000);
+
 async function bukaPopupChat(resi) {
     resiChatAktif = resi;
     const semuaData = await bacaSemuaData();
@@ -1272,17 +1290,14 @@ async function bukaPopupChat(resi) {
     wadahPesan.innerHTML = isiPesan || `<p class="text-center text-muted mt-3">Belum ada pesan</p>`;
     wadahPesan.scrollTop = wadahPesan.scrollHeight;
 
-    // Tandai sudah dibaca
     pesanTerakhirDilihat[resi] = daftarPesan.length;
 
-    // Tampilkan popup chat
     document.getElementById("popupOverlay").style.display = "flex";
     document.querySelector(".popup-form").style.display = "none";
     document.getElementById("popupChat").style.display = "flex";
     setTimeout(() => document.getElementById("popupOverlay").classList.add("tampil"), 10);
 }
 
-// ✅ KIRIM PESAN CHAT
 async function kirimPesanChat() {
     const teks = document.getElementById("inputPesanChat").value.trim();
     if (!teks || !resiChatAktif) return;
@@ -1308,18 +1323,18 @@ async function kirimPesanChat() {
     }
 }
 
-// ✅ CEK PESAN BARU DARI DRIVER & TAMPILKAN NOTIFIKASI
 async function cekPesanBaru() {
     if (!penggunaSaatIni) return;
     const semuaData = await bacaSemuaData();
     const daftarPesanan = semuaData.daftarPesanan || [];
-    const pesananSaya = daftarPesanan.filter(p => p.hp === penggunaSaatIni.hp && p.status !== "Selesai");
+    
+    // Perbaikan: Sekarang juga ngecek yang statusnya selesai kalau masih ada tombol chat
+    const pesananSaya = daftarPesanan.filter(p => p.hp === penggunaSaatIni.hp);
 
     pesananSaya.forEach(pes => {
         const jumlahSekarang = pes.pesanChat ? pes.pesanChat.length : 0;
         const jumlahDilihat = pesanTerakhirDilihat[pes.resi] || 0;
 
-        // Ada pesan baru yang belum dibaca & bukan dari pengguna sendiri
         if (jumlahSekarang > jumlahDilihat) {
             const pesanTerakhir = pes.pesanChat[jumlahSekarang - 1];
             if (!pesanTerakhir.pengirim.includes("(Anda)")) {
@@ -1330,51 +1345,44 @@ async function cekPesanBaru() {
     });
 }
 
-// ✅ TAMPILKAN NOTIFIKASI PESAN BARU
 function tampilkanNotifPesan(namaPengirim, teksPesan, resi) {
     const notif = document.getElementById("notifPesanBaru");
     document.getElementById("teksNotifPesan").innerHTML = `<strong>${namaPengirim}:</strong> ${teksPesan}`;
     notif.dataset.resi = resi;
     notif.classList.add("tampil");
 
-    // Hilangkan otomatis setelah 8 detik
     setTimeout(() => {
         notif.classList.remove("tampil");
     }, 8000);
 }
 
-// ✅ BUKA CHAT DARI KLIK NOTIFIKASI
 function bukaChatDariNotif() {
     const resi = document.getElementById("notifPesanBaru").dataset.resi;
     tutupNotifPesan();
     if (resi) bukaPopupChat(resi);
 }
 
-// ✅ TUTUP NOTIFIKASI
 function tutupNotifPesan(e) {
     if (e) e.stopPropagation();
     document.getElementById("notifPesanBaru").classList.remove("tampil");
 }
 
-// Simpan daftar menu sementara untuk popup
 async function perbaruiDaftarMenuSementara() {
     const semuaData = await bacaSemuaData();
     localStorage.setItem("DAFTAR_MENU_SEMENTARA", JSON.stringify(semuaData.daftarMenu || []));
 }
 
-// Jalankan semua fungsi saat halaman dimuat
 window.onload = function() {
     cekLogin();
     inisialisasiPeta();
     perbaruiDaftarMenuSementara();
 
-    // Interval pembaruan data
     setInterval(tampilkanBanner, 5000);
     setInterval(tampilkanMenu, 5000);
-    setInterval(ambilLokasiSaya, 10000); // Lebih jarang, tidak memaksa terus
+    setInterval(ambilLokasiSaya, 10000);
     setInterval(perbaruiDataPeta, 4000);
     setInterval(tampilkanRiwayat, 5000);
-    setInterval(cekPesanBaru, 3000); // Cek pesan baru setiap 3 detik
+    setInterval(cekPesanBaru, 3000); 
 };
 </script>
 
