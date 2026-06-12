@@ -332,15 +332,35 @@
             cursor: not-allowed;
         }
 
+        /* ✅ Perbaikan desain tombol keluar */
+        .btn-outline-danger {
+            border: 1px solid #ef4444 !important;
+            color: #ef4444 !important;
+            background: #fff !important;
+            padding: 0.4rem 0.9rem !important;
+            font-size: 0.85rem !important;
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
+        }
+        .btn-outline-danger:hover {
+            background: #ef4444 !important;
+            color: #fff !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+        }
+
         .info-pengguna {
             background: white;
-            padding: 0.8rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+            padding: 0.9rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            border: 1px solid #f1f5f9;
         }
 
         .info-akurasi {
@@ -447,7 +467,7 @@
             display: block;
         }
 
-        /* ✅ GAYA POPUP CHAT BARU */
+        /* ✅ GAYA POPUP CHAT DENGAN NAMA PENGIRIM */
         .popup-chat {
             background: white;
             width: 100%;
@@ -502,6 +522,12 @@
             font-size: 0.9rem;
             line-height: 1.4;
         }
+        .pesan-pengirim .nama {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            margin-bottom: 0.2rem;
+            display: block;
+        }
 
         .pesan-driver {
             background: #e2e8f0;
@@ -513,6 +539,12 @@
             max-width: 85%;
             font-size: 0.9rem;
             line-height: 1.4;
+        }
+        .pesan-driver .nama {
+            font-size: 0.75rem;
+            color: #475569;
+            margin-bottom: 0.2rem;
+            display: block;
         }
 
         .form-kirim-chat {
@@ -1053,10 +1085,13 @@ function bukaPopup(indeks) {
     ambilLokasiSaya();
 }
 
+// ✅ Perbaikan fungsi tutup popup agar tidak ada layar hitam
 function tutupPopup() {
     document.getElementById("popupOverlay").classList.remove("tampil");
     setTimeout(() => {
         document.getElementById("popupOverlay").style.display = "none";
+        document.querySelector(".popup-form").style.display = "block";
+        document.getElementById("popupChat").style.display = "none";
         document.body.style.overflow = "auto";
         document.getElementById("alamat").value = "";
         document.getElementById("catatan").value = "";
@@ -1064,9 +1099,15 @@ function tutupPopup() {
 }
 
 function tutupPopupChat() {
-    document.getElementById("popupChat").style.display = "none";
-    resiChatAktif = null;
-    document.getElementById("inputPesanChat").value = "";
+    document.getElementById("popupOverlay").classList.remove("tampil");
+    setTimeout(() => {
+        document.getElementById("popupOverlay").style.display = "none";
+        document.querySelector(".popup-form").style.display = "block";
+        document.getElementById("popupChat").style.display = "none";
+        document.body.style.overflow = "auto";
+        resiChatAktif = null;
+        document.getElementById("inputPesanChat").value = "";
+    }, 300);
 }
 
 document.getElementById("popupOverlay").addEventListener("click", function(e) {
@@ -1156,7 +1197,6 @@ async function kirimPesanan() {
         tutupPopup();
     }
 }
-
 // ✅ PERBAIKAN: Tampilkan tombol chat dan riwayat pesanan
 async function tampilkanRiwayat() {
     const wadah = document.getElementById("daftarRiwayat");
@@ -1203,7 +1243,7 @@ async function tampilkanRiwayat() {
     });
 }
 
-// ✅ BUKA POPUP CHAT LENGKAP
+// ✅ BUKA POPUP CHAT LENGKAP DENGAN NAMA PENGIRIM
 async function bukaPopupChat(resi) {
     resiChatAktif = resi;
     const semuaData = await bacaSemuaData();
@@ -1217,9 +1257,15 @@ async function bukaPopupChat(resi) {
     let isiPesan = "";
     daftarPesan.forEach(p => {
         if (p.pengirim.includes("(Anda)")) {
-            isiPesan += `<div class="pesan-pengirim">${p.teks}</div>`;
+            isiPesan += `<div class="pesan-pengirim">
+                            <span class="nama">${p.pengirim}</span>
+                            ${p.teks}
+                         </div>`;
         } else {
-            isiPesan += `<div class="pesan-driver">${p.teks}</div>`;
+            isiPesan += `<div class="pesan-driver">
+                            <span class="nama">${p.pengirim}</span>
+                            ${p.teks}
+                         </div>`;
         }
     });
 
@@ -1334,4 +1380,3 @@ window.onload = function() {
 
 </body>
 </html>
-
