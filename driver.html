@@ -2,8 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aplikasi Antar - Driver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-Delivery - Pelanggan</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,111 +17,464 @@
             --hijau: #22C55E;
             --kuning: #F59E0B;
             --biru: #3B82F6;
+            --merah: #EF4444;
             --abu: #6B7280;
             --abu-terang: #F3F4F6;
             --putih: #FFFFFF;
             --teks: #111827;
+            --bayangan: rgba(0, 0, 0, 0.1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            background-color: var(--abu-terang);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             color: var(--teks);
-            padding-bottom: 85px;
+            padding-bottom: 90px;
         }
 
-        /* ✅ HEADER DIPERBAIKI LEBIH KEREN */
+        /* ✅ HEADER LEBIH MENARIK */
         .header {
-            background: linear-gradient(135deg, #0F4C5C 0%, #16657a 100%);
+            background: linear-gradient(135deg, #0F4C5C 0%, #18778C 100%);
             color: white;
-            padding: 1.2rem 1rem;
+            padding: 1.3rem 1rem;
             text-align: center;
-            font-size: 1.3rem;
-            font-weight: 700;
             position: sticky;
             top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(15, 76, 92, 0.25);
-            border-bottom-left-radius: 16px;
-            border-bottom-right-radius: 16px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(15, 76, 92, 0.3);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
         }
 
-        .header h1 {
+        .brand-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .brand-title i {
+            font-size: 1.9rem;
+            color: #FBBF24;
+        }
+
+        #judulHalaman {
+            font-size: 0.95rem;
+            font-weight: 400;
+            opacity: 0.9;
             margin: 0;
-            letter-spacing: 0.5px;
         }
 
         .container {
             padding: 1rem;
-            max-width: 1000px;
+            max-width: 550px;
             margin: 0 auto;
         }
 
-        .info-pengguna {
-            background: white;
-            padding: 0.9rem 1rem;
-            border-radius: 12px;
-            margin-bottom: 1.2rem;
+        /* Halaman Login */
+        .halaman-login {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-            border: 1px solid #f1f5f9;
+            justify-content: center;
+            min-height: 80vh;
+            text-align: center;
+        }
+
+        .card-login {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .info-login {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #075985;
+        }
+
+        .info-login ul {
+            margin: 0.6rem 0 0 1.4rem;
+            padding: 0;
+        }
+
+        /* Banner */
+        .banner-wadah {
+            width: 100%;
+            height: 170px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+        }
+
+        .banner-wadah:hover {
+            transform: translateY(-2px);
+        }
+
+        .banner-gambar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-kosong {
+            color: var(--abu);
+            font-size: 1rem;
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-            padding: 1.2rem;
-            margin-bottom: 1.2rem;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             border: 1px solid #f1f5f9;
+            transition: transform 0.2s ease;
         }
 
-        .pesanan-item {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 1.2rem;
-            margin-bottom: 1.2rem;
-            background: #ffffff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            transition: all 0.2s ease;
-        }
-
-        .pesanan-item:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        .card:hover {
             transform: translateY(-2px);
         }
 
-        .status-badge {
-            padding: 0.35rem 0.9rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+        .card h5 {
+            font-size: 1.15rem;
             font-weight: 600;
-            color: white;
-            white-space: nowrap;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--utama);
         }
 
+        /* ✅ PILIHAN JENIS LAYANAN */
+        .pilihan-layanan {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .kartu-layanan {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 1.2rem 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .kartu-layanan.aktif {
+            border-color: var(--utama);
+            background: #f0f9fa;
+            box-shadow: 0 4px 12px rgba(15, 76, 92, 0.15);
+        }
+
+        .kartu-layanan i {
+            font-size: 2.2rem;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        .kartu-layanan span {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .layanan-makanan i { color: #F59E0B; }
+        .layanan-ojek i { color: #3B82F6; }
+
+        .filter-kategori {
+            display: flex;
+            gap: 0.7rem;
+            overflow-x: auto;
+            padding-bottom: 0.7rem;
+            margin-bottom: 1.2rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tombol-kategori {
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: var(--teks);
+            border-radius: 25px;
+            padding: 0.5rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .tombol-kategori.aktif {
+            background: var(--utama);
+            color: white;
+            border-color: var(--utama);
+            box-shadow: 0 3px 8px rgba(15, 76, 92, 0.2);
+        }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+        }
+
+        .kartu-menu {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        .kartu-menu:hover {
+            border-color: var(--utama);
+            box-shadow: 0 6px 14px rgba(15, 76, 92, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .gambar-menu {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+
+        .info-menu {
+            padding: 1rem;
+        }
+
+        .nama-menu {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .harga-menu {
+            color: var(--hijau);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .kosong {
+            text-align: center;
+            padding: 3.5rem 1rem;
+            color: var(--abu);
+        }
+
+        .kosong i {
+            font-size: 3.5rem;
+            margin-bottom: 1.2rem;
+            opacity: 0.35;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-form {
+            background: white;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 18px;
+            padding: 1.8rem;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+            transform: scale(0.85);
+            opacity: 0;
+            transition: all 0.35s ease;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        .overlay.tampil .popup-form {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .popup-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--utama);
+            font-size: 1.2rem;
+        }
+
+        .tombol-tutup {
+            background: #f3f4f6;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--abu);
+            transition: all 0.2s;
+        }
+
+        .tombol-tutup:hover {
+            background: #ef4444;
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            font-size: 0.95rem;
+            width: 100%;
+            transition: border 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--utama);
+            box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.15);
+            outline: none;
+        }
+
+        .btn {
+            border-radius: 10px;
+            padding: 0.9rem;
+            font-weight: 600;
+            width: 100%;
+            border: none;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+        }
+
+        .btn-hijau {
+            background: var(--hijau);
+            color: white;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+        }
+
+        .btn-hijau:hover {
+            background: #16a34a;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-abu {
+            background: #9CA3AF;
+            color: white;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-outline-danger {
+            border: 2px solid #ef4444 !important;
+            color: #ef4444 !important;
+            background: #fff !important;
+            padding: 0.5rem 1rem !important;
+            font-size: 0.9rem !important;
+            border-radius: 10px !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15) !important;
+        }
+        .btn-outline-danger:hover {
+            background: #ef4444 !important;
+            color: #fff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25) !important;
+        }
+
+        .info-pengguna {
+            background: white;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            border: 1px solid #f1f5f9;
+        }
+
+        .info-akurasi {
+            font-size: 0.9rem;
+            color: #dc2626;
+            text-align: center;
+            margin: 0.8rem 0;
+            display: none;
+            padding: 0.6rem;
+            background: #fef2f2;
+            border-radius: 8px;
+        }
+
+        /* ✅ PETA DENGAN FITUR PILIH LOKASI MANUAL */
         #peta {
             width: 100%;
-            height: 380px;
+            height: 480px;
             border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            margin-bottom: 1rem;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 1.2rem;
             z-index: 1;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
-        .tombol-posisi-semula {
+        .tombol-posisi-saya {
             position: absolute;
             top: 15px;
             right: 15px;
@@ -127,8 +483,8 @@
             border: none;
             border-radius: 10px;
             padding: 10px 14px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 0.95rem;
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -137,14 +493,73 @@
             transition: all 0.2s ease;
         }
 
-        .tombol-posisi-semula:hover {
+        .tombol-posisi-saya:hover {
             background: #f8fafc;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
-        .tombol-posisi-semula i {
+        .tombol-posisi-saya i {
+            font-size: 1.15rem;
             color: var(--utama);
-            font-size: 1.1rem;
+        }
+
+        .tombol-pilih-lokasi {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background: var(--utama);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            box-shadow: 0 4px 12px rgba(15, 76, 92, 0.2);
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tombol-pilih-lokasi:hover {
+            background: #0d3d4a;
+            transform: translateY(-2px);
+        }
+
+        .info-peta {
+            background: white;
+            padding: 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            font-size: 0.95rem;
+            border: 1px solid #f1f5f9;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.9rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .pesanan-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.2s ease;
+        }
+
+        .pesanan-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .nav-bawah {
@@ -153,19 +568,19 @@
             left: 0;
             right: 0;
             background: white;
-            box-shadow: 0 -3px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
             display: flex;
             justify-content: space-around;
             padding: 0.9rem 0;
-            z-index: 99;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
+            z-index: 999;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
         }
 
         .nav-item {
             text-align: center;
             color: var(--abu);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             flex: 1;
             transition: all 0.2s ease;
@@ -174,10 +589,11 @@
         .nav-item.aktif {
             color: var(--utama);
             font-weight: 600;
+            transform: translateY(-3px);
         }
 
         .nav-item i {
-            font-size: 1.35rem;
+            font-size: 1.5rem;
             display: block;
             margin-bottom: 0.3rem;
         }
@@ -190,108 +606,166 @@
             display: block;
         }
 
-        .kosong {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--abu);
+        /* GAYA POPUP CHAT */
+        .popup-chat {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+            transform: scale(0.85);
+            opacity: 0;
+            transition: all 0.35s ease;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
         }
 
-        .kosong i {
-            font-size: 3rem;
+        .overlay.tampil .popup-chat {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .header-chat {
+            background: linear-gradient(135deg, #0F4C5C 0%, #18778C 100%);
+            color: white;
+            padding: 1.1rem 1.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-chat h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .wadah-pesan {
+            flex: 1;
+            padding: 1.2rem;
+            overflow-y: auto;
+            max-height: 480px;
+            background: #fafafa;
+        }
+
+        .pesan-pengirim {
+            background: var(--utama);
+            color: white;
+            padding: 0.7rem 1rem;
+            border-radius: 18px 18px 4px 18px;
+            margin-left: auto;
             margin-bottom: 1rem;
-            opacity: 0.3;
+            max-width: 88%;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 6px rgba(15, 76, 92, 0.2);
+        }
+        .pesan-pengirim .nama {
+            font-size: 0.78rem;
+            opacity: 0.85;
+            margin-bottom: 0.3rem;
+            display: block;
         }
 
-        .mode-switch {
+        .pesan-driver {
+            background: #e2e8f0;
+            color: var(--teks);
+            padding: 0.7rem 1rem;
+            border-radius: 18px 18px 18px 4px;
+            margin-right: auto;
+            margin-bottom: 1rem;
+            max-width: 88%;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .pesan-driver .nama {
+            font-size: 0.78rem;
+            color: #475569;
+            margin-bottom: 0.3rem;
+            display: block;
+            font-weight: 500;
+        }
+
+        .form-kirim-chat {
+            display: flex;
+            gap: 0.7rem;
+            padding: 1rem 1.2rem;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .input-chat {
+            flex: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            padding: 0.7rem 1.2rem;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border 0.2s ease;
+        }
+
+        .input-chat:focus {
+            border-color: var(--utama);
+            box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.15);
+        }
+
+        .btn-kirim-chat {
+            background: var(--utama);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0.9rem 1.2rem;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-radius: 12px;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 2px 6px rgba(34, 197, 94, 0.1);
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
+            justify-content: center;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #d1d5db;
-            border-radius: 26px;
-            transition: 0.3s;
+            transition: background 0.2s ease;
+            box-shadow: 0 3px 8px rgba(15, 76, 92, 0.2);
         }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            border-radius: 50%;
-            transition: 0.3s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        .btn-kirim-chat:hover {
+            background: #0d3d4a;
+            transform: scale(1.05);
         }
 
-        input:checked + .slider {
-            background-color: var(--hijau);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
-        }
-
-        .popup-notif {
+        .popup-notif-chat {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
+            top: 25px;
+            right: 25px;
+            z-index: 10000;
             width: 320px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            border-left: 5px solid var(--hijau);
-            padding: 1rem;
-            transform: translateX(400px);
+            border-radius: 14px;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+            border-left: 5px solid var(--biru);
+            padding: 1.2rem;
+            transform: translateX(450px);
             opacity: 0;
             transition: all 0.4s ease;
+            cursor: pointer;
         }
 
-        .popup-notif.tampil {
+        .popup-notif-chat.tampil {
             transform: translateX(0);
             opacity: 1;
         }
 
-        .notif-header {
+        .notif-chat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
         }
 
-        .notif-header h6 {
+        .notif-chat-header h6 {
             margin: 0;
-            color: var(--hijau);
+            color: var(--biru);
             font-weight: 600;
+            font-size: 1rem;
         }
 
         .tombol-tutup-notif {
@@ -304,327 +778,168 @@
         }
 
         .tombol-tutup-notif:hover {
-            color: #ef4444;
-        }
-
-        /* ✅ Gaya untuk Popup Chat - DITAMBAH NAMA PENGIRIM */
-        .overlay-chat {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .popup-chat {
-            background: white;
-            width: 100%;
-            max-width: 420px;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 12px 36px rgba(0,0,0,0.25);
-            display: flex;
-            flex-direction: column;
-            max-height: 85vh;
-        }
-
-        .header-chat {
-            background: linear-gradient(135deg, #0F4C5C 0%, #16657a 100%);
-            color: white;
-            padding: 1rem 1.2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-chat h6 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .tombol-tutup-chat {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            color: white;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .tombol-tutup-chat:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .wadah-pesan {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            max-height: 450px;
-            background: #fafafa;
-        }
-
-        /* ✅ Pesan Driver */
-        .pesan-pengirim {
-            background: var(--utama);
-            color: white;
-            padding: 0.7rem 0.9rem;
-            border-radius: 16px 16px 4px 16px;
-            margin-left: auto;
-            margin-bottom: 0.8rem;
-            max-width: 85%;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .pesan-pengirim .nama {
-            font-size: 0.75rem;
-            opacity: 0.85;
-            margin-bottom: 0.2rem;
-            display: block;
-        }
-
-        /* ✅ Pesan Pelanggan / Costumer */
-        .pesan-pelanggan {
-            background: #e2e8f0;
-            color: var(--teks);
-            padding: 0.7rem 0.9rem;
-            border-radius: 16px 16px 16px 4px;
-            margin-right: auto;
-            margin-bottom: 0.8rem;
-            max-width: 85%;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .pesan-pelanggan .nama {
-            font-size: 0.75rem;
-            color: #475569;
-            margin-bottom: 0.2rem;
-            display: block;
-            font-weight: 500;
-        }
-
-        .form-kirim-chat {
-            display: flex;
-            gap: 0.6rem;
-            padding: 0.9rem 1rem;
-            border-top: 1px solid #e5e7eb;
-            background: white;
-        }
-
-        .input-chat {
-            flex: 1;
-            border: 1px solid #d1d5db;
-            border-radius: 20px;
-            padding: 0.6rem 1rem;
-            outline: none;
-            font-size: 0.9rem;
-            transition: border 0.2s ease;
-        }
-
-        .input-chat:focus {
-            border-color: var(--utama);
-            box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.15);
-        }
-
-        .btn-kirim-chat {
-            background: var(--utama);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s ease;
-        }
-
-        .btn-kirim-chat:hover {
-            background: #0d3d4a;
-        }
-
-        /* ✅ Info Lokasi Pelanggan */
-        .info-pelanggan {
-            margin-top: 1rem;
-            padding: 0.8rem;
-            background: #f0f9ff;
-            border-radius: 8px;
-            border: 1px solid #bae6fd;
-            font-size: 0.9rem;
-        }
-
-        /* ✅ Tambahan Gaya untuk Pesanan Ojek Online */
-        .tipe-pesanan {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
-            display: inline-block;
-        }
-        .tipe-ojek { background: #9333ea; color: white; }
-        .tipe-antar { background: #0891b2; color: white; }
-        .info-jarak-harga {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            background: #f8fafc;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        @media (min-width: 768px) {
-            .container { padding: 1.5rem; }
-            #peta { height: 450px; }
-            .pesanan-item { padding: 1.4rem; }
-            .nav-item { font-size: 0.9rem; }
-            .nav-item i { font-size: 1.5rem; }
-            .popup-notif { width: 360px; }
-        }
-
-        @media (min-width: 1024px) {
-            .container { padding: 2rem; max-width: 1100px; }
-            #peta { height: 500px; }
-            .grid-pesanan { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+            color: var(--merah);
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1 id="judulHalaman">Aplikasi Antar - Driver</h1>
+    <div class="brand-title"><i class="bi bi-box-seam-fill"></i> K-Delivery</div>
+    <p id="judulHalaman">Pesan Makanan & Ojek</p>
 </div>
 
 <div class="container">
-    <div class="halaman" id="halaman-login">
-        <div class="d-flex flex-column align-items-center justify-content-center min-vh-75 text-center">
-            <div class="card w-100" style="max-width: 400px;">
-                <h4 class="mb-3">Masuk Sebagai Driver</h4>
-                <div class="alert alert-info text-start small mb-3">
-                    <strong>Catatan:</strong> Gunakan nomor HP yang sudah didaftarkan oleh Admin
+    <div class="halaman aktif" id="halaman-login">
+        <div class="halaman-login">
+            <div class="card-login">
+                <h4 class="mb-4">Masuk Sebagai Pelanggan</h4>
+                
+                <div class="info-login">
+                    <strong>📝 Ketentuan Masuk:</strong>
+                    <ul>
+                        <li>Gunakan nama lengkap Anda</li>
+                        <li>Nomor HP yang aktif dan benar</li>
+                        <li>Riwayat pesanan akan tersimpan sesuai nomor HP</li>
+                        <li>Bisa masuk di perangkat lain dengan data yang sama</li>
+                    </ul>
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Nomor HP</label>
-                    <input type="tel" id="inputHpDriver" class="form-control" placeholder="Contoh: 0812xxxxxxx" required>
+                    <label class="form-label fw-medium">Nama Lengkap</label>
+                    <input type="text" id="inputNama" class="form-control" placeholder="Contoh: Budi Santoso" required>
                 </div>
-                <button onclick="loginDriver()" class="btn btn-success w-100">Masuk</button>
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Nomor HP</label>
+                    <input type="tel" id="inputHp" class="form-control" placeholder="Contoh: 08123456789" required>
+                </div>
+                <button onclick="login()" class="btn btn-hijau">Masuk & Mulai Pesan</button>
             </div>
         </div>
     </div>
 
-    <div class="halaman" id="halaman-pesanan">
+    <div class="halaman" id="halaman-beranda">
         <div class="info-pengguna">
             <div>
-                <span class="text-muted">Driver:</span>
-                <strong id="namaDriver">-</strong>
+                <span class="text-muted">Masuk sebagai:</span>
+                <strong id="namaPengguna" class="ms-1"></strong>
             </div>
-            <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
 
-        <div class="mode-switch">
-            <div>
-                <strong>Terima Pesanan Otomatis</strong>
-                <div class="text-muted small">Mencari pesanan terdekat termasuk Ojek Online</div>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="modeOtomatis" onchange="ubahModeOtomatis()">
-                <span class="slider"></span>
-            </label>
+        <div class="banner-wadah" id="wadahBanner">
+            <div class="banner-kosong">Belum ada banner</div>
         </div>
 
+        <!-- ✅ PILIHAN JENIS LAYANAN -->
         <div class="card">
-            <h5><i class="bi bi-bell"></i> Pesanan Tersedia & Sedang Dikerjakan</h5>
-            <div id="daftarPesananMasuk"></div>
+            <h5><i class="bi bi-grid-3x3-gap"></i> Pilih Layanan</h5>
+            <div class="pilihan-layanan">
+                <div class="kartu-layanan layanan-makanan aktif" onclick="pilihLayanan('makanan')">
+                    <i class="bi bi-egg-fried"></i>
+                    <span>Makanan/Barang</span>
+                </div>
+                <div class="kartu-layanan layanan-ojek" onclick="pilihLayanan('ojek')">
+                    <i class="bi bi-bicycle"></i>
+                    <span>Ojek Online</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="wadahMenuMakanan">
+            <h5><i class="bi bi-egg-fried text-success"></i> Daftar Menu</h5>
+            <div id="wadahKategori" class="filter-kategori"></div>
+            <div id="daftarMenu" class="grid-menu"></div>
+        </div>
+
+        <div class="card" id="wadahLayananOjek" style="display: none;">
+            <h5><i class="bi bi-bicycle text-primary"></i> Pesan Ojek Online</h5>
+            <div style="position: relative;">
+                <div id="petaOjek" style="width:100%;height:400px;border-radius:10px;border:1px solid #e2e8f0;"></div>
+                <button class="tombol-posisi-saya" onclick="posisiSayaOjek()">
+                    <i class="bi bi-geo-alt-fill"></i> Posisi Saya
+                </button>
+                <button class="tombol-pilih-lokasi" onclick="modePilihLokasiManual()">
+                    <i class="bi bi-hand-pointer"></i> Pilih Lokasi
+                </button>
+            </div>
+            <div class="mt-3">
+                <label class="form-label fw-medium">Lokasi Jemput</label>
+                <input type="text" id="lokasiJemput" class="form-control mb-2" placeholder="Otomatis / Pilih di peta" readonly>
+                <label class="form-label fw-medium">Lokasi Tujuan</label>
+                <input type="text" id="lokasiTujuan" class="form-control mb-3" placeholder="Ketik atau pilih di peta">
+                <button onclick="pesanOjek()" class="btn btn-hijau">Pesan Ojek Sekarang</button>
+            </div>
         </div>
     </div>
 
     <div class="halaman" id="halaman-riwayat">
         <div class="info-pengguna">
             <div>
-                <span class="text-muted">Driver:</span>
-                <strong id="namaDriver2">-</strong>
+                <span class="text-muted">Masuk sebagai:</span>
+                <strong id="namaPengguna2">-</strong>
             </div>
-            <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
         <div class="card">
-            <h5><i class="bi bi-clock-history"></i> Riwayat Pesanan Selesai</h5>
-            <div id="daftarRiwayatDriver"></div>
+            <h5><i class="bi bi-list-check text-success"></i> Riwayat Pesanan Saya</h5>
+            <div id="daftarRiwayat"></div>
         </div>
     </div>
 
     <div class="halaman" id="halaman-peta">
         <div class="info-pengguna">
             <div>
-                <span class="text-muted">Driver:</span>
-                <strong id="namaDriver3">-</strong>
+                <span class="text-muted">Masuk sebagai:</span>
+                <strong id="namaPengguna3">-</strong>
             </div>
-            <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
-        <div class="card" style="position: relative;">
-            <h5><i class="bi bi-map"></i> Peta Perjalanan</h5>
-            <button class="tombol-posisi-semula" onclick="posisiPetaSemula()">
-                <i class="bi bi-geo-alt"></i> Posisi Semula
-            </button>
-            <div id="peta"></div>
-            <div class="mt-3">
-                <p class="mb-1"><strong>Lokasi Anda:</strong> <span id="lokasiDriverSekarang">-</span></p>
-                <p class="mb-0"><strong>Lokasi Jemput:</strong> <span id="lokasiJemputSekarang">-</span></p>
-                <p class="mb-0"><strong>Lokasi Tujuan:</strong> <span id="lokasiPelangganSekarang">-</span></p>
-                <p class="mb-0"><strong>Jarak Total:</strong> <span id="jarakKePelanggan">-</span></p>
+        <div class="card">
+            <h5><i class="bi bi-map text-primary"></i> Peta Pelacakan</h5>
+            <div style="position: relative;">
+                <div id="peta"></div>
+                <button class="tombol-posisi-saya" onclick="kembaliKePosisiSaya()">
+                    <i class="bi bi-geo-alt-fill"></i> Posisi Saya
+                </button>
+            </div>
+            <div class="info-peta">
+                <p class="mb-1"><strong>Posisi Anda:</strong> <span id="infoPosisiSaya">-</span></p>
+                <p class="mb-1"><strong>Posisi Driver:</strong> <span id="infoPosisiDriver">-</span></p>
+                <p class="mb-0"><strong>Jarak:</strong> <span id="infoJarak">-</span></p>
             </div>
         </div>
     </div>
 </div>
 
-<div class="nav-bawah">
-    <div class="nav-item" onclick="bukaHalamanDriver('pesanan')">
-        <i class="bi bi-list-task"></i>
-        <span>Pesanan</span>
+<div class="overlay" id="popupOverlay">
+    <div class="popup-form">
+        <div class="popup-header">
+            <h5><i class="bi bi-pencil-square"></i> Form Pemesanan</h5>
+            <button class="tombol-tutup" onclick="tutupPopup()">&times;</button>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-medium">Menu Dipilih</label>
+            <input type="text" id="barang" class="form-control" readonly>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-medium">Alamat Lengkap</label>
+            <textarea id="alamat" class="form-control" rows="3" placeholder="Contoh: Jl. Mawar No.12, Kelurahan X"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-medium">Catatan (Opsional)</label>
+            <input type="text" id="catatan" class="form-control" placeholder="Contoh: Jangan terlalu pedas / Bawa barang kecil">
+        </div>
+        <div id="infoAkurasi" class="info-akurasi text-warning">Mencari lokasi perangkat Anda...</div>
+        <button onclick="kirimPesanan()" id="tombolKirim" class="btn btn-hijau btn-abu" disabled>Kirim Pesanan Sekarang</button>
     </div>
-    <div class="nav-item" onclick="bukaHalamanDriver('riwayat')">
-        <i class="bi bi-clock-history"></i>
-        <span>Riwayat</span>
-    </div>
-    <div class="nav-item" onclick="bukaHalamanDriver('peta')">
-        <i class="bi bi-map"></i>
-        <span>Peta</span>
-    </div>
-</div>
 
-<div id="popupNotif" class="popup-notif">
-    <div class="notif-header">
-        <h6><i class="bi bi-bell-fill me-1"></i> Pesanan Masuk!</h6>
-        <button class="tombol-tutup-notif" onclick="tutupNotif()">&times;</button>
-    </div>
-    <div id="isiNotif" class="small">
-        <p class="mb-1">Ada pesanan terdekat diterima otomatis</p>
-    </div>
-</div>
-
-<!-- ✅ POPUP CHAT BARU -->
-<div id="overlayChat" class="overlay-chat">
-    <div class="popup-chat">
+    <div class="popup-chat" id="popupChat">
         <div class="header-chat">
-            <h6 id="judulChat">Chat dengan Pelanggan</h6>
-            <button class="tombol-tutup-chat" onclick="tutupPopupChat()">&times;</button>
+            <h6 id="judulChat">Chat dengan Driver</h6>
+            <button class="tombol-tutup" onclick="tutupPopupChat()">&times;</button>
         </div>
-        <div id="wadahPesan" class="wadah-pesan"></div>
+        <div class="wadah-pesan" id="wadahPesan"></div>
         <div class="form-kirim-chat">
             <input type="text" id="inputPesanChat" class="input-chat" placeholder="Ketik pesan...">
             <button onclick="kirimPesanChat()" class="btn-kirim-chat"><i class="bi bi-send-fill"></i></button>
@@ -632,13 +947,35 @@
     </div>
 </div>
 
-<!-- ✅ PUSTAKA FIREBASE -->
+<div class="popup-notif-chat" id="notifPesanBaru" onclick="bukaChatDariNotif()">
+    <div class="notif-chat-header">
+        <h6><i class="bi bi-chat-dots"></i> Pesan Baru</h6>
+        <button class="tombol-tutup-notif" onclick="tutupNotifPesan(event)">&times;</button>
+    </div>
+    <p class="mb-0 small" id="teksNotifPesan">Ada pesan baru dari Driver</p>
+</div>
+
+<div class="nav-bawah">
+    <div class="nav-item" onclick="bukaHalaman('beranda')">
+        <i class="bi bi-house"></i>
+        <span>Beranda</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('riwayat')">
+        <i class="bi bi-list-check"></i>
+        <span>Riwayat</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('peta')">
+        <i class="bi bi-map"></i>
+        <span>Peta</span>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
 // ==========================================
-// ✅ KONFIGURASI FIREBASE (SAMA DENGAN ADMIN)
+// KONFIGURASI FIREBASE
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
@@ -655,186 +992,373 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refData = db.ref("data");
 
-let peta;
-let penandaDriver, penandaJemput, penandaTujuan, garisRute;
-let lokasiDriver = { lat: -5.1477, lon: 119.4327, akurasi: 9999 };
-let lokasiJemput = null;
-let lokasiTujuan = null;
-let dataDriverSaatIni = null;
-let modeOtomatisAktif = false;
-let intervalCariPesanan = null;
+let peta, petaOjek;
+let penandaSaya, penandaDriver, penandaJemput, penandaTujuan;
+let garisRute;
+let lokasiSaya = { lat: -5.1477, lon: 119.4327, akurasi: 9999 };
+let pesananAktif = null;
+let kategoriTerpilih = "semua";
+let penggunaSaatIni = null;
 let resiChatAktif = null;
-let pesananAktifSekarang = null;
+let pesanTerakhirDilihat = {};
+let layananTerpilih = "makanan";
+let lokasiJemputManual = null;
+let lokasiTujuanManual = null;
+let modePilih = "jemput";
 
-// ==========================================
-// ✅ FUNGSI BACA & SIMPAN KE FIREBASE
-// ==========================================
-async function bacaData() {
+async function bacaSemuaData() {
     try {
         const snapshot = await refData.once("value");
         return snapshot.val() || {};
     } catch (err) {
-        console.warn("Gagal baca data:", err);
+        console.warn("Gagal membaca data:", err);
         return {};
     }
 }
 
-async function simpanData(dataBaru) {
+async function simpanSemuaData(dataBaru) {
     try {
         await refData.set(dataBaru);
         return true;
     } catch (err) {
-        console.error("Gagal simpan data:", err);
-        alert("Gagal menyimpan perubahan!");
+        console.error("Gagal menyimpan data:", err);
+        alert("Gagal mengirim data! Cek koneksi internet.");
         return false;
     }
 }
 
-// ✅ LOKASI TIDAK DIPAKSA AKURAT - BISA BERJALAN DENGAN AKURASI APA SAJA
-function ambilLokasiDriver() {
+function cekKeamananPerangkat() {
+    if (navigator.userAgent.match(/root|su|superuser|emulator/i)) {
+        alert("❌ Perangkat terdeteksi sudah di-root atau menggunakan emulator! Aplikasi tidak dapat digunakan.");
+        localStorage.removeItem("PENGGUNA_SAAT_INI");
+        location.reload();
+        return false;
+    }
+    return true;
+}
+
+async function login() {
+    const nama = document.getElementById("inputNama").value.trim();
+    const hp = document.getElementById("inputHp").value.trim();
+    
+    if (!nama) return alert("⚠️ Nama lengkap tidak boleh kosong!");
+    if (!hp) return alert("⚠️ Nomor HP tidak boleh kosong!");
+    if (hp.length < 10 || hp.length > 14) return alert("⚠️ Nomor HP tidak valid!");
+
+    const semuaData = await bacaSemuaData();
+    const daftarPengguna = semuaData.daftarPengguna || [];
+    const cariPengguna = daftarPengguna.find(p => p.hp === hp);
+
+    if (!cariPengguna) {
+        const penggunaBaru = {
+            nama: nama,
+            hp: hp,
+            waktuDaftar: new Date().toLocaleString('id-ID')
+        };
+        daftarPengguna.push(penggunaBaru);
+        semuaData.daftarPengguna = daftarPengguna;
+        await simpanSemuaData(semuaData);
+        penggunaSaatIni = penggunaBaru;
+    } else {
+        penggunaSaatIni = cariPengguna;
+        if (cariPengguna.nama !== nama) {
+            cariPengguna.nama = nama;
+            semuaData.daftarPengguna = daftarPengguna;
+            await simpanSemuaData(semuaData);
+        }
+    }
+
+    localStorage.setItem("PENGGUNA_SAAT_INI", JSON.stringify(penggunaSaatIni));
+    bukaHalaman('beranda');
+    ambilLokasiSaya();
+}
+
+function logout() {
+    if (!confirm("Yakin ingin keluar dari akun?")) return;
+    localStorage.removeItem("PENGGUNA_SAAT_INI");
+    penggunaSaatIni = null;
+    document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
+    document.getElementById("halaman-login").classList.add("aktif");
+}
+
+function cekLogin() {
+    const data = localStorage.getItem("PENGGUNA_SAAT_INI");
+    if (data) {
+        penggunaSaatIni = JSON.parse(data);
+        bukaHalaman('beranda');
+    } else {
+        document.getElementById("halaman-login").classList.add("aktif");
+    }
+}
+
+function ambilLokasiSaya() {
     if (!navigator.geolocation) {
-        alert("Perangkat tidak mendukung fitur lokasi!");
+        alert("❌ Perangkat Anda tidak mendukung fitur lokasi!");
         return;
     }
+
     navigator.geolocation.getCurrentPosition(
         (pos) => {
-            lokasiDriver.lat = pos.coords.latitude;
-            lokasiDriver.lon = pos.coords.longitude;
-            lokasiDriver.akurasi = pos.coords.accuracy;
-            
-            if (penandaDriver) penandaDriver.setLatLng([lokasiDriver.lat, lokasiDriver.lon]);
-            document.getElementById("lokasiDriverSekarang").textContent = 
-                `${lokasiDriver.lat.toFixed(6)}, ${lokasiDriver.lon.toFixed(6)} (Akurasi: ${lokasiDriver.akurasi.toFixed(1)} m)`;
-            
-            perbaruiPosisiDriverDiPesanan();
-            perbaruiLokasiPelangganRealTime();
+            lokasiSaya.lat = pos.coords.latitude;
+            lokasiSaya.lon = pos.coords.longitude;
+            lokasiSaya.akurasi = pos.coords.accuracy;
+
+            if (!cekKeamananPerangkat()) return;
+
+            if (penandaSaya) penandaSaya.setLatLng([lokasiSaya.lat, lokasiSaya.lon]);
+            document.getElementById("infoPosisiSaya").textContent = 
+                `${lokasiSaya.lat.toFixed(6)}, ${lokasiSaya.lon.toFixed(6)} (Akurasi: ${lokasiSaya.akurasi.toFixed(1)} m)`;
+
+            cekStatusTombolPesan();
         },
         (err) => {
-            console.warn("Gagal dapatkan lokasi:", err.message);
-            setTimeout(ambilLokasiDriver, 5000);
+            console.warn("Izin lokasi belum aktif:", err);
         },
         { enableHighAccuracy: false, maximumAge: 60000, timeout: 15000 }
     );
 }
 
-function inisialisasiPetaDriver() {
-    if (!peta) {
-        peta = L.map('peta').setView([lokasiDriver.lat, lokasiDriver.lon], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(peta);
-        
-        const ikonDriver = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048315.png',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35]
-        });
-        
-        const ikonJemput = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3177/3177355.png',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35]
-        });
-
-        const ikonTujuan = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-            iconSize: [35, 35],
-            iconAnchor: [17, 35]
-        });
-        
-        penandaDriver = L.marker([lokasiDriver.lat, lokasiDriver.lon], { icon: ikonDriver }).addTo(peta).bindPopup("Posisi Anda");
-        penandaJemput = L.marker([0, 0], { icon: ikonJemput }).addTo(peta).setOpacity(0);
-        penandaTujuan = L.marker([0, 0], { icon: ikonTujuan }).addTo(peta).setOpacity(0);
-        garisRute = L.polyline([], { color: '#22C55E', weight: 4, dashArray: '5, 10' }).addTo(peta);
-    }
-}
-
-function posisiPetaSemula() {
-    if (peta && lokasiDriver.lat && lokasiDriver.lon) {
-        peta.setView([lokasiDriver.lat, lokasiDriver.lon], 15);
-    }
-}
-
-function cekLoginDriver() {
-    const data = localStorage.getItem("DRIVER_SAAT_INI");
-    if (data) {
-        dataDriverSaatIni = JSON.parse(data);
-        bukaHalamanDriver("pesanan");
-        const statusOtomatis = localStorage.getItem("MODE_OTOMATIS") === "aktif";
-        document.getElementById("modeOtomatis").checked = statusOtomatis;
-        ubahModeOtomatis();
+// ✅ KELONGGARAN AKURASI: Cukup ada kordinat GPS perangkat saja
+function cekStatusTombolPesan() {
+    const tombol = document.getElementById("tombolKirim");
+    const info = document.getElementById("infoAkurasi");
+    
+    if (lokasiSaya.lat !== -5.1477) {
+        tombol.classList.remove("btn-abu");
+        tombol.disabled = false;
+        info.style.display = "none";
     } else {
-        document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
-        document.getElementById("halaman-login").classList.add("aktif");
+        tombol.classList.add("btn-abu");
+        tombol.disabled = true;
+        info.style.display = "block";
     }
 }
 
-async function loginDriver() {
-    const hp = document.getElementById("inputHpDriver").value.trim();
-    if (!hp) return alert("Masukkan nomor HP!");
-
-    const semuaData = await bacaData();
-    const daftarDriver = semuaData.daftarDriver || [];
-    const hpBersih = hp.replace(/\D/g, '');
-    const cari = daftarDriver.find(d => {
-        const hpDriverBersih = String(d.hp || '').replace(/\D/g, '');
-        return hpDriverBersih === hpBersih && d.status === "Aktif";
-    });
-
-    if (!cari) return alert("Nomor HP tidak terdaftar atau belum diaktifkan Admin!");
-
-    dataDriverSaatIni = cari;
-    localStorage.setItem("DRIVER_SAAT_INI", JSON.stringify(cari));
-    bukaHalamanDriver("pesanan");
-    ambilLokasiDriver();
+// ✅ FUNGSI PILIH LAYANAN
+function pilihLayanan(jenis) {
+    layananTerpilih = jenis;
+    document.querySelectorAll(".kartu-layanan").forEach(el => el.classList.remove("aktif"));
+    if (jenis === "makanan") {
+        document.querySelector(".layanan-makanan").classList.add("aktif");
+        document.getElementById("wadahMenuMakanan").style.display = "block";
+        document.getElementById("wadahLayananOjek").style.display = "none";
+    } else {
+        document.querySelector(".layanan-ojek").classList.add("aktif");
+        document.getElementById("wadahMenuMakanan").style.display = "none";
+        document.getElementById("wadahLayananOjek").style.display = "block";
+        setTimeout(inisialisasiPetaOjek, 100);
+    }
 }
 
-function logoutDriver() {
-    if (!confirm("Yakin ingin keluar?")) return;
-    localStorage.removeItem("DRIVER_SAAT_INI");
-    localStorage.removeItem("MODE_OTOMATIS");
-    dataDriverSaatIni = null;
-    modeOtomatisAktif = false;
-    pesananAktifSekarang = null;
-    lokasiJemput = null;
-    lokasiTujuan = null;
-    if (intervalCariPesanan) clearInterval(intervalCariPesanan);
-    document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
-    document.getElementById("halaman-login").classList.add("aktif");
-}
-
-function bukaHalamanDriver(nama) {
+function bukaHalaman(nama) {
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
     document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("aktif"));
 
-    if (!dataDriverSaatIni) {
+    if (!penggunaSaatIni) {
         document.getElementById("halaman-login").classList.add("aktif");
         return;
     }
 
-    if (nama === "pesanan") {
-        document.getElementById("halaman-pesanan").classList.add("aktif");
+    if (nama === "beranda") {
+        document.getElementById("halaman-beranda").classList.add("aktif");
         document.querySelector(".nav-item:nth-child(1)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Pesanan Tersedia";
-        document.getElementById("namaDriver").textContent = dataDriverSaatIni.nama;
-        tampilkanPesananMasuk();
+        document.getElementById("judulHalaman").textContent = "Beranda";
+        document.getElementById("namaPengguna").textContent = penggunaSaatIni.nama;
+        tampilkanBanner();
+        tampilkanKategori();
+        tampilkanMenu();
     } else if (nama === "riwayat") {
         document.getElementById("halaman-riwayat").classList.add("aktif");
         document.querySelector(".nav-item:nth-child(2)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Riwayat Antar";
-        document.getElementById("namaDriver2").textContent = dataDriverSaatIni.nama;
-        tampilkanRiwayatDriver();
+        document.getElementById("judulHalaman").textContent = "Riwayat Pesanan";
+        document.getElementById("namaPengguna2").textContent = penggunaSaatIni.nama;
+        tampilkanRiwayat();
     } else if (nama === "peta") {
         document.getElementById("halaman-peta").classList.add("aktif");
         document.querySelector(".nav-item:nth-child(3)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Peta Perjalanan";
-        document.getElementById("namaDriver3").textContent = dataDriverSaatIni.nama;
-        setTimeout(() => { 
-            inisialisasiPetaDriver(); 
-            ambilLokasiDriver(); 
-            perbaruiLokasiPelangganRealTime();
+        document.getElementById("judulHalaman").textContent = "Peta Pelacakan";
+        document.getElementById("namaPengguna3").textContent = penggunaSaatIni.nama;
+        setTimeout(() => {
+            if (peta) peta.invalidateSize();
+            kembaliKePosisiSaya();
+            perbaruiDataPeta();
         }, 100);
     }
+}
+
+async function tampilkanBanner() {
+    const wadah = document.getElementById("wadahBanner");
+    const semuaData = await bacaSemuaData();
+    const daftarBanner = semuaData.daftarBanner || [];
+    if (daftarBanner.length > 0) {
+        wadah.innerHTML = `<img src="${daftarBanner[0].link}" alt="Banner Promo" class="banner-gambar" loading="lazy">`;
+    } else {
+        wadah.innerHTML = `<div class="banner-kosong">Belum ada banner yang diatur</div>`;
+    }
+}
+
+async function tampilkanKategori() {
+    const semuaData = await bacaSemuaData();
+    const daftarKategori = semuaData.daftarKategori || [];
+    const wadah = document.getElementById("wadahKategori");
+    wadah.innerHTML = `<button class="tombol-kategori aktif" onclick="pilihKategori('semua')">Semua</button>`;
+    daftarKategori.forEach((kat) => {
+        wadah.innerHTML += `<button class="tombol-kategori" onclick="pilihKategori(${kat.id})">${kat.nama}</button>`;
+    });
+}
+
+function pilihKategori(id) {
+    kategoriTerpilih = id;
+    document.querySelectorAll(".tombol-kategori").forEach(btn => btn.classList.remove("aktif"));
+    event.target.classList.add("aktif");
+    tampilkanMenu();
+}
+
+async function tampilkanMenu() {
+    const semuaData = await bacaSemuaData();
+    const daftarMenu = semuaData.daftarMenu || [];
+const daftarKategori = semuaData.daftarKategori || [];
+    const wadah = document.getElementById("daftarMenu");
+    let menuTampil = daftarMenu;
+    if (kategoriTerpilih !== "semua") {
+        menuTampil = daftarMenu.filter(m => m.idKategori == kategoriTerpilih);
+    }
+    if (menuTampil.length === 0) {
+        wadah.innerHTML = `<div class="kosong p-4" style="grid-column: 1 / -1;"><i class="bi bi-clipboard-x"></i><p>Menu tidak tersedia</p></div>`;
+        return;
+    }
+    wadah.innerHTML = "";
+    menuTampil.forEach((item) => {
+        const namaKat = daftarKategori.find(k => k.id == item.idKategori)?.nama || "Lainnya";
+        wadah.innerHTML += `<div class="kartu-menu" onclick="bukaPopup(${daftarMenu.indexOf(item)})">
+            <img src="${item.gambar}" alt="${item.nama}" class="gambar-menu" loading="lazy">
+            <div class="info-menu">
+                <span class="badge bg-primary text-white px-2 py-1 rounded-pill small">${namaKat}</span>
+                <h6 class="nama-menu mt-2">${item.nama}</h6>
+                <div class="harga-menu">Rp ${Number(item.harga).toLocaleString('id-ID')}</div>
+            </div>
+        </div>`;
+    });
+}
+
+function bukaPopup(indeks) {
+    const semuaData = JSON.parse(localStorage.getItem("DAFTAR_MENU_SEMENTARA") || "[]");
+    const item = semuaData[indeks];
+    document.getElementById("barang").value = `${item.nama} - Rp ${Number(item.harga).toLocaleString('id-ID')}`;
+    document.getElementById("popupOverlay").style.display = "flex";
+    document.getElementById("popupChat").style.display = "none";
+    setTimeout(() => document.getElementById("popupOverlay").classList.add("tampil"), 10);
+    document.body.style.overflow = "hidden";
+    ambilLokasiSaya();
+}
+
+function tutupPopup() {
+    document.getElementById("popupOverlay").classList.remove("tampil");
+    setTimeout(() => {
+        document.getElementById("popupOverlay").style.display = "none";
+        document.querySelector(".popup-form").style.display = "block";
+        document.getElementById("popupChat").style.display = "none";
+        document.body.style.overflow = "auto";
+        document.getElementById("alamat").value = "";
+        document.getElementById("catatan").value = "";
+    }, 300);
+}
+
+function tutupPopupChat() {
+    document.getElementById("popupOverlay").classList.remove("tampil");
+    setTimeout(() => {
+        document.getElementById("popupOverlay").style.display = "none";
+        document.querySelector(".popup-form").style.display = "block";
+        document.getElementById("popupChat").style.display = "none";
+        document.body.style.overflow = "auto";
+        resiChatAktif = null;
+        document.getElementById("inputPesanChat").value = "";
+    }, 300);
+}
+
+document.getElementById("popupOverlay").addEventListener("click", function(e) {
+    if (e.target === this) tutupPopup();
+});
+
+// ✅ INISIALISASI PETA UTAMA
+function inisialisasiPeta() {
+    if (!peta) {
+        peta = L.map('peta').setView([lokasiSaya.lat, lokasiSaya.lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(peta);
+        const ikonSaya = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [35, 35], iconAnchor: [17, 35] });
+        const ikonDriver = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048315.png', iconSize: [35, 35], iconAnchor: [17, 35] });
+        penandaSaya = L.marker([lokasiSaya.lat, lokasiSaya.lon], { icon: ikonSaya }).addTo(peta).bindPopup("Posisi Anda");
+        penandaDriver = L.marker([0, 0], { icon: ikonDriver }).addTo(peta).setOpacity(0);
+        garisRute = L.polyline([], { color: '#22C55E', weight: 4 }).addTo(peta);
+    }
+}
+
+// ✅ INISIALISASI PETA UNTUK OJEK
+function inisialisasiPetaOjek() {
+    if (!petaOjek) {
+        petaOjek = L.map('petaOjek').setView([lokasiSaya.lat, lokasiSaya.lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(petaOjek);
+
+        const ikonJemput = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [32, 32], iconAnchor: [16, 32] });
+        const ikonTujuan = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048315.png', iconSize: [32, 32], iconAnchor: [16, 32] });
+
+        penandaJemput = L.marker([lokasiSaya.lat, lokasiSaya.lon], { icon: ikonJemput, draggable: true }).addTo(petaOjek).bindPopup("Lokasi Jemput");
+        penandaTujuan = L.marker([lokasiSaya.lat, lokasiSaya.lon], { icon: ikonTujuan, draggable: true }).addTo(petaOjek).bindPopup("Lokasi Tujuan").setOpacity(0.4);
+
+        // Event klik peta untuk pilih lokasi manual
+        petaOjek.on('click', function(e) {
+            const { lat, lng } = e.latlng;
+            if (modePilih === "jemput") {
+                penandaJemput.setLatLng([lat, lng]);
+                lokasiJemputManual = { lat, lon: lng };
+                document.getElementById("lokasiJemput").value = `Lat: ${lat.toFixed(6)}, Lon: ${lng.toFixed(6)}`;
+            } else {
+                penandaTujuan.setLatLng([lat, lng]).setOpacity(1);
+                lokasiTujuanManual = { lat, lon: lng };
+                document.getElementById("lokasiTujuan").value = `Lat: ${lat.toFixed(6)}, Lon: ${lng.toFixed(6)}`;
+            }
+        });
+
+        // Update posisi saat penanda digeser
+        penandaJemput.on('dragend', function(e) {
+            const pos = e.target.getLatLng();
+            lokasiJemputManual = { lat: pos.lat, lon: pos.lng };
+            document.getElementById("lokasiJemput").value = `Lat: ${pos.lat.toFixed(6)}, Lon: ${pos.lng.toFixed(6)}`;
+        });
+
+        penandaTujuan.on('dragend', function(e) {
+            const pos = e.target.getLatLng();
+            lokasiTujuanManual = { lat: pos.lat, lon: pos.lng };
+            document.getElementById("lokasiTujuan").value = `Lat: ${pos.lat.toFixed(6)}, Lon: ${pos.lng.toFixed(6)}`;
+        });
+
+        lokasiJemputManual = { lat: lokasiSaya.lat, lon: lokasiSaya.lon };
+        document.getElementById("lokasiJemput").value = `Lat: ${lokasiSaya.lat.toFixed(6)}, Lon: ${lokasiSaya.lon.toFixed(6)}`;
+    } else {
+        setTimeout(() => petaOjek.invalidateSize(), 100);
+    }
+}
+
+function modePilihLokasiManual() {
+    modePilih = modePilih === "jemput" ? "tujuan" : "jemput";
+    alert(`Sekarang pilih titik ${modePilih} di peta`);
+}
+
+function posisiSayaOjek() {
+    if (petaOjek && lokasiSaya.lat) {
+        petaOjek.setView([lokasiSaya.lat, lokasiSaya.lon], 16);
+        penandaJemput.setLatLng([lokasiSaya.lat, lokasiSaya.lon]);
+        lokasiJemputManual = { lat: lokasiSaya.lat, lon: lokasiSaya.lon };
+        document.getElementById("lokasiJemput").value = `Lat: ${lokasiSaya.lat.toFixed(6)}, Lon: ${lokasiSaya.lon.toFixed(6)}`;
+    }
+}
+
+function kembaliKePosisiSaya() {
+    if (peta && lokasiSaya.lat && lokasiSaya.lon) peta.setView([lokasiSaya.lat, lokasiSaya.lon], 16);
 }
 
 function hitungJarak(lat1, lon1, lat2, lon2) {
@@ -845,206 +1369,229 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ✅ Hitung Harga Berdasarkan Jarak
-function hitungHarga(jarakKm) {
-    const tarifDasar = 3000; // Rp 3.000 untuk km pertama
-    const tarifPerKm = 1500; // Rp 1.500 per km selanjutnya
-    return jarakKm <= 1 ? tarifDasar : Math.round(tarifDasar + (jarakKm - 1) * tarifPerKm);
-}
-
-function ubahModeOtomatis() {
-    modeOtomatisAktif = document.getElementById("modeOtomatis").checked;
-    localStorage.setItem("MODE_OTOMATIS", modeOtomatisAktif ? "aktif" : "mati");
-    
-    if (modeOtomatisAktif) {
-        if (intervalCariPesanan) clearInterval(intervalCariPesanan);
-        intervalCariPesanan = setInterval(cariDanAmbilPesananTerdekat, 5000);
+async function perbaruiDataPeta() {
+    const semuaData = await bacaSemuaData();
+    const daftar = semuaData.daftarPesanan || [];
+    pesananAktif = daftar.find(p => p.hp === penggunaSaatIni.hp && p.status !== "Selesai");
+    if (pesananAktif && pesananAktif.lokasiDriver) {
+        const posDriver = [pesananAktif.lokasiDriver.lat, pesananAktif.lokasiDriver.lon];
+        penandaDriver.setLatLng(posDriver).setOpacity(1);
+        garisRute.setLatLngs([posDriver, [lokasiSaya.lat, lokasiSaya.lon]]);
+        const jarak = hitungJarak(pesananAktif.lokasiDriver.lat, pesananAktif.lokasiDriver.lon, lokasiSaya.lat, lokasiSaya.lon);
+        document.getElementById("infoPosisiDriver").textContent = `${pesananAktif.lokasiDriver.lat.toFixed(6)}, ${pesananAktif.lokasiDriver.lon.toFixed(6)}`;
+        document.getElementById("infoJarak").textContent = `${jarak.toFixed(2)} km`;
     } else {
-        if (intervalCariPesanan) clearInterval(intervalCariPesanan);
-    }
-}
-
-// ✅ DIPERBARUI: Mencari pesanan termasuk Ojek Online
-async function cariDanAmbilPesananTerdekat() {
-    const semuaData = await bacaData();
-    const daftar = semuaData.daftarPesanan || [];
-    const pesananMenunggu = daftar.filter(p => 
-        !p.idDriver && 
-        p.status === "Menunggu" && 
-        p.lokasiJemput && 
-        p.lokasiTujuan
-    );
-    if (pesananMenunggu.length === 0) return;
-
-    let terdekat = null, jarakMin = 9999;
-    pesananMenunggu.forEach(pes => {
-        const jarak = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pes.lokasiJemput.lat, pes.lokasiJemput.lon);
-        if (jarak < jarakMin) { jarakMin = jarak; terdekat = pes; }
-    });
-
-    if (terdekat && jarakMin <= 5) {
-        ambilPesanan(terdekat.resi);
-        tampilkanNotif(terdekat);
-    }
-}
-
-function tampilkanNotif(pesanan) {
-    const notif = document.getElementById("popupNotif");
-    const isi = document.getElementById("isiNotif");
-    const jarakJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pesanan.lokasiJemput.lat, pesanan.lokasiJemput.lon);
-    const jarakTotal = hitungJarak(pesanan.lokasiJemput.lat, pesanan.lokasiJemput.lon, pesanan.lokasiTujuan.lat, pesanan.lokasiTujuan.lon);
-    isi.innerHTML = `
-        <p class="mb-1"><strong>Resi:</strong> ${pesanan.resi}</p>
-        <p class="mb-1"><strong>Tipe:</strong> ${pesanan.tipePesanan || 'Antar Barang'}</p>
-        <p class="mb-1"><strong>Pelanggan:</strong> ${pesanan.nama}</p>
-        <p class="mb-1"><strong>Jarak Jemput:</strong> ${jarakJemput.toFixed(2)} km</p>
-        <p class="mb-0"><strong>Estimasi Harga:</strong> Rp ${(pesanan.harga || hitungHarga(jarakTotal)).toLocaleString('id-ID')}</p>
-    `;
-    notif.classList.add("tampil");
-    setTimeout(() => tutupNotif(), 8000);
-}
-
-function tutupNotif() {
-    document.getElementById("popupNotif").classList.remove("tampil");
-}
-
-// ✅ DIPERBARUI: Tampilkan pesanan termasuk Ojek Online
-async function tampilkanPesananMasuk() {
-    const wadah = document.getElementById("daftarPesananMasuk");
-    const semuaData = await bacaData();
-    const daftar = semuaData.daftarPesanan || [];
-    
-    const urutanStatus = ["Menunggu", "Dalam Perjalanan ke Jemput", "Sudah Dijemput", "Dalam Perjalanan ke Tujuan", "Sampai di Tujuan"];
-    const pesananDiurut = daftar
-        .filter(p => 
-            (p.idDriver === dataDriverSaatIni.hp || !p.idDriver) 
-            && p.status !== "Selesai"
-        )
-        .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
-
-    // Simpan pesanan yang sedang dikerjakan
-    pesananAktifSekarang = pesananDiurut.find(p => p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai") || null;
-
-    if (pesananDiurut.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia atau sedang dikerjakan</p></div>`;
-        penandaJemput.setOpacity(0);
-        penandaTujuan.setOpacity(0);
+        penandaDriver.setOpacity(0);
         garisRute.setLatLngs([]);
-        lokasiJemput = null;
-        lokasiTujuan = null;
+        document.getElementById("infoPosisiDriver").textContent = "-";
+        document.getElementById("infoJarak").textContent = "Belum ada pesanan aktif";
+    }
+}
+
+// ✅ KIRIM PESANAN MAKANAN
+async function kirimPesanan() {
+    const barang = document.getElementById("barang").value.trim();
+    const alamat = document.getElementById("alamat").value.trim();
+    const catatan = document.getElementById("catatan").value.trim();
+
+    if (!barang || !alamat) return alert("❌ Lengkapi semua data yang wajib diisi!");
+    if (!cekKeamananPerangkat()) return;
+
+    const semuaData = await bacaSemuaData();
+    const daftarPesanan = semuaData.daftarPesanan || [];
+
+    const pesananBaru = {
+        resi: "RESI-" + Math.floor(100000 + Math.random() * 900000),
+        jenis: "makanan",
+        barang: barang,
+        nama: penggunaSaatIni.nama,
+        hp: penggunaSaatIni.hp,
+        alamat: alamat,
+        catatan: catatan,
+        lokasiTujuan: { lat: lokasiSaya.lat, lon: lokasiSaya.lon },
+        akurasi: lokasiSaya.akurasi,
+        lokasiDriver: null,
+        idDriver: null,
+        namaDriver: null,
+        status: "Menunggu",
+        waktuPesan: new Date().toLocaleString('id-ID'),
+        timestampMs: Date.now(),
+        pesanChat: []
+    };
+
+    daftarPesanan.push(pesananBaru);
+    semuaData.daftarPesanan = daftarPesanan;
+
+    if (await simpanSemuaData(semuaData)) {
+        alert(`✅ Pesanan berhasil dikirim!\nNomor Resi: ${pesananBaru.resi}`);
+        tutupPopup();
+    }
+}
+
+// ✅ KIRIM PESANAN OJEK
+async function pesanOjek() {
+    if (!lokasiJemputManual || !lokasiTujuanManual) {
+        return alert("❌ Silakan tentukan lokasi jemput dan tujuan terlebih dahulu!");
+    }
+    const jarak = hitungJarak(lokasiJemputManual.lat, lokasiJemputManual.lon, lokasiTujuanManual.lat, lokasiTujuanManual.lon);
+    const biaya = Math.round(jarak * 3500); // Tarif Rp3.500 per km
+
+    const konfirmasi = confirm(`Konfirmasi pesanan ojek?\nJarak: ${jarak.toFixed(2)} km\nPerkiraan biaya: Rp ${biaya.toLocaleString('id-ID')}`);
+    if (!konfirmasi) return;
+
+    const semuaData = await bacaSemuaData();
+    const daftarPesanan = semuaData.daftarPesanan || [];
+
+    const pesananOjek = {
+        resi: "RESI-OJEK-" + Math.floor(100000 + Math.random() * 900000),
+        jenis: "ojek",
+        barang: `Ojek | Jemput: ${document.getElementById("lokasiJemput").value} | Tujuan: ${document.getElementById("lokasiTujuan").value}`,
+        nama: penggunaSaatIni.nama,
+        hp: penggunaSaatIni.hp,
+        alamat: `Jemput: ${document.getElementById("lokasiJemput").value}\nTujuan: ${document.getElementById("lokasiTujuan").value}`,
+        catatan: `Perkiraan biaya: Rp ${biaya.toLocaleString('id-ID')}`,
+        lokasiJemput: lokasiJemputManual,
+        lokasiTujuan: lokasiTujuanManual,
+        jarakKm: jarak.toFixed(2),
+        biaya: biaya,
+        lokasiDriver: null,
+        idDriver: null,
+        namaDriver: null,
+        status: "Menunggu Driver",
+        waktuPesan: new Date().toLocaleString('id-ID'),
+        timestampMs: Date.now(),
+        pesanChat: []
+    };
+
+    daftarPesanan.push(pesananOjek);
+    semuaData.daftarPesanan = daftarPesanan;
+
+    if (await simpanSemuaData(semuaData)) {
+        alert(`✅ Pesanan ojek berhasil dikirim!\nNomor Resi: ${pesananOjek.resi}`);
+        pilihLayanan("makanan");
+    }
+}
+
+// ✅ TAMPILKAN RIWAYAT PESANAN
+async function tampilkanRiwayat() {
+    const wadah = document.getElementById("daftarRiwayat");
+    const semuaData = await bacaSemuaData();
+    const daftar = semuaData.daftarPesanan || [];
+    const pesananSaya = daftar.filter(p => p.hp === penggunaSaatIni.hp).reverse();
+    
+    if (pesananSaya.length === 0) {
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan</p></div>`;
         return;
     }
 
     wadah.innerHTML = "";
-    pesananDiurut.forEach(pes => {
-        const jarakJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pes.lokasiJemput.lat, pes.lokasiJemput.lon);
-        const jarakTotal = hitungJarak(pes.lokasiJemput.lat, pes.lokasiJemput.lon, pes.lokasiTujuan.lat, pes.lokasiTujuan.lon);
-        const harga = pes.harga || hitungHarga(jarakTotal);
-        const tipeKelas = pes.tipePesanan === "Ojek Online" ? "tipe-ojek" : "tipe-antar";
+    pesananSaya.forEach(pes => {
+        let warna = "#6B7280", teks = "Menunggu";
+        if (pes.status === "Sudah Diambil") { warna = "#22C55E"; teks = "Sudah Diambil"; }
+        else if (pes.status === "Sampai di Lokasi") { warna = "#3B82F6"; teks = "Sampai"; }
+        else if (pes.status === "Dalam Perjalanan") { warna = "#F59E0B"; teks = "Dalam Perjalanan"; }
+        else if (pes.status === "Selesai") { warna = "#0F4C5C"; teks = "Selesai"; }
 
-        let warnaStatus, tombolAksi = "";
-        switch(pes.status) {
-            case "Menunggu":
-                warnaStatus = "#6B7280";
-                tombolAksi = `<button onclick="ambilPesanan('${pes.resi}')" class="btn btn-success w-100">Ambil Pesanan</button>`;
-                break;
-            case "Dalam Perjalanan ke Jemput":
-                warnaStatus = "#22C55E";
-                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Sudah Dijemput')" class="btn btn-primary w-100">Sudah Dijemput</button>`;
-                break;
-            case "Sudah Dijemput":
-                warnaStatus = "#3B82F6";
-                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Dalam Perjalanan ke Tujuan')" class="btn btn-warning w-100 text-white">Antar ke Tujuan</button>`;
-                break;
-            case "Dalam Perjalanan ke Tujuan":
-                warnaStatus = "#F59E0B";
-                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Sampai di Tujuan')" class="btn btn-info w-100 text-white">Sampai di Tujuan</button>`;
-                break;
-            case "Sampai di Tujuan":
-                warnaStatus = "#0F4C5C";
-                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Selesai')" class="btn btn-dark w-100">Pesanan Selesai</button>`;
-                break;
+        const infoDriver = pes.namaDriver ? `<p class="mb-1 text-primary"><strong>Driver:</strong> ${pes.namaDriver}</p>` : "";
+
+        let tombolChat = "";
+        let infoTimer = "";
+
+        if (pes.idDriver) {
+            if (pes.status !== "Selesai") {
+                tombolChat = `<button onclick="bukaPopupChat('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>`;
+            } else if (pes.status === "Selesai") {
+                const batasWaktuMs = 3 * 60 * 60 * 1000;
+                const waktuSelesaiMs = pes.timestampMs || Date.now(); 
+                const sisaWaktu = (waktuSelesaiMs + batasWaktuMs) - Date.now();
+                
+                if (sisaWaktu > 0) {
+                    tombolChat = `<button onclick="bukaPopupChat('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100 btn-chat-selesai"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>`;
+                    infoTimer = `<div class="text-center mt-1 small text-danger fw-bold timer-chat" data-expired="${waktuSelesaiMs + batasWaktuMs}">Batas chat: <span class="waktu-mundur">Menghitung...</span></div>`;
+                }
+            }
         }
 
-        wadah.innerHTML += `<div class="pesanan-item">
-            <span class="tipe-pesanan ${tipeKelas}">${pes.tipePesanan || 'Antar Barang'}</span>
+        wadah.innerHTML += `<div class="pesanan-item" id="pesanan-${pes.resi}">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">Resi: ${pes.resi}</span>
-                <span class="status-badge" style="background:${warnaStatus}">${pes.status}</span>
+                <span class="fw-bold">${pes.resi}</span>
+                <span class="status-badge" style="background:${warna}">${teks}</span>
             </div>
-            <p><strong>Pelanggan:</strong> ${pes.nama}</p>
-            <p><strong>HP:</strong> ${pes.hp}</p>
-            <p><strong>Alamat Jemput:</strong> ${pes.alamatJemput || '-'}</p>
-            <p><strong>Alamat Tujuan:</strong> ${pes.alamatTujuan || '-'}</p>
-            <p><strong>Detail:</strong> ${pes.barang || '-'}</p>
-            <div class="info-jarak-harga">
-                <span>Jarak: ${jarakTotal.toFixed(2)} km</span>
-                <span class="fw-bold">Rp ${harga.toLocaleString('id-ID')}</span>
-            </div>
-            <div class="d-flex gap-2 mt-3">
-                <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-chat-text"></i> Chat</button>
-                ${tombolAksi}
-            </div>
+            <p class="mb-1"><strong>Jenis:</strong> ${pes.jenis === "ojek" ? "Ojek Online" : "Makanan/Barang"}</p>
+            <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang}</p>
+            ${infoDriver}
+            <p class="mb-1 text-muted"><i class="bi bi-geo-alt"></i> ${pes.alamat.replace(/\n/g, '<br>')}</p>
+            <p class="mb-1 small text-muted"><i class="bi bi-clock"></i> ${pes.waktuPesan || '-'}</p>
+            ${pes.catatan ? `<p class="mb-0 small text-success"><i class="bi bi-chat-left-text"></i> ${pes.catatan}</p>` : ""}
+            ${tombolChat}
+            ${infoTimer}
         </div>`;
+
+        if (!pesanTerakhirDilihat[pes.resi]) {
+            pesanTerakhirDilihat[pes.resi] = pes.pesanChat ? pes.pesanChat.length : 0;
+        }
     });
 }
 
-// ✅ Buka Popup Chat - Menampilkan Nama Pelanggan
-async function bukaPopupChat(resi, namaPelanggan) {
-    resiChatAktif = resi;
-    document.getElementById("judulChat").textContent = `Chat dengan ${namaPelanggan}`;
-    document.getElementById("overlayChat").style.display = "flex";
-    document.getElementById("wadahPesan").scrollTop = 9999;
-    muatRiwayatPesan();
-}
-
-function tutupPopupChat() {
-    document.getElementById("overlayChat").style.display = "none";
-    resiChatAktif = null;
-    document.getElementById("inputPesanChat").value = "";
-}
-
-// ✅ Muat Riwayat Pesan - Menampilkan Nama Pengirim
-async function muatRiwayatPesan() {
-    if (!resiChatAktif) return;
-    const semuaData = await bacaData();
-    const pesanan = semuaData.daftarPesanan.find(p => p.resi === resiChatAktif);
-    const wadah = document.getElementById("wadahPesan");
-    wadah.innerHTML = "";
-
-    if (!pesanan || !pesanan.pesanChat || pesanan.pesanChat.length === 0) {
-        wadah.innerHTML = `<div class="text-center text-muted small py-4">Belum ada pesan</div>`;
-        return;
-    }
-
-    pesanan.pesanChat.forEach(pesan => {
-        if (pesan.pengirim.includes("(Anda)") || pesan.pengirim.includes("(Driver)")) {
-            wadah.innerHTML += `<div class="pesan-pengirim">
-                <span class="nama">${pesan.pengirim}</span>
-                ${pesan.teks}
-            </div>`;
+setInterval(() => {
+    document.querySelectorAll(".timer-chat").forEach(el => {
+        const expired = parseInt(el.getAttribute("data-expired"));
+        const sisa = expired - Date.now();
+        
+        if (sisa <= 0) {
+            el.innerHTML = "Waktu chat telah habis";
+            el.classList.replace("text-danger", "text-muted");
+            const parent = el.closest(".pesanan-item");
+            const btn = parent.querySelector(".btn-chat-selesai");
+            if (btn) btn.style.display = "none";
         } else {
-            wadah.innerHTML += `<div class="pesan-pelanggan">
-                <span class="nama">${pesan.pengirim}</span>
-                ${pesan.teks}
-            </div>`;
+            const jam = Math.floor((sisa / (1000 * 60 * 60)) % 24);
+            const menit = Math.floor((sisa / 1000 / 60) % 60);
+            const detik = Math.floor((sisa / 1000) % 60);
+            el.querySelector(".waktu-mundur").textContent = `${jam}j ${menit}m ${detik}s`;
+        }
+    });
+}, 1000);
+
+async function bukaPopupChat(resi) {
+    resiChatAktif = resi;
+    const semuaData = await bacaSemuaData();
+    const pesanan = semuaData.daftarPesanan.find(p => p.resi === resi);
+    if (!pesanan) return;
+
+    document.getElementById("judulChat").textContent = `Chat dengan ${pesanan.namaDriver || "Driver"}`;
+    const wadahPesan = document.getElementById("wadahPesan");
+    const daftarPesan = pesanan.pesanChat || [];
+
+    let isiPesan = "";
+    daftarPesan.forEach(p => {
+        if (p.pengirim.includes("(Anda)")) {
+            isiPesan += `<div class="pesan-pengirim"><span class="nama">${p.pengirim}</span>${p.teks}</div>`;
+        } else {
+            isiPesan += `<div class="pesan-driver"><span class="nama">${p.pengirim}</span>${p.teks}</div>`;
         }
     });
 
-    wadah.scrollTop = wadah.scrollHeight;
+    wadahPesan.innerHTML = isiPesan || `<p class="text-center text-muted mt-3">Belum ada pesan</p>`;
+    wadahPesan.scrollTop = wadahPesan.scrollHeight;
+    pesanTerakhirDilihat[resi] = daftarPesan.length;
+
+    document.getElementById("popupOverlay").style.display = "flex";
+    document.querySelector(".popup-form").style.display = "none";
+    document.getElementById("popupChat").style.display = "flex";
+    setTimeout(() => document.getElementById("popupOverlay").classList.add("tampil"), 10);
 }
 
 async function kirimPesanChat() {
-    if (!resiChatAktif) return;
     const teks = document.getElementById("inputPesanChat").value.trim();
-    if (!teks) return;
+    if (!teks || !resiChatAktif) return;
 
-    const semuaData = await bacaData();
+    const semuaData = await bacaSemuaData();
     const indeks = semuaData.daftarPesanan.findIndex(p => p.resi === resiChatAktif);
     if (indeks === -1) return;
 
     const pesanBaru = {
-        pengirim: dataDriverSaatIni.nama + " (Driver)",
+        pengirim: penggunaSaatIni.nama + " (Anda)",
         teks: teks,
         waktu: new Date().toLocaleString('id-ID')
     };
@@ -1054,146 +1601,68 @@ async function kirimPesanChat() {
     }
     semuaData.daftarPesanan[indeks].pesanChat.push(pesanBaru);
 
-    if (await simpanData(semuaData)) {
+    if (await simpanSemuaData(semuaData)) {
         document.getElementById("inputPesanChat").value = "";
-        muatRiwayatPesan();
+        bukaPopupChat(resiChatAktif);
     }
 }
 
-async function ambilPesanan(resi) {
-    const semuaData = await bacaData();
-    const daftar = semuaData.daftarPesanan || [];
-    const indeks = daftar.findIndex(p => p.resi === resi);
-    if (indeks !== -1) {
-        const jarakTotal = hitungJarak(daftar[indeks].lokasiJemput.lat, daftar[indeks].lokasiJemput.lon, daftar[indeks].lokasiTujuan.lat, daftar[indeks].lokasiTujuan.lon);
-        daftar[indeks].idDriver = dataDriverSaatIni.hp;
-        daftar[indeks].namaDriver = dataDriverSaatIni.nama;
-        daftar[indeks].status = "Dalam Perjalanan ke Jemput";
-        daftar[indeks].lokasiDriver = { ...lokasiDriver };
-        daftar[indeks].harga = daftar[indeks].harga || hitungHarga(jarakTotal);
-        if (!daftar[indeks].pesanChat) daftar[indeks].pesanChat = [];
-        semuaData.daftarPesanan = daftar;
-        if (await simpanData(semuaData)) {
-            tampilkanPesananMasuk();
-            tampilkanRiwayatDriver();
-        }
-    }
-}
+async function cekPesanBaru() {
+    if (!penggunaSaatIni) return;
+    const semuaData = await bacaSemuaData();
+    const daftarPesanan = semuaData.daftarPesanan || [];
+    const pesananSaya = daftarPesanan.filter(p => p.hp === penggunaSaatIni.hp);
 
-async function ubahStatus(resi, statusBaru) {
-    const semuaData = await bacaData();
-    const daftar = semuaData.daftarPesanan || [];
-    const indeks = daftar.findIndex(p => p.resi === resi);
-    if (indeks !== -1) {
-        daftar[indeks].status = statusBaru;
-        semuaData.daftarPesanan = daftar;
-        if (await simpanData(semuaData)) {
-            tampilkanPesananMasuk();
-            tampilkanRiwayatDriver();
-        }
-    }
-}
-async function tampilkanRiwayatDriver() {
-    const wadah = document.getElementById("daftarRiwayatDriver");
-    const semuaData = await bacaData();
-    const daftar = semuaData.daftarPesanan || [];
-    const riwayat = daftar
-        .filter(p => p.idDriver === dataDriverSaatIni.hp && p.status === "Selesai")
-        .reverse();
+    pesananSaya.forEach(pes => {
+        const jumlahSekarang = pes.pesanChat ? pes.pesanChat.length : 0;
+        const jumlahDilihat = pesanTerakhirDilihat[pes.resi] || 0;
 
-    if (riwayat.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan yang selesai</p></div>`;
-        return;
-    }
-
-    wadah.innerHTML = "";
-    riwayat.forEach(pes => {
-        const tipeKelas = pes.tipePesanan === "Ojek Online" ? "tipe-ojek" : "tipe-antar";
-        wadah.innerHTML += `<div class="pesanan-item">
-            <span class="tipe-pesanan ${tipeKelas}">${pes.tipePesanan || 'Antar Barang'}</span>
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">Resi: ${pes.resi}</span>
-                <span class="status-badge" style="background:#0F4C5C">Selesai</span>
-            </div>
-            <p><strong>Pelanggan:</strong> ${pes.nama}</p>
-            <p><strong>Alamat Jemput:</strong> ${pes.alamatJemput || '-'}</p>
-            <p><strong>Alamat Tujuan:</strong> ${pes.alamatTujuan || '-'}</p>
-            <p><strong>Total Bayar:</strong> Rp ${(pes.harga || 0).toLocaleString('id-ID')}</p>
-            <p><strong>Waktu Selesai:</strong> ${pes.waktuSelesai || pes.waktuPesan || '-'}</p>
-            <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-text"></i> Lihat Pesan</button>
-        </div>`;
-    });
-}
-
-async function perbaruiPosisiDriverDiPesanan() {
-    if (!dataDriverSaatIni) return;
-    const semuaData = await bacaData();
-    const daftar = semuaData.daftarPesanan || [];
-    let adaPerubahan = false;
-    daftar.forEach(p => {
-        if (p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai") {
-            p.lokasiDriver = { ...lokasiDriver };
-            adaPerubahan = true;
+        if (jumlahSekarang > jumlahDilihat) {
+            const pesanTerakhir = pes.pesanChat[jumlahSekarang - 1];
+            if (!pesanTerakhir.pengirim.includes("(Anda)")) {
+                tampilkanNotifPesan(pes.namaDriver || "Driver", pesanTerakhir.teks, pes.resi);
+                pesanTerakhirDilihat[pes.resi] = jumlahSekarang;
+            }
         }
     });
-    if (adaPerubahan) {
-        semuaData.daftarPesanan = daftar;
-        await simpanData(semuaData);
-    }
 }
 
-// ✅ CEK LOKASI JEMPUT & TUJUAN SECARA REAL-TIME UNTUK OJEK ONLINE
-async function perbaruiLokasiPelangganRealTime() {
-    if (!pesananAktifSekarang || !peta) return;
-    
-    const semuaData = await bacaData();
-    const pesanan = semuaData.daftarPesanan.find(p => p.resi === pesananAktifSekarang.resi);
-    
-    if (!pesanan || !pesanan.lokasiJemput || !pesanan.lokasiTujuan) {
-        penandaJemput.setOpacity(0);
-        penandaTujuan.setOpacity(0);
-        garisRute.setLatLngs([]);
-        document.getElementById("lokasiJemputSekarang").textContent = "-";
-        document.getElementById("lokasiPelangganSekarang").textContent = "-";
-        document.getElementById("jarakKePelanggan").textContent = "-";
-        lokasiJemput = null;
-        lokasiTujuan = null;
-        return;
-    }
+function tampilkanNotifPesan(namaPengirim, teksPesan, resi) {
+    const notif = document.getElementById("notifPesanBaru");
+    document.getElementById("teksNotifPesan").innerHTML = `<strong>${namaPengirim}:</strong> ${teksPesan}`;
+    notif.dataset.resi = resi;
+    notif.classList.add("tampil");
+    setTimeout(() => notif.classList.remove("tampil"), 8000);
+}
 
-    lokasiJemput = pesanan.lokasiJemput;
-    lokasiTujuan = pesanan.lokasiTujuan;
+function bukaChatDariNotif() {
+    const resi = document.getElementById("notifPesanBaru").dataset.resi;
+    tutupNotifPesan();
+    if (resi) bukaPopupChat(resi);
+}
 
-    const jarakKeJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, lokasiJemput.lat, lokasiJemput.lon);
-    const jarakTotal = hitungJarak(lokasiJemput.lat, lokasiJemput.lon, lokasiTujuan.lat, lokasiTujuan.lon);
+function tutupNotifPesan(e) {
+    if (e) e.stopPropagation();
+    document.getElementById("notifPesanBaru").classList.remove("tampil");
+}
 
-    // Tampilkan penanda sesuai status pesanan
-    if (pesanan.status === "Dalam Perjalanan ke Jemput") {
-        penandaJemput.setLatLng([lokasiJemput.lat, lokasiJemput.lon]).setOpacity(1);
-        penandaTujuan.setOpacity(0);
-        garisRute.setLatLngs([[lokasiDriver.lat, lokasiDriver.lon], [lokasiJemput.lat, lokasiJemput.lon]]);
-        document.getElementById("jarakKePelanggan").textContent = `${jarakKeJemput.toFixed(2)} km ke lokasi jemput`;
-    } else {
-        penandaJemput.setOpacity(0);
-        penandaTujuan.setLatLng([lokasiTujuan.lat, lokasiTujuan.lon]).setOpacity(1);
-        garisRute.setLatLngs([[lokasiDriver.lat, lokasiDriver.lon], [lokasiTujuan.lat, lokasiTujuan.lon]]);
-        document.getElementById("jarakKePelanggan").textContent = `${jarakTotal.toFixed(2)} km ke tujuan`;
-    }
-    
-    document.getElementById("lokasiJemputSekarang").textContent = 
-        `${lokasiJemput.lat.toFixed(6)}, ${lokasiJemput.lon.toFixed(6)}`;
-    document.getElementById("lokasiPelangganSekarang").textContent = 
-        `${lokasiTujuan.lat.toFixed(6)}, ${lokasiTujuan.lon.toFixed(6)}`;
+async function perbaruiDaftarMenuSementara() {
+    const semuaData = await bacaSemuaData();
+    localStorage.setItem("DAFTAR_MENU_SEMENTARA", JSON.stringify(semuaData.daftarMenu || []));
 }
 
 window.onload = function() {
-    cekLoginDriver();
-    setInterval(ambilLokasiDriver, 5000);
-    setInterval(tampilkanPesananMasuk, 3000);
-    setInterval(() => { if (resiChatAktif) muatRiwayatPesan(); }, 2500);
-    setInterval(perbaruiLokasiPelangganRealTime, 4000);
+    cekLogin();
+    inisialisasiPeta();
+    perbaruiDaftarMenuSementara();
+
+    setInterval(tampilkanBanner, 5000);
+    setInterval(tampilkanMenu, 5000);
+    setInterval(ambilLokasiSaya, 10000);
+    setInterval(perbaruiDataPeta, 4000);
+    setInterval(tampilkanRiwayat, 5000);
+    setInterval(cekPesanBaru, 3000); 
 };
 </script>
-
 </body>
 </html>
