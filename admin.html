@@ -43,7 +43,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0.1);
         }
 
         .container {
@@ -259,16 +259,29 @@
     </div>
 </div>
 
+<!-- ✅ PUSTAKA FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 <script>
 // ==========================================
-// ✅ PENGATURAN PENYIMPANAN KE GITHUB
+// ✅ PENGATURAN FIREBASE
 // ==========================================
-// Ganti nilai ini sesuai data akun GitHub Anda
-const GITHUB = {
-    username: "fa-digitalstudio",
-    token: "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",
-    gistId: "0896a7416917aced60c143ebf16eba84"
+// GANTI DENGAN KONFIGURASI PROYEK FIREBASE KAMU
+const firebaseConfig = {
+  apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
+  authDomain: "dok123-1bd6f.firebaseapp.com",
+  databaseURL: "https://dok123-1bd6f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dok123-1bd6f",
+  storageBucket: "dok123-1bd6f.firebasestorage.app",
+  messagingSenderId: "664523539322",
+  appId: "1:664523539322:web:61c0adedc67fee015dccc3"
 };
+    
+// Inisialisasi Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const refData = db.ref("data");
 
 // Variabel data
 let daftarMenu = [];
@@ -278,30 +291,26 @@ let daftarPesanan = [];
 let daftarBanner = [];
 
 // ==========================================
-// ✅ FUNGSI SINKRONISASI KE GITHUB
+// ✅ FUNGSI SINKRONISASI KE FIREBASE
 // ==========================================
-async function bacaDariGitHub() {
+async function bacaDariPenyimpanan() {
     try {
-        const res = await fetch(`https://api.github.com/gists/${GITHUB.gistId}`, {
-            headers: { Authorization: `token ${GITHUB.token}` }
-        });
-        const data = await res.json();
-        const konten = JSON.parse(data.files["data.json"].content || "{}");
-        
+        const snapshot = await refData.once("value");
+        const konten = snapshot.val() || {};
+
         daftarMenu = konten.daftarMenu || [];
         daftarKategori = konten.daftarKategori || [];
         daftarDriver = konten.daftarDriver || [];
         daftarPesanan = konten.daftarPesanan || [];
         daftarBanner = konten.daftarBanner || [];
 
-        console.log("✅ Data berhasil dimuat dari GitHub");
+        console.log("✅ Data berhasil dimuat dari Firebase");
     } catch (err) {
-        console.warn("⚠️ Tidak dapat membaca dari GitHub, gunakan data kosong:", err);
-        // Jika gagal, tetap gunakan data kosong
+        console.warn("⚠️ Tidak dapat membaca dari Firebase:", err);
     }
 }
 
-async function simpanKeGitHub() {
+async function simpanKePenyimpanan() {
     try {
         const dataUntukSimpan = {
             daftarMenu,
@@ -312,30 +321,18 @@ async function simpanKeGitHub() {
             diperbaruiPada: new Date().toISOString()
         };
 
-        await fetch(`https://api.github.com/gists/${GITHUB.gistId}`, {
-            method: "PATCH",
-            headers: {
-                Authorization: `token ${GITHUB.token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                files: {
-                    "data.json": { content: JSON.stringify(dataUntukSimpan, null, 2) }
-                }
-            })
-        });
-
-        console.log("✅ Data berhasil disimpan ke GitHub");
+        await refData.set(dataUntukSimpan);
+        console.log("✅ Data berhasil disimpan ke Firebase");
         return true;
     } catch (err) {
-        console.error("❌ Gagal menyimpan ke GitHub:", err);
-        alert("Gagal menyimpan data ke GitHub. Periksa koneksi dan pengaturan Anda.");
+        console.error("❌ Gagal menyimpan ke Firebase:", err);
+        alert("Gagal menyimpan data: " + err.message);
         return false;
     }
 }
 
 // ==========================================
-// ✅ FUNGSI UTAMA (TIDAK DIUBAH LOGIKANYA)
+// ✅ FUNGSI UTAMA (TIDAK DIUBAH SAMA SEKALI)
 // ==========================================
 function bukaHalamanAdmin(nama) {
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
@@ -421,14 +418,14 @@ async function ubahStatus(resi, statusBaru) {
     const indeks = daftarPesanan.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
         daftarPesanan[indeks].status = statusBaru;
-        if (await simpanKeGitHub()) tampilkanSemuaPesanan();
+        if (await simpanKePenyimpanan()) tampilkanSemuaPesanan();
     }
 }
 
 async function hapusPesanan(resi) {
     if (!confirm("Yakin ingin menghapus pesanan ini?")) return;
     daftarPesanan = daftarPesanan.filter(p => p.resi !== resi);
-    if (await simpanKeGitHub()) tampilkanSemuaPesanan();
+    if (await simpanKePenyimpanan()) tampilkanSemuaPesanan();
 }
 
 async function tambahDriver() {
@@ -457,7 +454,7 @@ async function tambahDriver() {
         waktuDaftar: new Date().toLocaleString('id-ID')
     });
 
-    if (await simpanKeGitHub()) {
+    if (await simpanKePenyimpanan()) {
         document.getElementById("namaDriverBaru").value = "";
         document.getElementById("hpDriverBaru").value = "";
         tampilkanDaftarDriver();
@@ -505,13 +502,13 @@ function tampilkanDaftarDriver() {
 
 async function ubahStatusDriver(indeks) {
     daftarDriver[indeks].status = daftarDriver[indeks].status === "Aktif" ? "Nonaktif" : "Aktif";
-    if (await simpanKeGitHub()) tampilkanDaftarDriver();
+    if (await simpanKePenyimpanan()) tampilkanDaftarDriver();
 }
 
 async function hapusDriver(indeks) {
     if (!confirm("Yakin ingin menghapus data driver ini?")) return;
     daftarDriver.splice(indeks, 1);
-    if (await simpanKeGitHub()) tampilkanDaftarDriver();
+    if (await simpanKePenyimpanan()) tampilkanDaftarDriver();
 }
 
 // ==========================================
@@ -529,7 +526,7 @@ async function tambahKategori() {
     const nama = document.getElementById("namaKategori").value.trim();
     if (!nama) return alert("Nama kategori tidak boleh kosong!");
     daftarKategori.push({ id: Date.now(), nama: nama });
-    if (await simpanKeGitHub()) {
+    if (await simpanKePenyimpanan()) {
         document.getElementById("namaKategori").value = "";
         tampilkanKategoriDiPilihan();
         tampilkanDaftarKategoriAdmin();
@@ -554,7 +551,7 @@ function tampilkanDaftarKategoriAdmin() {
 async function hapusKategori(i) {
     if (!confirm("Yakin hapus kategori ini?")) return;
     daftarKategori.splice(i, 1);
-    if (await simpanKeGitHub()) {
+    if (await simpanKePenyimpanan()) {
         tampilkanKategoriDiPilihan();
         tampilkanDaftarKategoriAdmin();
     }
@@ -576,7 +573,7 @@ async function tambahMenu() {
         idKategori: daftarKategori[idKat].id
     });
 
-    if (await simpanKeGitHub()) {
+    if (await simpanKePenyimpanan()) {
         document.getElementById("namaMenu").value = "";
         document.getElementById("hargaMenu").value = "";
         document.getElementById("gambarMenu").value = "";
@@ -612,14 +609,14 @@ function tampilkanDaftarMenuAdmin() {
 async function hapusMenu(i) {
     if (!confirm("Yakin hapus menu ini?")) return;
     daftarMenu.splice(i, 1);
-    if (await simpanKeGitHub()) tampilkanDaftarMenuAdmin();
+    if (await simpanKePenyimpanan()) tampilkanDaftarMenuAdmin();
 }
 
 async function simpanBanner() {
     const link = document.getElementById("linkBanner").value.trim();
     if (!link) return alert("Masukkan link gambar banner!");
     daftarBanner = [{ link: link }];
-    if (await simpanKeGitHub()) {
+    if (await simpanKePenyimpanan()) {
         tampilkanBannerSaatIni();
         alert("Banner berhasil disimpan!");
     }
@@ -638,10 +635,10 @@ function tampilkanBannerSaatIni() {
 // ✅ JALANKAN SAAT HALAMAN DIMUAT
 // ==========================================
 window.onload = async function() {
-    await bacaDariGitHub();
+    await bacaDariPenyimpanan();
     bukaHalamanAdmin('pesanan');
     setInterval(async () => {
-        await bacaDariGitHub();
+        await bacaDariPenyimpanan();
         if (document.getElementById("halaman-pesanan").classList.contains("aktif")) tampilkanSemuaPesanan();
     }, 5000);
 };
