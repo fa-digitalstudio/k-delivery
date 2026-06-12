@@ -468,6 +468,27 @@
             font-size: 0.9rem;
         }
 
+        /* ✅ Tambahan Gaya untuk Pesanan Ojek Online */
+        .tipe-pesanan {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .tipe-ojek { background: #9333ea; color: white; }
+        .tipe-antar { background: #0891b2; color: white; }
+        .info-jarak-harga {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
         @media (min-width: 768px) {
             .container { padding: 1.5rem; }
             #peta { height: 450px; }
@@ -519,7 +540,7 @@
         <div class="mode-switch">
             <div>
                 <strong>Terima Pesanan Otomatis</strong>
-                <div class="text-muted small">Mencari pesanan terdekat</div>
+                <div class="text-muted small">Mencari pesanan terdekat termasuk Ojek Online</div>
             </div>
             <label class="switch">
                 <input type="checkbox" id="modeOtomatis" onchange="ubahModeOtomatis()">
@@ -563,8 +584,9 @@
             <div id="peta"></div>
             <div class="mt-3">
                 <p class="mb-1"><strong>Lokasi Anda:</strong> <span id="lokasiDriverSekarang">-</span></p>
-                <p class="mb-0"><strong>Lokasi Pelanggan:</strong> <span id="lokasiPelangganSekarang">-</span></p>
-                <p class="mb-0"><strong>Jarak:</strong> <span id="jarakKePelanggan">-</span></p>
+                <p class="mb-0"><strong>Lokasi Jemput:</strong> <span id="lokasiJemputSekarang">-</span></p>
+                <p class="mb-0"><strong>Lokasi Tujuan:</strong> <span id="lokasiPelangganSekarang">-</span></p>
+                <p class="mb-0"><strong>Jarak Total:</strong> <span id="jarakKePelanggan">-</span></p>
             </div>
         </div>
     </div>
@@ -634,9 +656,10 @@ const db = firebase.database();
 const refData = db.ref("data");
 
 let peta;
-let penandaDriver, penandaPelanggan, garisRute;
+let penandaDriver, penandaJemput, penandaTujuan, garisRute;
 let lokasiDriver = { lat: -5.1477, lon: 119.4327, akurasi: 9999 };
-let lokasiPelanggan = null;
+let lokasiJemput = null;
+let lokasiTujuan = null;
 let dataDriverSaatIni = null;
 let modeOtomatisAktif = false;
 let intervalCariPesanan = null;
@@ -707,14 +730,21 @@ function inisialisasiPetaDriver() {
             iconAnchor: [17, 35]
         });
         
-        const ikonPelanggan = L.icon({
+        const ikonJemput = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3177/3177355.png',
+            iconSize: [35, 35],
+            iconAnchor: [17, 35]
+        });
+
+        const ikonTujuan = L.icon({
             iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
             iconSize: [35, 35],
             iconAnchor: [17, 35]
         });
         
         penandaDriver = L.marker([lokasiDriver.lat, lokasiDriver.lon], { icon: ikonDriver }).addTo(peta).bindPopup("Posisi Anda");
-        penandaPelanggan = L.marker([0, 0], { icon: ikonPelanggan }).addTo(peta).setOpacity(0);
+        penandaJemput = L.marker([0, 0], { icon: ikonJemput }).addTo(peta).setOpacity(0);
+        penandaTujuan = L.marker([0, 0], { icon: ikonTujuan }).addTo(peta).setOpacity(0);
         garisRute = L.polyline([], { color: '#22C55E', weight: 4, dashArray: '5, 10' }).addTo(peta);
     }
 }
@@ -766,7 +796,8 @@ function logoutDriver() {
     dataDriverSaatIni = null;
     modeOtomatisAktif = false;
     pesananAktifSekarang = null;
-    lokasiPelanggan = null;
+    lokasiJemput = null;
+    lokasiTujuan = null;
     if (intervalCariPesanan) clearInterval(intervalCariPesanan);
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
     document.getElementById("halaman-login").classList.add("aktif");
@@ -814,6 +845,13 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+// ✅ Hitung Harga Berdasarkan Jarak
+function hitungHarga(jarakKm) {
+    const tarifDasar = 3000; // Rp 3.000 untuk km pertama
+    const tarifPerKm = 1500; // Rp 1.500 per km selanjutnya
+    return jarakKm <= 1 ? tarifDasar : Math.round(tarifDasar + (jarakKm - 1) * tarifPerKm);
+}
+
 function ubahModeOtomatis() {
     modeOtomatisAktif = document.getElementById("modeOtomatis").checked;
     localStorage.setItem("MODE_OTOMATIS", modeOtomatisAktif ? "aktif" : "mati");
@@ -826,15 +864,21 @@ function ubahModeOtomatis() {
     }
 }
 
+// ✅ DIPERBARUI: Mencari pesanan termasuk Ojek Online
 async function cariDanAmbilPesananTerdekat() {
     const semuaData = await bacaData();
     const daftar = semuaData.daftarPesanan || [];
-    const pesananMenunggu = daftar.filter(p => !p.idDriver && p.status === "Menunggu" && p.lokasiTujuan);
+    const pesananMenunggu = daftar.filter(p => 
+        !p.idDriver && 
+        p.status === "Menunggu" && 
+        p.lokasiJemput && 
+        p.lokasiTujuan
+    );
     if (pesananMenunggu.length === 0) return;
 
     let terdekat = null, jarakMin = 9999;
     pesananMenunggu.forEach(pes => {
-        const jarak = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pes.lokasiTujuan.lat, pes.lokasiTujuan.lon);
+        const jarak = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pes.lokasiJemput.lat, pes.lokasiJemput.lon);
         if (jarak < jarakMin) { jarakMin = jarak; terdekat = pes; }
     });
 
@@ -847,10 +891,14 @@ async function cariDanAmbilPesananTerdekat() {
 function tampilkanNotif(pesanan) {
     const notif = document.getElementById("popupNotif");
     const isi = document.getElementById("isiNotif");
+    const jarakJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pesanan.lokasiJemput.lat, pesanan.lokasiJemput.lon);
+    const jarakTotal = hitungJarak(pesanan.lokasiJemput.lat, pesanan.lokasiJemput.lon, pesanan.lokasiTujuan.lat, pesanan.lokasiTujuan.lon);
     isi.innerHTML = `
         <p class="mb-1"><strong>Resi:</strong> ${pesanan.resi}</p>
+        <p class="mb-1"><strong>Tipe:</strong> ${pesanan.tipePesanan || 'Antar Barang'}</p>
         <p class="mb-1"><strong>Pelanggan:</strong> ${pesanan.nama}</p>
-        <p class="mb-0"><strong>Jarak:</strong> ${hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pesanan.lokasiTujuan.lat, pesanan.lokasiTujuan.lon).toFixed(2)} km</p>
+        <p class="mb-1"><strong>Jarak Jemput:</strong> ${jarakJemput.toFixed(2)} km</p>
+        <p class="mb-0"><strong>Estimasi Harga:</strong> Rp ${(pesanan.harga || hitungHarga(jarakTotal)).toLocaleString('id-ID')}</p>
     `;
     notif.classList.add("tampil");
     setTimeout(() => tutupNotif(), 8000);
@@ -860,12 +908,13 @@ function tutupNotif() {
     document.getElementById("popupNotif").classList.remove("tampil");
 }
 
+// ✅ DIPERBARUI: Tampilkan pesanan termasuk Ojek Online
 async function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
     const semuaData = await bacaData();
     const daftar = semuaData.daftarPesanan || [];
     
-    const urutanStatus = ["Menunggu", "Sudah Diambil", "Sampai di Restoran", "Dalam Perjalanan"];
+    const urutanStatus = ["Menunggu", "Dalam Perjalanan ke Jemput", "Sudah Dijemput", "Dalam Perjalanan ke Tujuan", "Sampai di Tujuan"];
     const pesananDiurut = daftar
         .filter(p => 
             (p.idDriver === dataDriverSaatIni.hp || !p.idDriver) 
@@ -878,43 +927,60 @@ async function tampilkanPesananMasuk() {
 
     if (pesananDiurut.length === 0) {
         wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia atau sedang dikerjakan</p></div>`;
-        penandaPelanggan.setOpacity(0);
+        penandaJemput.setOpacity(0);
+        penandaTujuan.setOpacity(0);
         garisRute.setLatLngs([]);
-        lokasiPelanggan = null;
+        lokasiJemput = null;
+        lokasiTujuan = null;
         return;
     }
 
     wadah.innerHTML = "";
     pesananDiurut.forEach(pes => {
+        const jarakJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pes.lokasiJemput.lat, pes.lokasiJemput.lon);
+        const jarakTotal = hitungJarak(pes.lokasiJemput.lat, pes.lokasiJemput.lon, pes.lokasiTujuan.lat, pes.lokasiTujuan.lon);
+        const harga = pes.harga || hitungHarga(jarakTotal);
+        const tipeKelas = pes.tipePesanan === "Ojek Online" ? "tipe-ojek" : "tipe-antar";
+
         let warnaStatus, tombolAksi = "";
         switch(pes.status) {
             case "Menunggu":
                 warnaStatus = "#6B7280";
                 tombolAksi = `<button onclick="ambilPesanan('${pes.resi}')" class="btn btn-success w-100">Ambil Pesanan</button>`;
                 break;
-            case "Sudah Diambil":
+            case "Dalam Perjalanan ke Jemput":
                 warnaStatus = "#22C55E";
-                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Sampai di Restoran')" class="btn btn-primary w-100">Sampai di Restoran</button>`;
+                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Sudah Dijemput')" class="btn btn-primary w-100">Sudah Dijemput</button>`;
                 break;
-            case "Sampai di Restoran":
+            case "Sudah Dijemput":
                 warnaStatus = "#3B82F6";
-                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Dalam Perjalanan')" class="btn btn-warning w-100 text-white">Antar ke Pelanggan</button>`;
+                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Dalam Perjalanan ke Tujuan')" class="btn btn-warning w-100 text-white">Antar ke Tujuan</button>`;
                 break;
-            case "Dalam Perjalanan":
+            case "Dalam Perjalanan ke Tujuan":
                 warnaStatus = "#F59E0B";
+                tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Sampai di Tujuan')" class="btn btn-info w-100 text-white">Sampai di Tujuan</button>`;
+                break;
+            case "Sampai di Tujuan":
+                warnaStatus = "#0F4C5C";
                 tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Selesai')" class="btn btn-dark w-100">Pesanan Selesai</button>`;
                 break;
         }
 
         wadah.innerHTML += `<div class="pesanan-item">
+            <span class="tipe-pesanan ${tipeKelas}">${pes.tipePesanan || 'Antar Barang'}</span>
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">Resi: ${pes.resi}</span>
                 <span class="status-badge" style="background:${warnaStatus}">${pes.status}</span>
             </div>
             <p><strong>Pelanggan:</strong> ${pes.nama}</p>
             <p><strong>HP:</strong> ${pes.hp}</p>
-            <p><strong>Alamat:</strong> ${pes.alamat}</p>
-            <p><strong>Pesanan:</strong> ${pes.barang}</p>
+            <p><strong>Alamat Jemput:</strong> ${pes.alamatJemput || '-'}</p>
+            <p><strong>Alamat Tujuan:</strong> ${pes.alamatTujuan || '-'}</p>
+            <p><strong>Detail:</strong> ${pes.barang || '-'}</p>
+            <div class="info-jarak-harga">
+                <span>Jarak: ${jarakTotal.toFixed(2)} km</span>
+                <span class="fw-bold">Rp ${harga.toLocaleString('id-ID')}</span>
+            </div>
             <div class="d-flex gap-2 mt-3">
                 <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-chat-text"></i> Chat</button>
                 ${tombolAksi}
@@ -999,10 +1065,12 @@ async function ambilPesanan(resi) {
     const daftar = semuaData.daftarPesanan || [];
     const indeks = daftar.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
+        const jarakTotal = hitungJarak(daftar[indeks].lokasiJemput.lat, daftar[indeks].lokasiJemput.lon, daftar[indeks].lokasiTujuan.lat, daftar[indeks].lokasiTujuan.lon);
         daftar[indeks].idDriver = dataDriverSaatIni.hp;
         daftar[indeks].namaDriver = dataDriverSaatIni.nama;
-        daftar[indeks].status = "Sudah Diambil";
+        daftar[indeks].status = "Dalam Perjalanan ke Jemput";
         daftar[indeks].lokasiDriver = { ...lokasiDriver };
+        daftar[indeks].harga = daftar[indeks].harga || hitungHarga(jarakTotal);
         if (!daftar[indeks].pesanChat) daftar[indeks].pesanChat = [];
         semuaData.daftarPesanan = daftar;
         if (await simpanData(semuaData)) {
@@ -1025,7 +1093,6 @@ async function ubahStatus(resi, statusBaru) {
         }
     }
 }
-
 async function tampilkanRiwayatDriver() {
     const wadah = document.getElementById("daftarRiwayatDriver");
     const semuaData = await bacaData();
@@ -1041,16 +1108,18 @@ async function tampilkanRiwayatDriver() {
 
     wadah.innerHTML = "";
     riwayat.forEach(pes => {
-        let warna = "#0F4C5C";
-
+        const tipeKelas = pes.tipePesanan === "Ojek Online" ? "tipe-ojek" : "tipe-antar";
         wadah.innerHTML += `<div class="pesanan-item">
+            <span class="tipe-pesanan ${tipeKelas}">${pes.tipePesanan || 'Antar Barang'}</span>
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">Resi: ${pes.resi}</span>
-                <span class="status-badge" style="background:${warna}">Selesai</span>
+                <span class="status-badge" style="background:#0F4C5C">Selesai</span>
             </div>
             <p><strong>Pelanggan:</strong> ${pes.nama}</p>
-            <p><strong>Pesanan:</strong> ${pes.barang}</p>
-            <p><strong>Waktu:</strong> ${pes.waktuPesan || '-'}</p>
+            <p><strong>Alamat Jemput:</strong> ${pes.alamatJemput || '-'}</p>
+            <p><strong>Alamat Tujuan:</strong> ${pes.alamatTujuan || '-'}</p>
+            <p><strong>Total Bayar:</strong> Rp ${(pes.harga || 0).toLocaleString('id-ID')}</p>
+            <p><strong>Waktu Selesai:</strong> ${pes.waktuSelesai || pes.waktuPesan || '-'}</p>
             <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-text"></i> Lihat Pesan</button>
         </div>`;
     });
@@ -1073,31 +1142,48 @@ async function perbaruiPosisiDriverDiPesanan() {
     }
 }
 
-// ✅ CEK LOKASI PELANGGAN SECARA REAL-TIME
+// ✅ CEK LOKASI JEMPUT & TUJUAN SECARA REAL-TIME UNTUK OJEK ONLINE
 async function perbaruiLokasiPelangganRealTime() {
     if (!pesananAktifSekarang || !peta) return;
     
     const semuaData = await bacaData();
     const pesanan = semuaData.daftarPesanan.find(p => p.resi === pesananAktifSekarang.resi);
     
-    if (!pesanan || !pesanan.lokasiTujuan) {
-        penandaPelanggan.setOpacity(0);
+    if (!pesanan || !pesanan.lokasiJemput || !pesanan.lokasiTujuan) {
+        penandaJemput.setOpacity(0);
+        penandaTujuan.setOpacity(0);
         garisRute.setLatLngs([]);
+        document.getElementById("lokasiJemputSekarang").textContent = "-";
         document.getElementById("lokasiPelangganSekarang").textContent = "-";
         document.getElementById("jarakKePelanggan").textContent = "-";
-        lokasiPelanggan = null;
+        lokasiJemput = null;
+        lokasiTujuan = null;
         return;
     }
 
-    lokasiPelanggan = pesanan.lokasiTujuan;
-    const jarak = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, lokasiPelanggan.lat, lokasiPelanggan.lon);
+    lokasiJemput = pesanan.lokasiJemput;
+    lokasiTujuan = pesanan.lokasiTujuan;
 
-    penandaPelanggan.setLatLng([lokasiPelanggan.lat, lokasiPelanggan.lon]).setOpacity(1);
-    garisRute.setLatLngs([[lokasiDriver.lat, lokasiDriver.lon], [lokasiPelanggan.lat, lokasiPelanggan.lon]]);
+    const jarakKeJemput = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, lokasiJemput.lat, lokasiJemput.lon);
+    const jarakTotal = hitungJarak(lokasiJemput.lat, lokasiJemput.lon, lokasiTujuan.lat, lokasiTujuan.lon);
+
+    // Tampilkan penanda sesuai status pesanan
+    if (pesanan.status === "Dalam Perjalanan ke Jemput") {
+        penandaJemput.setLatLng([lokasiJemput.lat, lokasiJemput.lon]).setOpacity(1);
+        penandaTujuan.setOpacity(0);
+        garisRute.setLatLngs([[lokasiDriver.lat, lokasiDriver.lon], [lokasiJemput.lat, lokasiJemput.lon]]);
+        document.getElementById("jarakKePelanggan").textContent = `${jarakKeJemput.toFixed(2)} km ke lokasi jemput`;
+    } else {
+        penandaJemput.setOpacity(0);
+        penandaTujuan.setLatLng([lokasiTujuan.lat, lokasiTujuan.lon]).setOpacity(1);
+        garisRute.setLatLngs([[lokasiDriver.lat, lokasiDriver.lon], [lokasiTujuan.lat, lokasiTujuan.lon]]);
+        document.getElementById("jarakKePelanggan").textContent = `${jarakTotal.toFixed(2)} km ke tujuan`;
+    }
     
+    document.getElementById("lokasiJemputSekarang").textContent = 
+        `${lokasiJemput.lat.toFixed(6)}, ${lokasiJemput.lon.toFixed(6)}`;
     document.getElementById("lokasiPelangganSekarang").textContent = 
-        `${lokasiPelanggan.lat.toFixed(6)}, ${lokasiPelanggan.lon.toFixed(6)}`;
-    document.getElementById("jarakKePelanggan").textContent = `${jarak.toFixed(2)} km`;
+        `${lokasiTujuan.lat.toFixed(6)}, ${lokasiTujuan.lon.toFixed(6)}`;
 }
 
 window.onload = function() {
