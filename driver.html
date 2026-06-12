@@ -329,7 +329,7 @@
         </div>
 
         <div class="card">
-            <h5><i class="bi bi-bell"></i> Pesanan Tersedia & Dalam Proses</h5>
+            <h5><i class="bi bi-bell"></i> Pesanan Tersedia & Sedang Dikerjakan</h5>
             <div id="daftarPesananMasuk"></div>
         </div>
     </div>
@@ -344,7 +344,7 @@
             <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
         <div class="card">
-            <h5><i class="bi bi-clock-history"></i> Riwayat Antar</h5>
+            <h5><i class="bi bi-clock-history"></i> Riwayat Pesanan Selesai</h5>
             <div id="daftarRiwayatDriver"></div>
         </div>
     </div>
@@ -570,20 +570,23 @@ function tutupNotif() {
     document.getElementById("popupNotif").classList.remove("tampil");
 }
 
-// ✅ Urutkan & tampilkan pesanan - hanya tampilkan jika ada
+// ✅ DIPERBAIKI: Hanya tampilkan pesanan yang BELUM SELESAI di halaman Pesanan
 function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
     
-    // Urutkan sesuai urutan proses
-    const urutanStatus = ["Menunggu", "Sudah Diambil", "Sampai di Restoran", "Dalam Perjalanan", "Selesai"];
+    // Urutkan sesuai urutan proses & HANYA ambil yang belum selesai
+    const urutanStatus = ["Menunggu", "Sudah Diambil", "Sampai di Restoran", "Dalam Perjalanan"];
     const pesananDiurut = daftar
-        .filter(p => p.idDriver === dataDriverSaatIni.hp || !p.idDriver)
+        .filter(p => 
+            (p.idDriver === dataDriverSaatIni.hp || !p.idDriver) 
+            && p.status !== "Selesai" // ❗ Tidak tampilkan yang sudah selesai
+        )
         .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
 
     // ✅ Jika tidak ada pesanan, tampilkan tulisan kosong saja
     if (pesananDiurut.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia</p></div>`;
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia atau sedang dikerjakan</p></div>`;
         return;
     }
 
@@ -606,10 +609,6 @@ function tampilkanPesananMasuk() {
             case "Dalam Perjalanan":
                 warnaStatus = "#F59E0B";
                 tombolAksi = `<button onclick="ubahStatus('${pes.resi}', 'Selesai')" class="btn btn-dark w-100">Pesanan Selesai</button>`;
-                break;
-            case "Selesai":
-                warnaStatus = "#0F4C5C";
-                tombolAksi = `<span class="text-success">✅ Pesanan selesai</span>`;
                 break;
         }
 
@@ -661,28 +660,27 @@ function ubahStatus(resi, statusBaru) {
     }
 }
 
+// ✅ Riwayat hanya tampilkan yang sudah selesai
 function tampilkanRiwayatDriver() {
     const wadah = document.getElementById("daftarRiwayatDriver");
     const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    const riwayat = daftar.filter(p => p.idDriver === dataDriverSaatIni.hp).reverse();
+    const riwayat = daftar
+        .filter(p => p.idDriver === dataDriverSaatIni.hp && p.status === "Selesai")
+        .reverse();
 
     if (riwayat.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada riwayat antar</p></div>`;
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan yang selesai</p></div>`;
         return;
     }
 
     wadah.innerHTML = "";
     riwayat.forEach(pes => {
-        let warna = "#6B7280";
-        if (pes.status === "Sudah Diambil") warna = "#22C55E";
-        if (pes.status === "Sampai di Restoran") warna = "#3B82F6";
-        if (pes.status === "Dalam Perjalanan") warna = "#F59E0B";
-        if (pes.status === "Selesai") warna = "#0F4C5C";
+        let warna = "#0F4C5C";
 
         wadah.innerHTML += `<div class="pesanan-item">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold">Resi: ${pes.resi}</span>
-                <span class="status-badge" style="background:${warna}">${pes.status}</span>
+                <span class="status-badge" style="background:${warna}">Selesai</span>
             </div>
             <p><strong>Pelanggan:</strong> ${pes.nama}</p>
             <p><strong>Pesanan:</strong> ${pes.barang}</p>
