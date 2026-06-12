@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Pesan Makanan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         :root {
             --utama: #0F4C5C;
             --hijau: #22C55E;
             --kuning: #F59E0B;
-            --biru: #3B82F6;
+            --merah: #EF4444;
             --abu: #6B7280;
             --abu-terang: #F3F4F6;
             --putih: #FFFFFF;
@@ -28,7 +28,7 @@
         body {
             background-color: var(--abu-terang);
             color: var(--teks);
-            padding-bottom: 85px;
+            padding-bottom: 80px;
         }
 
         .header {
@@ -46,14 +46,14 @@
 
         .container {
             padding: 1rem;
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
         .card {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             padding: 1.2rem;
             margin-bottom: 1.2rem;
         }
@@ -67,30 +67,54 @@
             gap: 0.5rem;
         }
 
-        .form-control {
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-size: 0.95rem;
+        .form-group {
+            margin-bottom: 1rem;
         }
 
-        .form-control:focus {
-            border-color: var(--utama);
-            box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.2);
-            outline: none;
-        }
-
-        .btn {
-            border-radius: 8px;
-            padding: 0.6rem 1rem;
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
             font-weight: 500;
         }
 
-        .daftar-item {
-            border: 1px solid #e5e7eb;
+        input, textarea, select {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #D1D5DB;
             border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        button {
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn-hijau { background: var(--hijau); color: white; }
+        .btn-biru { background: var(--biru, #3B82F6); color: white; }
+        .btn-kuning { background: var(--kuning); color: white; }
+        .btn-merah { background: var(--merah); color: white; }
+        .btn-abu { background: var(--abu); color: white; }
+
+        .tabel {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .tabel th, .tabel td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #E5E7EB;
+            text-align: left;
+        }
+
+        .tabel th {
+            background: #F9FAFB;
+            font-weight: 600;
         }
 
         .nav-bawah {
@@ -99,10 +123,10 @@
             left: 0;
             right: 0;
             background: white;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
             display: flex;
             justify-content: space-around;
-            padding: 0.8rem 0;
+            padding: 0.7rem 0;
             z-index: 99;
         }
 
@@ -122,7 +146,7 @@
         .nav-item i {
             font-size: 1.3rem;
             display: block;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
 
         .halaman {
@@ -133,14 +157,32 @@
             display: block;
         }
 
-        /* Style khusus Banner */
-        .preview-banner {
+        .kosong {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--abu);
+        }
+
+        .kosong i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Tambahan gaya untuk halaman pengguna */
+        .tabel-pengguna {
             width: 100%;
-            height: 120px;
-            border-radius: 8px;
-            object-fit: cover;
-            margin: 0.5rem 0;
-            border: 1px solid #ddd;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .tabel-pengguna th, .tabel-pengguna td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        .tabel-pengguna th {
+            background: #f3f4f6;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -151,71 +193,94 @@
 </div>
 
 <div class="container">
-    <!-- HALAMAN KATEGORI -->
-    <div class="halaman aktif" id="halaman-kategori">
+    <!-- Halaman Dashboard -->
+    <div class="halaman aktif" id="halaman-dashboard">
         <div class="card">
-            <h5><i class="bi bi-tags text-primary"></i> Kelola Kategori</h5>
-            <div class="mb-3 d-flex gap-2">
-                <input type="text" id="namaKategori" class="form-control" placeholder="Nama kategori baru">
-                <button onclick="tambahKategori()" class="btn btn-primary">Tambah</button>
+            <h5><i class="bi bi-speedometer2 text-primary"></i> Ringkasan Data</h5>
+            <p>Selamat datang di panel admin. Gunakan menu di bawah untuk mengelola data.</p>
+        </div>
+    </div>
+
+    <!-- Halaman Kelola Banner -->
+    <div class="halaman" id="halaman-banner">
+        <div class="card">
+            <h5><i class="bi bi-image text-success"></i> Kelola Banner</h5>
+            <div class="form-group">
+                <label>Link Gambar Banner</label>
+                <input type="text" id="linkBanner" placeholder="Masukkan URL gambar">
             </div>
+            <button class="btn btn-hijau w-100" onclick="simpanBanner()">Simpan Banner</button>
+            <div id="daftarBanner"></div>
+        </div>
+    </div>
+
+    <!-- Halaman Kelola Kategori -->
+    <div class="halaman" id="halaman-kategori">
+        <div class="card">
+            <h5><i class="bi bi-list text-warning"></i> Kelola Kategori</h5>
+            <div class="form-group">
+                <label>Nama Kategori</label>
+                <input type="text" id="namaKategori" placeholder="Contoh: Makanan Berat">
+            </div>
+            <button class="btn btn-hijau w-100" onclick="tambahKategori()">Tambah Kategori</button>
             <div id="daftarKategori"></div>
         </div>
     </div>
 
-    <!-- HALAMAN MENU -->
+    <!-- Halaman Kelola Menu -->
     <div class="halaman" id="halaman-menu">
         <div class="card">
-            <h5><i class="bi bi-egg-fried text-success"></i> Kelola Menu Makanan</h5>
-            <div class="mb-3">
-                <label class="form-label">Pilih Kategori</label>
-                <select id="pilihKategori" class="form-control"></select>
+            <h5><i class="bi bi-egg-fried text-danger"></i> Kelola Menu Makanan</h5>
+            <div class="form-group">
+                <label>Pilih Kategori</label>
+                <select id="kategoriMenu"></select>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Nama Menu</label>
-                <input type="text" id="namaMenu" class="form-control" placeholder="Contoh: Nasi Goreng">
+            <div class="form-group">
+                <label>Nama Makanan</label>
+                <input type="text" id="namaMenu" placeholder="Contoh: Nasi Goreng">
             </div>
-            <div class="mb-3">
-                <label class="form-label">Harga (Rp)</label>
-                <input type="number" id="hargaMenu" class="form-control" placeholder="Contoh: 15000">
+            <div class="form-group">
+                <label>Harga (Rp)</label>
+                <input type="number" id="hargaMenu" placeholder="Contoh: 15000">
             </div>
-            <div class="mb-3">
-                <label class="form-label">Link Gambar</label>
-                <input type="url" id="gambarMenu" class="form-control" placeholder="Masukkan URL gambar">
+            <div class="form-group">
+                <label>Link Gambar</label>
+                <input type="text" id="gambarMenu" placeholder="URL gambar makanan">
             </div>
-            <button onclick="tambahMenu()" class="btn btn-success w-100 mb-4">Simpan Menu</button>
+            <button class="btn btn-hijau w-100" onclick="tambahMenu()">Tambah Menu</button>
             <div id="daftarMenu"></div>
         </div>
     </div>
 
-    <!-- HALAMAN PESANAN -->
+    <!-- Halaman Daftar Pesanan -->
     <div class="halaman" id="halaman-pesanan">
         <div class="card">
-            <h5><i class="bi bi-list-check text-warning"></i> Daftar Pesanan Masuk</h5>
+            <h5><i class="bi bi-receipt-cutoff text-info"></i> Daftar Pesanan Masuk</h5>
             <div id="daftarPesanan"></div>
         </div>
     </div>
 
-    <!-- ✅ HALAMAN BARU: KELOLA BANNER -->
-    <div class="halaman" id="halaman-banner">
+    <!-- ✅ HALAMAN BARU: Kelola Pengguna -->
+    <div class="halaman" id="halaman-pengguna">
         <div class="card">
-            <h5><i class="bi bi-image text-info"></i> Kelola Banner Halaman Pelanggan</h5>
-            <div class="mb-3">
-                <label class="form-label">Link Gambar Banner</label>
-                <input type="url" id="linkBanner" class="form-control" placeholder="Contoh: https://contoh.com/banner.jpg">
-                <small class="text-muted">Gambar akan muncul di halaman depan pelanggan</small>
-            </div>
-            <button onclick="tambahBanner()" class="btn btn-primary w-100 mb-4">Simpan Banner</button>
-            <h6 class="mb-3">Daftar Banner Aktif</h6>
-            <div id="daftarBanner"></div>
+            <h5><i class="bi bi-people text-primary"></i> Daftar Pengguna Terdaftar</h5>
+            <div id="daftarPengguna"></div>
         </div>
     </div>
 </div>
 
-<!-- NAVIGASI BAWAH - SEMUA MENU TETAP ADA -->
+<!-- Navigasi Bawah -->
 <div class="nav-bawah">
-    <div class="nav-item aktif" onclick="bukaHalaman('kategori')">
-        <i class="bi bi-tags"></i>
+    <div class="nav-item aktif" onclick="bukaHalaman('dashboard')">
+        <i class="bi bi-house"></i>
+        <span>Dasbor</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('banner')">
+        <i class="bi bi-image"></i>
+        <span>Banner</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('kategori')">
+        <i class="bi bi-list"></i>
         <span>Kategori</span>
     </div>
     <div class="nav-item" onclick="bukaHalaman('menu')">
@@ -223,200 +288,246 @@
         <span>Menu</span>
     </div>
     <div class="nav-item" onclick="bukaHalaman('pesanan')">
-        <i class="bi bi-list-check"></i>
+        <i class="bi bi-receipt"></i>
         <span>Pesanan</span>
     </div>
-    <div class="nav-item" onclick="bukaHalaman('banner')">
-        <i class="bi bi-image"></i>
-        <span>Banner</span>
+    <!-- ✅ MENU BARU: Pengguna -->
+    <div class="nav-item" onclick="bukaHalaman('pengguna')">
+        <i class="bi bi-people"></i>
+        <span>Pengguna</span>
     </div>
 </div>
 
 <script>
-// --- FUNGSI UMUM ---
+// Fungsi navigasi
 function bukaHalaman(nama) {
-    document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
-    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("aktif"));
+    document.querySelectorAll('.halaman').forEach(h => h.classList.remove('aktif'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('aktif'));
 
-    if (nama === "kategori") {
-        document.getElementById("halaman-kategori").classList.add("aktif");
-        document.querySelector(".nav-item:nth-child(1)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Kelola Kategori";
+    if (nama === 'dashboard') {
+        document.getElementById('halaman-dashboard').classList.add('aktif');
+        document.querySelector('.nav-item:nth-child(1)').classList.add('aktif');
+        document.getElementById('judulHalaman').textContent = 'Dasbor Admin';
+    } else if (nama === 'banner') {
+        document.getElementById('halaman-banner').classList.add('aktif');
+        document.querySelector('.nav-item:nth-child(2)').classList.add('aktif');
+        document.getElementById('judulHalaman').textContent = 'Kelola Banner';
+        tampilkanBanner();
+    } else if (nama === 'kategori') {
+        document.getElementById('halaman-kategori').classList.add('aktif');
+        document.querySelector('.nav-item:nth-child(3)').classList.add('aktif');
+        document.getElementById('judulHalaman').textContent = 'Kelola Kategori';
         tampilkanKategori();
-    } else if (nama === "menu") {
-        document.getElementById("halaman-menu").classList.add("aktif");
-        document.querySelector(".nav-item:nth-child(2)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Kelola Menu";
-        muatPilihanKategori();
+    } else if (nama === 'menu') {
+        document.getElementById('halaman-menu').classList.add('aktif');
+        document.querySelector('.nav-item:nth-child(4)').classList.add('aktif');
+        document.getElementById('judulHalaman').textContent = 'Kelola Menu';
+        isiPilihanKategori();
         tampilkanMenu();
-    } else if (nama === "pesanan") {
-        document.getElementById("halaman-pesanan").classList.add("aktif");
-        document.querySelector(".nav-item:nth-child(3)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Daftar Pesanan";
+    } else if (nama === 'pesanan') {
+        document.getElementById('halaman-pesanan').classList.add('aktif');
+        document.querySelector('.nav-item:nth-child(5)').classList.add('aktif');
+        document.getElementById('judulHalaman').textContent = 'Daftar Pesanan';
         tampilkanPesanan();
-    } else if (nama === "banner") {
-        document.getElementById("halaman-banner").classList.add("aktif");
-        document.querySelector(".nav-item:nth-child(4)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Kelola Banner";
-        tampilkanDaftarBanner();
+    }
+    // ✅ HALAMAN BARU: Pengguna
+    else if (nama === 'pengguna') {
+        document.getElementById('halaman-pengguna').classList.add('aktif');
+        document.querySelector('.nav-item:nth-child(6)').classList.add('aktif');
+        document.getElementById('judulHalaman').textContent = 'Kelola Pengguna';
+        tampilkanDaftarPengguna();
     }
 }
 
-// --- FUNGSI KATEGORI ---
+// Fungsi Banner
+function simpanBanner() {
+    const link = document.getElementById('linkBanner').value.trim();
+    if (!link) return alert('Masukkan link gambar!');
+    localStorage.setItem('DAFTAR_BANNER', JSON.stringify([{ link }]));
+    alert('Banner disimpan!');
+    tampilkanBanner();
+    document.getElementById('linkBanner').value = '';
+}
+
+function tampilkanBanner() {
+    const wadah = document.getElementById('daftarBanner');
+    const data = JSON.parse(localStorage.getItem('DAFTAR_BANNER')) || [];
+    if (data.length === 0) {
+        wadah.innerHTML = '<p class="mt-3 text-muted">Belum ada banner</p>';
+        return;
+    }
+    wadah.innerHTML = `<div class="mt-3"><img src="${data[0].link}" alt="Banner" style="width:100%; border-radius:8px;"></div>`;
+}
+
+// Fungsi Kategori
 function tambahKategori() {
-    const nama = document.getElementById("namaKategori").value.trim();
-    if (!nama) return alert("Isi nama kategori terlebih dahulu!");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
-    daftar.push({ nama: nama });
-    localStorage.setItem("DAFTAR_KATEGORI", JSON.stringify(daftar));
-    document.getElementById("namaKategori").value = "";
+    const nama = document.getElementById('namaKategori').value.trim();
+    if (!nama) return alert('Masukkan nama kategori!');
+    const daftar = JSON.parse(localStorage.getItem('DAFTAR_KATEGORI')) || [];
+    if (daftar.some(k => k.nama.toLowerCase() === nama.toLowerCase())) return alert('Kategori sudah ada!');
+    daftar.push({ id: Date.now(), nama });
+    localStorage.setItem('DAFTAR_KATEGORI', JSON.stringify(daftar));
+    alert('Kategori ditambahkan!');
     tampilkanKategori();
+    document.getElementById('namaKategori').value = '';
 }
 
 function tampilkanKategori() {
-    const wadah = document.getElementById("daftarKategori");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
-    if (daftar.length === 0) return wadah.innerHTML = "<p class='text-muted'>Belum ada kategori</p>";
-    wadah.innerHTML = "";
-    daftar.forEach((kat, idx) => {
-        wadah.innerHTML += `
-        <div class="daftar-item d-flex justify-content-between align-items-center">
-            <span>${kat.nama}</span>
-            <button onclick="hapusKategori(${idx})" class="btn btn-sm btn-danger">Hapus</button>
-        </div>`;
-    });
+    const wadah = document.getElementById('daftarKategori');
+    const daftar = JSON.parse(localStorage.getItem('DAFTAR_KATEGORI')) || [];
+    if (daftar.length === 0) {
+        wadah.innerHTML = '<p class="mt-3 text-muted">Belum ada kategori</p>';
+        return;
+    }
+    wadah.innerHTML = `<table class="tabel mt-3">
+        <tr><th>Nama Kategori</th><th>Aksi</th></tr>
+        ${daftar.map(k => `<tr><td>${k.nama}</td><td><button class="btn btn-sm btn-merah" onclick="hapusKategori(${k.id})">Hapus</button></td></tr>`).join('')}
+    </table>`;
 }
 
-function hapusKategori(idx) {
-    if (!confirm("Yakin hapus kategori?")) return;
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
-    daftar.splice(idx, 1);
-    localStorage.setItem("DAFTAR_KATEGORI", JSON.stringify(daftar));
+function hapusKategori(id) {
+    if (!confirm('Yakin hapus kategori ini?')) return;
+    let daftar = JSON.parse(localStorage.getItem('DAFTAR_KATEGORI')) || [];
+    daftar = daftar.filter(k => k.id !== id);
+    localStorage.setItem('DAFTAR_KATEGORI', JSON.stringify(daftar));
     tampilkanKategori();
 }
 
-// --- FUNGSI MENU ---
-function muatPilihanKategori() {
-    const pilih = document.getElementById("pilihKategori");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
-    pilih.innerHTML = "";
-    daftar.forEach((kat, idx) => pilih.innerHTML += `<option value="${idx}">${kat.nama}</option>`);
+// Fungsi Menu
+function isiPilihanKategori() {
+    const pilih = document.getElementById('kategoriMenu');
+    const daftar = JSON.parse(localStorage.getItem('DAFTAR_KATEGORI')) || [];
+    pilih.innerHTML = daftar.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
 }
 
 function tambahMenu() {
-    const idKat = document.getElementById("pilihKategori").value;
-    const nama = document.getElementById("namaMenu").value.trim();
-    const harga = parseInt(document.getElementById("hargaMenu").value);
-    const gambar = document.getElementById("gambarMenu").value.trim();
-    if (!nama || !harga || !gambar) return alert("Lengkapi semua data!");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
-    daftar.push({ idKat: idKat, nama: nama, harga: harga, gambar: gambar });
-    localStorage.setItem("DAFTAR_MENU", JSON.stringify(daftar));
-    document.getElementById("namaMenu").value = "";
-    document.getElementById("hargaMenu").value = "";
-    document.getElementById("gambarMenu").value = "";
+    const idKategori = document.getElementById('kategoriMenu').value;
+    const nama = document.getElementById('namaMenu').value.trim();
+    const harga = document.getElementById('hargaMenu').value;
+    const gambar = document.getElementById('gambarMenu').value.trim();
+    if (!nama || !harga || !gambar) return alert('Lengkapi semua data!');
+    const daftar = JSON.parse(localStorage.getItem('DAFTAR_MENU')) || [];
+    daftar.push({ id: Date.now(), idKategori, nama, harga, gambar });
+    localStorage.setItem('DAFTAR_MENU', JSON.stringify(daftar));
+    alert('Menu ditambahkan!');
     tampilkanMenu();
+    document.getElementById('namaMenu').value = '';
+    document.getElementById('hargaMenu').value = '';
+    document.getElementById('gambarMenu').value = '';
 }
 
 function tampilkanMenu() {
-    const wadah = document.getElementById("daftarMenu");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
-    const daftarKat = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
-    if (daftar.length === 0) return wadah.innerHTML = "<p class='text-muted'>Belum ada menu</p>";
-    wadah.innerHTML = "";
-    daftar.forEach((menu, idx) => {
-        const namaKat = daftarKat[menu.idKat]?.nama || "Lainnya";
-        wadah.innerHTML += `
-        <div class="daftar-item">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span><strong>${menu.nama}</strong> (${namaKat})</span>
-                <span>Rp ${menu.harga.toLocaleString('id-ID')}</span>
-            </div>
-            <img src="${menu.gambar}" style="width:80px;height:60px;object-fit:cover;border-radius:4px;">
-            <button onclick="hapusMenu(${idx})" class="btn btn-sm btn-danger mt-2">Hapus</button>
-        </div>`;
-    });
+    const wadah = document.getElementById('daftarMenu');
+    const daftar = JSON.parse(localStorage.getItem('DAFTAR_MENU')) || [];
+    const kategori = JSON.parse(localStorage.getItem('DAFTAR_KATEGORI')) || [];
+    if (daftar.length === 0) {
+        wadah.innerHTML = '<p class="mt-3 text-muted">Belum ada menu</p>';
+        return;
+    }
+    wadah.innerHTML = `<table class="tabel mt-3">
+        <tr><th>Nama</th><th>Kategori</th><th>Harga</th><th>Aksi</th></tr>
+        ${daftar.map(m => {
+            const namaKat = kategori.find(k => k.id == m.idKategori)?.nama || '-';
+            return `<tr><td>${m.nama}</td><td>${namaKat}</td><td>Rp ${Number(m.harga).toLocaleString('id-ID')}</td><td><button class="btn btn-sm btn-merah" onclick="hapusMenu(${m.id})">Hapus</button></td></tr>`;
+        }).join('')}
+    </table>`;
 }
 
-function hapusMenu(idx) {
-    if (!confirm("Yakin hapus menu?")) return;
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
-    daftar.splice(idx, 1);
-    localStorage.setItem("DAFTAR_MENU", JSON.stringify(daftar));
+function hapusMenu(id) {
+    if (!confirm('Yakin hapus menu ini?')) return;
+    let daftar = JSON.parse(localStorage.getItem('DAFTAR_MENU')) || [];
+    daftar = daftar.filter(m => m.id !== id);
+    localStorage.setItem('DAFTAR_MENU', JSON.stringify(daftar));
     tampilkanMenu();
 }
 
-// --- FUNGSI PESANAN ---
+// Fungsi Pesanan
 function tampilkanPesanan() {
-    const wadah = document.getElementById("daftarPesanan");
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    if (daftar.length === 0) return wadah.innerHTML = "<p class='text-muted'>Belum ada pesanan masuk</p>";
-    wadah.innerHTML = "";
-    daftar.forEach((pes, idx) => {
-        wadah.innerHTML += `
-        <div class="daftar-item">
-            <p><strong>Resi:</strong> ${pes.resi}</p>
-            <p><strong>Pesanan:</strong> ${pes.barang}</p>
-            <p><strong>Nama:</strong> ${pes.nama} | ${pes.hp}</p>
-            <p><strong>Alamat:</strong> ${pes.alamat}</p>
-            <p><strong>Status:</strong> <span class="badge bg-secondary">${pes.status}</span></p>
-            <div class="mt-2 d-flex gap-2 flex-wrap">
-                <button onclick="ubahStatus(${idx}, 'Menunggu')" class="btn btn-sm btn-secondary">Menunggu</button>
-                <button onclick="ubahStatus(${idx}, 'Sudah Diambil')" class="btn btn-sm btn-success">Diambil</button>
-                <button onclick="ubahStatus(${idx}, 'Sampai di Restoran')" class="btn btn-sm btn-primary">Di Restoran</button>
-                <button onclick="ubahStatus(${idx}, 'Dalam Perjalanan')" class="btn btn-sm btn-warning">Perjalanan</button>
-                <button onclick="ubahStatus(${idx}, 'Selesai')" class="btn btn-sm btn-dark">Selesai</button>
-            </div>
-        </div>`;
-    });
+    const wadah = document.getElementById('daftarPesanan');
+    const daftar = JSON.parse(localStorage.getItem('PESANAN_AKTIF')) || [];
+    if (daftar.length === 0) {
+        wadah.innerHTML = '<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan masuk</p></div>';
+        return;
+    }
+    wadah.innerHTML = daftar.map(p => `
+        <div class="card mb-3 p-3 border">
+            <p><strong>Resi:</strong> ${p.resi}</p>
+            <p><strong>Pelanggan:</strong> ${p.nama} | ${p.hp}</p>
+            <p><strong>Pesanan:</strong> ${p.barang}</p>
+            <p><strong>Alamat:</strong> ${p.alamat}</p>
+            <p><strong>Posisi:</strong> ${p.lat}, ${p.lon} (Akurasi: ${p.akurasi.toFixed(1)} m)</p>
+            <p><strong>Status:</strong> 
+                <select onchange="ubahStatus('${p.resi}', this.value)">
+                    <option value="Menunggu" ${p.status === 'Menunggu' ? 'selected' : ''}>Menunggu</option>
+                    <option value="Sudah Diambil" ${p.status === 'Sudah Diambil' ? 'selected' : ''}>Sudah Diambil</option>
+                    <option value="Sampai di Restoran" ${p.status === 'Sampai di Restoran' ? 'selected' : ''}>Sampai di Restoran</option>
+                    <option value="Dalam Perjalanan" ${p.status === 'Dalam Perjalanan' ? 'selected' : ''}>Dalam Perjalanan</option>
+                    <option value="Selesai" ${p.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                </select>
+            </p>
+        </div>
+    `).join('');
 }
 
-function ubahStatus(idx, statusBaru) {
-    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
-    daftar[idx].status = statusBaru;
-    localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
-    tampilkanPesanan();
+function ubahStatus(resi, statusBaru) {
+    const daftar = JSON.parse(localStorage.getItem('PESANAN_AKTIF')) || [];
+    const indeks = daftar.findIndex(p => p.resi === resi);
+    if (indeks !== -1) {
+        daftar[indeks].status = statusBaru;
+        localStorage.setItem('PESANAN_AKTIF', JSON.stringify(daftar));
+        tampilkanPesanan();
+    }
 }
 
-// --- ✅ FUNGSI BARU: KELOLA BANNER ---
-function tambahBanner() {
-    const link = document.getElementById("linkBanner").value.trim();
-    if (!link) return alert("Masukkan link gambar terlebih dahulu!");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_BANNER")) || [];
-    daftar.push({ link: link });
-    localStorage.setItem("DAFTAR_BANNER", JSON.stringify(daftar));
-    document.getElementById("linkBanner").value = "";
-    alert("✅ Banner berhasil disimpan!");
-    tampilkanDaftarBanner();
+// ✅ FUNGSI BARU: Kelola Pengguna
+function tampilkanDaftarPengguna() {
+    const wadah = document.getElementById('daftarPengguna');
+    const daftar = JSON.parse(localStorage.getItem('DAFTAR_PENGGUNA')) || [];
+    
+    if (daftar.length === 0) {
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-person-x"></i><p>Belum ada pengguna yang mendaftar</p></div>`;
+        return;
+    }
+
+    wadah.innerHTML = `
+    <table class="tabel-pengguna">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Lengkap</th>
+                <th>Nomor HP</th>
+                <th>Waktu Daftar</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${daftar.map((p, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${p.nama}</td>
+                <td>${p.hp}</td>
+                <td>${p.waktuDaftar || '-'}</td>
+                <td><button class="btn btn-sm btn-merah" onclick="hapusPengguna('${p.hp}')">Hapus</button></td>
+            </tr>
+            `).join('')}
+        </tbody>
+    </table>`;
 }
 
-function tampilkanDaftarBanner() {
-    const wadah = document.getElementById("daftarBanner");
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_BANNER")) || [];
-    if (daftar.length === 0) return wadah.innerHTML = "<p class='text-muted'>Belum ada banner yang ditambahkan</p>";
-    wadah.innerHTML = "";
-    daftar.forEach((banner, idx) => {
-        wadah.innerHTML += `
-        <div class="daftar-item">
-            <img src="${banner.link}" class="preview-banner" alt="Preview">
-            <p class="text-break small">${banner.link}</p>
-            <button onclick="hapusBanner(${idx})" class="btn btn-sm btn-danger">Hapus</button>
-        </div>`;
-    });
+function hapusPengguna(hp) {
+    if (!confirm("Yakin ingin menghapus pengguna ini?")) return;
+    let daftar = JSON.parse(localStorage.getItem('DAFTAR_PENGGUNA')) || [];
+    daftar = daftar.filter(p => p.hp !== hp);
+    localStorage.setItem('DAFTAR_PENGGUNA', JSON.stringify(daftar));
+    tampilkanDaftarPengguna();
 }
 
-function hapusBanner(idx) {
-    if (!confirm("Yakin hapus banner ini?")) return;
-    const daftar = JSON.parse(localStorage.getItem("DAFTAR_BANNER")) || [];
-    daftar.splice(idx, 1);
-    localStorage.setItem("DAFTAR_BANNER", JSON.stringify(daftar));
-    tampilkanDaftarBanner();
-}
-
-// --- MUAT DATA SAAT HALAMAN DIBUKA ---
+// Muat data awal
 window.onload = function() {
+    tampilkanBanner();
     tampilkanKategori();
-    setInterval(tampilkanPesanan, 3000);
+    tampilkanMenu();
+    tampilkanPesanan();
 };
 </script>
 
