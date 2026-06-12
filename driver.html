@@ -34,7 +34,6 @@
             padding-bottom: 85px;
         }
 
-        /* ✅ HEADER DIPERBAIKI LEBIH KEREN */
         .header {
             background: linear-gradient(135deg, #0F4C5C 0%, #16657a 100%);
             color: white;
@@ -308,7 +307,6 @@
             color: #ef4444;
         }
 
-        /* ✅ Gaya untuk Popup Chat - DITAMBAH NAMA PENGIRIM */
         .overlay-chat {
             position: fixed;
             top: 0;
@@ -377,7 +375,6 @@
             background: #fafafa;
         }
 
-        /* ✅ Pesan Driver */
         .pesan-pengirim {
             background: var(--utama);
             color: white;
@@ -397,7 +394,6 @@
             display: block;
         }
 
-        /* ✅ Pesan Pelanggan / Costumer */
         .pesan-pelanggan {
             background: #e2e8f0;
             color: var(--teks);
@@ -459,7 +455,6 @@
             background: #0d3d4a;
         }
 
-        /* ✅ Info Lokasi Pelanggan */
         .info-pelanggan {
             margin-top: 1rem;
             padding: 0.8rem;
@@ -469,7 +464,7 @@
             font-size: 0.9rem;
         }
 
-        /* ✅ Tambahan Gaya untuk Pesanan Ojek Online & Barang */
+        /* ✅ Pembeda Jelas Tipe Pesanan */
         .tipe-pesanan {
             font-size: 0.75rem;
             font-weight: 600;
@@ -618,7 +613,6 @@
     </div>
 </div>
 
-<!-- ✅ POPUP CHAT BARU -->
 <div id="overlayChat" class="overlay-chat">
     <div class="popup-chat">
         <div class="header-chat">
@@ -633,14 +627,10 @@
     </div>
 </div>
 
-<!-- ✅ PUSTAKA FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-// ==========================================
-// ✅ KONFIGURASI FIREBASE (SAMA DENGAN ADMIN)
-// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
   authDomain: "dok123-1bd6f.firebaseapp.com",
@@ -651,7 +641,6 @@ const firebaseConfig = {
   appId: "1:664523539322:web:61c0adedc67fee015dccc3"
 };
 
-// Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refData = db.ref("data");
@@ -667,9 +656,6 @@ let intervalCariPesanan = null;
 let resiChatAktif = null;
 let pesananAktifSekarang = null;
 
-// ==========================================
-// ✅ FUNGSI BACA & SIMPAN KE FIREBASE
-// ==========================================
 async function bacaData() {
     try {
         const snapshot = await refData.once("value");
@@ -691,7 +677,7 @@ async function simpanData(dataBaru) {
     }
 }
 
-// ✅ Konversi Koordinat ke Nama Alamat (Geocoding Terbalik)
+// ✅ Fungsi untuk dapatkan nama alamat
 async function dapatkanNamaAlamat(lat, lon) {
     try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
@@ -703,7 +689,6 @@ async function dapatkanNamaAlamat(lat, lon) {
     }
 }
 
-// ✅ LOKASI TIDAK DIPAKSA AKURAT - BISA BERJALAN DENGAN AKURASI APA SAJA
 function ambilLokasiDriver() {
     if (!navigator.geolocation) {
         alert("Perangkat tidak mendukung fitur lokasi!");
@@ -858,15 +843,15 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ✅ Hitung Harga Berdasarkan Jarak
-function hitungHarga(jarakKm, tipePesanan = "Barang") {
+// ✅ Tarif berbeda sesuai jenis pesanan
+function hitungHarga(jarakKm, tipePesanan = "Antar Barang") {
     let tarifDasar, tarifPerKm;
     if (tipePesanan === "Ojek Online") {
-        tarifDasar = 3000; // Rp 3.000 untuk km pertama
-        tarifPerKm = 1500; // Rp 1.500 per km selanjutnya
+        tarifDasar = 3000;
+        tarifPerKm = 1500;
     } else {
-        tarifDasar = 4000; // Rp 4.000 untuk km pertama
-        tarifPerKm = 2000; // Rp 2.000 per km selanjutnya
+        tarifDasar = 4000;
+        tarifPerKm = 2000;
     }
     return jarakKm <= 1 ? tarifDasar : Math.round(tarifDasar + (jarakKm - 1) * tarifPerKm);
 }
@@ -883,7 +868,6 @@ function ubahModeOtomatis() {
     }
 }
 
-// ✅ Mencari pesanan termasuk Ojek Online & Barang
 async function cariDanAmbilPesananTerdekat() {
     const semuaData = await bacaData();
     const daftar = semuaData.daftarPesanan || [];
@@ -928,7 +912,6 @@ function tutupNotif() {
     document.getElementById("popupNotif").classList.remove("tampil");
 }
 
-// ✅ Tampilkan pesanan dengan pembeda jelas
 async function tampilkanPesananMasuk() {
     const wadah = document.getElementById("daftarPesananMasuk");
     const semuaData = await bacaData();
@@ -942,7 +925,6 @@ async function tampilkanPesananMasuk() {
         )
         .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
 
-    // Simpan pesanan yang sedang dikerjakan
     pesananAktifSekarang = pesananDiurut.find(p => p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai") || null;
 
     if (pesananDiurut.length === 0) {
@@ -1010,7 +992,6 @@ async function tampilkanPesananMasuk() {
     }
 }
 
-// ✅ Buka Popup Chat - Menampilkan Nama Pelanggan
 async function bukaPopupChat(resi, namaPelanggan) {
     resiChatAktif = resi;
     document.getElementById("judulChat").textContent = `Chat dengan ${namaPelanggan}`;
@@ -1025,7 +1006,6 @@ function tutupPopupChat() {
     document.getElementById("inputPesanChat").value = "";
 }
 
-// ✅ Muat Riwayat Pesan - Menampilkan Nama Pengirim
 async function muatRiwayatPesan() {
     if (!resiChatAktif) return;
     const semuaData = await bacaData();
@@ -1104,6 +1084,7 @@ async function ambilPesanan(resi) {
 }
 
 async function ubahStatus(resi, statusBaru) {
+async function ubahStatus(resi, statusBaru) {
     const semuaData = await bacaData();
     const daftar = semuaData.daftarPesanan || [];
     const indeks = daftar.findIndex(p => p.resi === resi);
@@ -1170,7 +1151,6 @@ async function perbaruiPosisiDriverDiPesanan() {
     }
 }
 
-// ✅ Tampilkan nama alamat, bukan hanya koordinat
 async function perbaruiLokasiPelangganRealTime() {
     if (!pesananAktifSekarang || !peta) return;
     
@@ -1225,4 +1205,3 @@ window.onload = function() {
 
 </body>
 </html>
-
