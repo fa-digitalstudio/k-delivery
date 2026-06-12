@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesan Makanan - Pelanggan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --utama: #0F4C5C;
+            --hijau: #22C55E;
+            --kuning: #F59E0B;
+            --biru: #3B82F6;
+            --abu: #6B7280;
+            --abu-terang: #F3F4F6;
+            --putih: #FFFFFF;
+            --teks: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--abu-terang);
+            color: var(--teks);
+            padding-bottom: 85px;
+        }
+
+        .header {
+            background-color: var(--utama);
+            color: white;
+            padding: 1.2rem;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            padding: 1rem;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* ===== STYLE BANNER ===== */
+        .banner-wadah {
+            width: 100%;
+            height: 160px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-gambar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-kosong {
+            color: var(--abu);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 1rem;
+        }
+        /* ======================== */
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .card h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-kategori {
+            display: flex;
+            gap: 0.6rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tombol-kategori {
+            border: 1px solid var(--utama);
+            background: white;
+            color: var(--utama);
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tombol-kategori.aktif {
+            background: var(--utama);
+            color: white;
+        }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .kartu-menu {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .kartu-menu:hover {
+            border-color: var(--utama);
+            box-shadow: 0 4px 12px rgba(15, 76, 92, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .gambar-menu {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            background: #f3f4f6;
+        }
+
+        .info-menu {
+            padding: 0.9rem;
+        }
+
+        .nama-menu {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+
+        .harga-menu {
+            color: var(--hijau);
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .badge-kategori {
+            background: var(--biru);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+
+        .kosong {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--abu);
+        }
+
+        .kosong i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-form {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .overlay.tampil .popup-form {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .popup-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--utama);
+        }
+
+        .tombol-tutup {
+            background: #f3f4f6;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--abu);
+            transition: all 0.2s;
+        }
+
+        .tombol-tutup:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .form-control {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--utama);
+            box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.2);
+            outline: none;
+        }
+
+        .btn-pesan {
+            background: var(--hijau);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.9rem;
+            width: 100%;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-pesan:hover {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-pesan.tidak-aktif {
+            background: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .pesanan-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #peta {
+            width: 100%;
+            height: 450px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+            z-index: 1;
+        }
+
+        .tombol-posisi-saya {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .tombol-posisi-saya i {
+            font-size: 1.1rem;
+            color: var(--utama);
+        }
+
+        .info-peta {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-size: 0.95rem;
+        }
+
+        .nav-bawah {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.8rem 0;
+            z-index: 99;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: var(--abu);
+            font-size: 0.85rem;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.aktif {
+            color: var(--utama);
+            font-weight: 500;
+        }
+
+        .nav-item i {
+            font-size: 1.3rem;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .halaman {
+            display: none;
+        }
+
+        .halaman.aktif {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1 id="judulHalaman">Pesan Makanan</h1>
+</div>
+
+<div class="container">
+    <div class="halaman aktif" id="halaman-beranda">
+        <!-- ✅ BANNER -->
+        <div class="banner-wadah" id="wadahBanner">
+            <div class="banner-kosong">Belum ada banner yang diatur</div>
+        </div>
+
+        <div class="card">
+            <h5><i class="bi bi-egg-fried text-success"></i> Daftar Menu</h5>
+            <div id="wadahKategori" class="filter-kategori"></div>
+            <div id="daftarMenu" class="grid-menu"></div>
+        </div>
+    </div>
+
+    <div class="halaman" id="halaman-riwayat">
+        <div class="card">
+            <h5><i class="bi bi-list-check text-success"></i> Status & Riwayat Pesanan</h5>
+            <div id="daftarRiwayat"></div>
+        </div>
+    </div>
+
+    <div class="halaman" id="halaman-peta">
+        <div class="card">
+            <h5><i class="bi bi-map text-primary"></i> Peta Pelacakan</h5>
+            <div style="position: relative;">
+                <div id="peta"></div>
+                <button class="tombol-posisi-saya" onclick="kembaliKePosisiSaya()">
+                    <i class="bi bi-geo-alt-fill"></i> Posisi Saya
+                </button>
+            </div>
+            <div class="info-peta">
+                <p class="mb-1"><strong>Posisi Anda:</strong> <span id="infoPosisiSaya">-</span></p>
+                <p class="mb-1"><strong>Posisi Driver:</strong> <span id="infoPosisiDriver">-</span></p>
+                <p class="mb-0"><strong>Jarak Driver ke Anda:</strong> <span id="infoJarak">-</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="overlay" id="popupOverlay">
+    <div class="popup-form">
+        <div class="popup-header">
+            <h5><i class="bi bi-pencil-square"></i> Form Pemesanan</h5>
+            <button class="tombol-tutup" onclick="tutupPopup()">&times;</button>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Menu Dipilih</label>
+            <input type="text" id="barang" class="form-control" readonly required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" id="nama" class="form-control" placeholder="Contoh: Budi Santoso" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nomor HP</label>
+            <input type="tel" id="hp" class="form-control" placeholder="Contoh: 08123456789" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Alamat Lengkap</label>
+            <textarea id="alamat" class="form-control" rows="3" placeholder="Contoh: Jl. Mawar No.12, Makassar" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Catatan Tambahan (Opsional)</label>
+            <input type="text" id="catatan" class="form-control" placeholder="Contoh: Jangan terlalu pedas">
+        </div>
+        <div id="infoAkurasi" class="text-center text-danger small mb-2" style="display:none;">⚠️ Lokasi belum cukup akurat! Tunggu sampai di bawah 50 meter</div>
+        <button onclick="kirimPesanan()" id="tombolKirim" class="btn-pesan">Kirim Pesanan Sekarang</button>
+    </div>
+</div>
+
+<div class="nav-bawah">
+    <div class="nav-item aktif" onclick="bukaHalaman('beranda')">
+        <i class="bi bi-house"></i>
+        <span>Beranda</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('riwayat')">
+        <i class="bi bi-list-check"></i>
+        <span>Riwayat</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('peta')">
+        <i class="bi bi-map"></i>
+        <span>Peta</span>
+    </div>
+</div>
+
+<script>
+let peta;
+let penandaSaya, penandaDriver;
+let garisRute;
+let lokasiSaya = { lat: -5.1477, lon: 119.4327, akurasi: 9999 };
+let pesananAktif = null;
+let kategoriTerpilih = "semua";
+
+// ✅ FUNGSI AMBIL LOKASI DENGAN AKURASI TERTINGGI
+function ambilLokasiSaya() {
+    if (!navigator.geolocation) {
+        alert("❌ Perangkat tidak mendukung GPS!");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            lokasiSaya.lat = pos.coords.latitude;
+            lokasiSaya.lon = pos.coords.longitude;
+            lokasiSaya.akurasi = pos.coords.accuracy;
+
+            penandaSaya.setLatLng([lokasiSaya.lat, lokasiSaya.lon]);
+            document.getElementById("infoPosisiSaya").textContent = 
+                `${lokasiSaya.lat.toFixed(6)}, ${lokasiSaya.lon.toFixed(6)} (Akurasi: ${lokasiSaya.akurasi.toFixed(1)} m)`;
+
+            // ✅ Cek dan atur status tombol kirim
+            cekStatusTombolPesan();
+        },
+        (err) => {
+            let pesan = "❌ Gagal mendapatkan lokasi: ";
+            if (err.code === 1) pesan += "Izin lokasi ditolak";
+            if (err.code === 2) pesan += "Sinyal GPS lemah";
+            if (err.code === 3) pesan += "Waktu permintaan habis";
+            alert(pesan);
+        },
+        {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 10000
+        }
+    );
+}
+
+// ✅ Cek apakah lokasi cukup akurat untuk pesan
+function cekStatusTombolPesan() {
+    const tombol = document.getElementById("tombolKirim");
+    const info = document.getElementById("infoAkurasi");
+
+    if (lokasiSaya.akurasi <= 50) {
+        tombol.classList.remove("tidak-aktif");
+        tombol.disabled = false;
+        info.style.display = "none";
+    } else {
+        tombol.classList.add("tidak-aktif");
+        tombol.disabled = true;
+        info.style.display = "block";
+    }
+}
+
+// ✅ Simpan posisi agar terlihat oleh driver/admin
+function simpanPosisiKePesanan() {
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const indeks = daftar.findIndex(p => p.status !== "Selesai");
+    if (indeks !== -1) {
+        daftar[indeks].lat = lokasiSaya.lat;
+        daftar[indeks].lon = lokasiSaya.lon;
+        daftar[indeks].akurasi = lokasiSaya.akurasi;
+        localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+    }
+}
+
+// ✅ FUNGSI TAMPILKAN BANNER
+function tampilkanBanner() {
+    const wadah = document.getElementById("wadahBanner");
+    const daftarBanner = JSON.parse(localStorage.getItem("DAFTAR_BANNER")) || [];
+    
+    if (daftarBanner.length > 0) {
+        wadah.innerHTML = `<img src="${daftarBanner[0].link}" alt="Banner Promo" class="banner-gambar" loading="lazy">`;
+    } else {
+        wadah.innerHTML = `<div class="banner-kosong">Belum ada banner yang diatur</div>`;
+    }
+}
+
+function tampilkanFilterKategori() {
+    const daftarKategori = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
+    const wadah = document.getElementById("wadahKategori");
+    wadah.innerHTML = `<button class="tombol-kategori aktif" onclick="pilihKategori('semua')">Semua</button>`;
+    daftarKategori.forEach((kat, idx) => {
+        wadah.innerHTML += `<button class="tombol-kategori" onclick="pilihKategori(${idx})">${kat.nama}</button>`;
+    });
+}
+
+function pilihKategori(id) {
+    kategoriTerpilih = id;
+    document.querySelectorAll(".tombol-kategori").forEach(btn => btn.classList.remove("aktif"));
+    event.target.classList.add("aktif");
+    tampilkanMenu();
+}
+
+function tampilkanMenu() {
+    const daftarMenu = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
+    const daftarKategori = JSON.parse(localStorage.getItem("DAFTAR_KATEGORI")) || [];
+    const wadah = document.getElementById("daftarMenu");
+    let menuTampil = daftarMenu;
+    if (kategoriTerpilih !== "semua") {
+        menuTampil = daftarMenu.filter(m => m.idKat === kategoriTerpilih);
+    }
+    if (menuTampil.length === 0) {
+        wadah.innerHTML = `<div class="kosong p-4" style="grid-column: 1 / -1;"><i class="bi bi-clipboard-x"></i><p>Menu tidak tersedia</p></div>`;
+        return;
+    }
+    wadah.innerHTML = "";
+    menuTampil.forEach((item) => {
+        const namaKat = item.idKat !== undefined && daftarKategori[item.idKat] ? daftarKategori[item.idKat].nama : "Lainnya";
+        wadah.innerHTML += `<div class="kartu-menu" onclick="bukaPopup(${daftarMenu.indexOf(item)})">
+            <img src="${item.gambar}" alt="${item.nama}" class="gambar-menu" loading="lazy">
+            <div class="info-menu">
+                <span class="badge-kategori">${namaKat}</span>
+                <h6 class="nama-menu mt-2">${item.nama}</h6>
+                <div class="harga-menu">Rp ${item.harga.toLocaleString('id-ID')}</div>
+            </div>
+        </div>`;
+    });
+}
+
+function bukaPopup(indeks) {
+    const daftarMenu = JSON.parse(localStorage.getItem("DAFTAR_MENU")) || [];
+    const menu = daftarMenu[indeks];
+    document.getElementById("barang").value = `${menu.nama} - Rp ${menu.harga.toLocaleString('id-ID')}`;
+    document.getElementById("popupOverlay").style.display = "flex";
+    setTimeout(() => document.getElementById("popupOverlay").classList.add("tampil"), 10);
+    document.body.style.overflow = "hidden";
+    cekStatusTombolPesan();
+}
+
+function tutupPopup() {
+    document.getElementById("popupOverlay").classList.remove("tampil");
+    setTimeout(() => {
+        document.getElementById("popupOverlay").style.display = "none";
+        document.body.style.overflow = "auto";
+        bersihkanForm();
+    }, 300);
+}
+
+function bersihkanForm() {
+    document.getElementById("barang").value = "";
+    document.getElementById("nama").value = "";
+    document.getElementById("hp").value = "";
+    document.getElementById("alamat").value = "";
+    document.getElementById("catatan").value = "";
+}
+
+document.getElementById("popupOverlay").addEventListener("click", function(e) {
+    if (e.target === this) tutupPopup();
+});
+
+function inisialisasiPeta() {
+    if (!peta) {
+        peta = L.map('peta').setView([lokasiSaya.lat, lokasiSaya.lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(peta);
+        const ikonSaya = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [35, 35], iconAnchor: [17, 35] });
+        const ikonDriver = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048315.png', iconSize: [35, 35], iconAnchor: [17, 35] });
+        penandaSaya = L.marker([lokasiSaya.lat, lokasiSaya.lon], { icon: ikonSaya }).addTo(peta).bindPopup("Posisi Anda");
+        penandaDriver = L.marker([0, 0], { icon: ikonDriver }).addTo(peta).setOpacity(0);
+        garisRute = L.polyline([], { color: '#22C55E', weight: 4 }).addTo(peta);
+    }
+    ambilLokasiSaya();
+    perbaruiDataPeta();
+}
+
+function kembaliKePosisiSaya() {
+    if (peta && lokasiSaya.lat && lokasiSaya.lon) peta.setView([lokasiSaya.lat, lokasiSaya.lon], 16);
+}
+
+function hitungJarak(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function perbaruiDataPeta() {
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    pesananAktif = daftar.find(p => p.status !== "Selesai");
+    if (pesananAktif && pesananAktif.lokasiDriver) {
+        const posDriver = [pesananAktif.lokasiDriver.lat, pesananAktif.lokasiDriver.lon];
+        penandaDriver.setLatLng(posDriver).setOpacity(1);
+        garisRute.setLatLngs([posDriver, [lokasiSaya.lat, lokasiSaya.lon]]);
+        const jarak = hitungJarak(pesananAktif.lokasiDriver.lat, pesananAktif.lokasiDriver.lon, lokasiSaya.lat, lokasiSaya.lon);
+        document.getElementById("infoPosisiDriver").textContent = `${pesananAktif.lokasiDriver.lat.toFixed(6)}, ${pesananAktif.lokasiDriver.lon.toFixed(6)}`;
+        document.getElementById("infoJarak").textContent = `${jarak.toFixed(2)} km`;
+    } else {
+        penandaDriver.setOpacity(0);
+        garisRute.setLatLngs([]);
+        document.getElementById("infoPosisiDriver").textContent = "-";
+        document.getElementById("infoJarak").textContent = "Belum ada pesanan aktif";
+    }
+}
+
+function bukaHalaman(nama) {
+    document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("aktif"));
+    if (nama === "beranda") {
+        document.getElementById("halaman-beranda").classList.add("aktif");
+        document.querySelector(".nav-item:nth-child(1)").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Pesan Makanan";
+        tampilkanBanner();
+        tampilkanFilterKategori();
+        tampilkanMenu();
+    } else if (nama === "riwayat") {
+        document.getElementById("halaman-riwayat").classList.add("aktif");
+        document.querySelector(".nav-item:nth-child(2)").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Riwayat Pesanan";
+        tampilkanRiwayat();
+    } else if (nama === "peta") {
+        document.getElementById("halaman-peta").classList.add("aktif");
+        document.querySelector(".nav-item:nth-child(3)").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Peta Pelacakan";
+        setTimeout(() => { if (peta) peta.invalidateSize(); kembaliKePosisiSaya(); perbaruiDataPeta(); }, 100);
+    }
+}
+
+// ✅ Fungsi kirim pesanan hanya berjalan jika akurasi cukup
+function kirimPesanan() {
+    const barang = document.getElementById("barang").value.trim();
+    const nama = document.getElementById("nama").value.trim();
+    const hp = document.getElementById("hp").value.trim();
+    const alamat = document.getElementById("alamat").value.trim();
+    const catatan = document.getElementById("catatan").value.trim();
+
+    if (!barang || !nama || !hp || !alamat) {
+        alert("❌ Lengkapi semua data yang wajib diisi!");
+        return;
+    }
+
+    // ✅ Cek akurasi terakhir sebelum dikirim
+    if (lokasiSaya.akurasi > 50) {
+        alert("❌ Lokasi belum cukup akurat! Tunggu sampai akurasi di bawah 50 meter.");
+        return;
+    }
+
+    const pesananBaru = {
+        resi: "RESI-" + Math.floor(100000 + Math.random() * 900000),
+        barang: barang, nama: nama, hp: hp, alamat: alamat, catatan: catatan,
+        lat: lokasiSaya.lat, lon: lokasiSaya.lon, akurasi: lokasiSaya.akurasi,
+        lokasiDriver: null, status: "Menunggu"
+    };
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    daftar.push(pesananBaru);
+    localStorage.setItem("PESANAN_AKTIF", JSON.stringify(daftar));
+    alert(`✅ Pesanan berhasil dikirim!\nNomor Resi: ${pesananBaru.resi}`);
+    tutupPopup();
+}
+
+function tampilkanRiwayat() {
+    const wadah = document.getElementById("daftarRiwayat");
+    const daftar = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
+    const daftarTerurut = [...daftar].reverse();
+    if (daftarTerurut.length === 0) {
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan</p></div>`;
+        return;
+    }
+    wadah.innerHTML = "";
+    daftarTerurut.forEach(pes => {
+        let warna = "#6B7280", teks = "Menunggu";
+        if (pes.status === "Sudah Diambil") { warna = "#22C55E"; teks = "Sudah Diambil"; }
+        else if (pes.status === "Sampai di Restoran") { warna = "#3B82F6"; teks = "Di Restoran"; }
+        else if (pes.status === "Dalam Perjalanan") { warna = "#F59E0B"; teks = "Dalam Perjalanan"; }
+        else if (pes.status === "Selesai") { warna = "#0F4C5C"; teks = "Selesai"; }
+        wadah.innerHTML += `<div class="pesanan-item">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">${pes.resi}</span>
+                <span class="status-badge" style="background:${warna}">${teks}</span>
+            </div>
+            <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang}</p>
+            <p class="mb-1 text-muted"><i class="bi bi-person"></i> ${pes.nama} | ${pes.hp}</p>
+            <p class="mb-1 text-muted"><i class="bi bi-geo-alt"></i> ${pes.alamat}</p>
+            ${pes.catatan ? `<p class="mb-0 small text-success"><i class="bi bi-chat-left-text"></i> ${pes.catatan}</p>` : ""}
+        </div>`;
+    });
+}
+
+window.onload = function() {
+    tampilkanBanner();
+    tampilkanFilterKategori();
+    tampilkanMenu();
+    inisialisasiPeta();
+    setInterval(tampilkanBanner, 3000);
+    setInterval(tampilkanMenu, 2000);
+    setInterval(ambilLokasiSaya, 5000); // Perbarui posisi setiap 5 detik
+    setInterval(perbaruiDataPeta, 3000);
+    setInterval(tampilkanRiwayat, 2000);
+};
+</script>
+
+</body>
+</html>
