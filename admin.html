@@ -278,7 +278,7 @@ function bukaHalamanAdmin(nama) {
     }
 }
 
-// ✅ Tampilkan Pesanan dengan data lengkap Pelanggan + Driver
+// ✅ DIPERBAIKI: Tampilkan SEMUA data pelanggan + data driver tetap ada
 function tampilkanSemuaPesanan() {
     const wadah = document.getElementById("daftarSemuaPesanan");
     const daftarPesanan = JSON.parse(localStorage.getItem("PESANAN_AKTIF")) || [];
@@ -289,17 +289,26 @@ function tampilkanSemuaPesanan() {
     }
 
     wadah.innerHTML = "";
-    daftarPesanan.reverse().forEach((pes, indeks) => {
+    daftarPesanan.reverse().forEach((pes) => {
         let warnaStatus, teksStatus;
         if (pes.status === "Menunggu") { warnaStatus = "#6B7280"; teksStatus = "Menunggu"; }
         else if (pes.status === "Sudah Diambil") { warnaStatus = "#22C55E"; teksStatus = "Sudah Diambil"; }
-        else if (pes.status === "Sampai di Restoran") { warnaStatus = "#3B82F6"; teksStatus = "Di Restoran"; }
+        else if (pes.status === "Sampai di Restoran") { warnaStatus = "#3B82F6"; teksStatus = "Sampai di Restoran"; }
         else if (pes.status === "Dalam Perjalanan") { warnaStatus = "#F59E0B"; teksStatus = "Dalam Perjalanan"; }
         else if (pes.status === "Selesai") { warnaStatus = "#0F4C5C"; teksStatus = "Selesai"; }
 
-        const dataDriver = pes.namaDriver 
+        // Data pelanggan TETAP LENGKAP seperti aslinya
+        const infoPelanggan = `
+            <p class="mb-1"><strong>Nama Pelanggan:</strong> ${pes.nama || '-'}</p>
+            <p class="mb-1"><strong>Nomor HP:</strong> ${pes.hp || '-'}</p>
+            <p class="mb-1"><strong>Alamat Lengkap:</strong> ${pes.alamat || '-'}</p>
+            <p class="mb-1"><strong>Catatan:</strong> ${pes.catatan || 'Tidak ada catatan'}</p>
+        `;
+
+        // Tambahan data driver
+        const infoDriver = pes.namaDriver 
             ? `<p class="mb-1"><strong>Driver:</strong> ${pes.namaDriver} | HP: ${pes.idDriver}</p>` 
-            : `<p class="mb-1"><strong>Driver:</strong> Belum diambil pesanan</p>`;
+            : `<p class="mb-1"><strong>Driver:</strong> Belum ada yang mengambil</p>`;
 
         wadah.innerHTML += `
         <div class="pesanan-item">
@@ -307,11 +316,12 @@ function tampilkanSemuaPesanan() {
                 <span class="fw-bold">Resi: ${pes.resi}</span>
                 <span class="status-badge" style="background: ${warnaStatus}">${teksStatus}</span>
             </div>
-            <p class="mb-1"><strong>Pelanggan:</strong> ${pes.nama} | HP: ${pes.hp}</p>
-            <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang}</p>
-            <p class="mb-1"><strong>Alamat:</strong> ${pes.alamat}</p>
-            ${dataDriver}
+
+            <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang || '-'}</p>
+            ${infoPelanggan}
+            ${infoDriver}
             <p class="mb-2 small text-muted"><strong>Waktu Pesan:</strong> ${pes.waktuPesan || '-'}</p>
+
             <div class="d-flex flex-wrap gap-2">
                 <button onclick="ubahStatus('${pes.resi}', 'Sampai di Restoran')" class="btn btn-sm btn-primary">Di Restoran</button>
                 <button onclick="ubahStatus('${pes.resi}', 'Dalam Perjalanan')" class="btn btn-sm btn-warning">Perjalanan</button>
@@ -430,7 +440,7 @@ function hapusDriver(indeks) {
     tampilkanDaftarDriver();
 }
 
-// ✅ Fungsi yang sudah ada sebelumnya (tidak diubah)
+// ✅ Fungsi yang sudah ada sebelumnya (TIDAK DIUBAH SAMA SEKALI)
 function tampilkanKategoriDiPilihan() {
     const pilih = document.getElementById("kategoriMenu");
     pilih.innerHTML = "";
