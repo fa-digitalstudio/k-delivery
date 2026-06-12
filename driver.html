@@ -264,6 +264,119 @@
             cursor: pointer;
         }
 
+        /* ✅ Gaya untuk Popup Chat */
+        .overlay-chat {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .popup-chat {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+        }
+
+        .header-chat {
+            background: var(--utama);
+            color: white;
+            padding: 0.8rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-chat h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .tombol-tutup-chat {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .wadah-pesan {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: 450px;
+            background: #fafafa;
+        }
+
+        .pesan-pengirim {
+            background: var(--utama);
+            color: white;
+            padding: 0.6rem 0.8rem;
+            border-radius: 12px 12px 0 12px;
+            margin-left: auto;
+            margin-bottom: 0.7rem;
+            max-width: 80%;
+            font-size: 0.9rem;
+        }
+
+        .pesan-pelanggan {
+            background: #e2e8f0;
+            color: var(--teks);
+            padding: 0.6rem 0.8rem;
+            border-radius: 12px 12px 12px 0;
+            margin-right: auto;
+            margin-bottom: 0.7rem;
+            max-width: 80%;
+            font-size: 0.9rem;
+        }
+
+        .form-kirim-chat {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .input-chat {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            outline: none;
+        }
+
+        .btn-kirim-chat {
+            background: var(--utama);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
         @media (min-width: 768px) {
             .container { padding: 1.5rem; }
             #peta { height: 450px; }
@@ -389,6 +502,21 @@
     </div>
 </div>
 
+<!-- ✅ POPUP CHAT BARU -->
+<div id="overlayChat" class="overlay-chat">
+    <div class="popup-chat">
+        <div class="header-chat">
+            <h6 id="judulChat">Chat dengan Pelanggan</h6>
+            <button class="tombol-tutup-chat" onclick="tutupPopupChat()">&times;</button>
+        </div>
+        <div id="wadahPesan" class="wadah-pesan"></div>
+        <div class="form-kirim-chat">
+            <input type="text" id="inputPesanChat" class="input-chat" placeholder="Ketik pesan...">
+            <button onclick="kirimPesanChat()" class="btn-kirim-chat"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+</div>
+
 <!-- ✅ PUSTAKA FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
@@ -418,6 +546,7 @@ let lokasiDriver = { lat: -5.1477, lon: 119.4327 };
 let dataDriverSaatIni = null;
 let modeOtomatisAktif = false;
 let intervalCariPesanan = null;
+let resiChatAktif = null; // ✅ Tambahan untuk menyimpan resi yang sedang di-chat
 
 // ==========================================
 // ✅ FUNGSI BACA & SIMPAN KE FIREBASE
@@ -658,16 +787,78 @@ async function tampilkanPesananMasuk() {
             <p><strong>Alamat:</strong> ${pes.alamat}</p>
             <p><strong>Pesanan:</strong> ${pes.barang}</p>
             <div class="d-flex gap-2 mt-3">
-                <button onclick="bukaChat('${pes.hp}')" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-chat-text"></i> Chat</button>
+                <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-chat-text"></i> Chat</button>
                 ${tombolAksi}
             </div>
         </div>`;
     });
 }
 
-function bukaChat(nomorHp) {
-    const nomor = nomorHp.replace(/\D/g, '');
-    window.open(`https://wa.me/${nomor}`, '_blank');
+// ✅ Fungsi baru: Buka Popup Chat
+async function bukaPopupChat(resi, namaPelanggan) {
+    resiChatAktif = resi;
+    document.getElementById("judulChat").textContent = `Chat dengan ${namaPelanggan}`;
+    document.getElementById("overlayChat").style.display = "flex";
+    document.getElementById("wadahPesan").scrollTop = 9999;
+    muatRiwayatPesan();
+}
+
+// ✅ Fungsi baru: Tutup Popup Chat
+function tutupPopupChat() {
+    document.getElementById("overlayChat").style.display = "none";
+    resiChatAktif = null;
+    document.getElementById("inputPesanChat").value = "";
+}
+
+// ✅ Fungsi baru: Muat riwayat pesan
+async function muatRiwayatPesan() {
+    if (!resiChatAktif) return;
+    const semuaData = await bacaData();
+    const pesanan = semuaData.daftarPesanan.find(p => p.resi === resiChatAktif);
+    const wadah = document.getElementById("wadahPesan");
+    wadah.innerHTML = "";
+
+    if (!pesanan || !pesanan.pesanChat || pesanan.pesanChat.length === 0) {
+        wadah.innerHTML = `<div class="text-center text-muted small py-4">Belum ada pesan</div>`;
+        return;
+    }
+
+    pesanan.pesanChat.forEach(pesan => {
+        if (pesan.pengirim.includes("(Anda)")) {
+            wadah.innerHTML += `<div class="pesan-pengirim">${pesan.teks}</div>`;
+        } else {
+            wadah.innerHTML += `<div class="pesan-pelanggan"><strong>${pesan.pengirim}:</strong><br>${pesan.teks}</div>`;
+        }
+    });
+
+    wadah.scrollTop = wadah.scrollHeight;
+}
+
+// ✅ Fungsi baru: Kirim pesan ke pelanggan
+async function kirimPesanChat() {
+    if (!resiChatAktif) return;
+    const teks = document.getElementById("inputPesanChat").value.trim();
+    if (!teks) return;
+
+    const semuaData = await bacaData();
+    const indeks = semuaData.daftarPesanan.findIndex(p => p.resi === resiChatAktif);
+    if (indeks === -1) return;
+
+    const pesanBaru = {
+        pengirim: dataDriverSaatIni.nama + " (Driver)",
+        teks: teks,
+        waktu: new Date().toLocaleString('id-ID')
+    };
+
+    if (!semuaData.daftarPesanan[indeks].pesanChat) {
+        semuaData.daftarPesanan[indeks].pesanChat = [];
+    }
+    semuaData.daftarPesanan[indeks].pesanChat.push(pesanBaru);
+
+    if (await simpanData(semuaData)) {
+        document.getElementById("inputPesanChat").value = "";
+        muatRiwayatPesan();
+    }
 }
 
 async function ambilPesanan(resi) {
@@ -679,6 +870,7 @@ async function ambilPesanan(resi) {
         daftar[indeks].namaDriver = dataDriverSaatIni.nama;
         daftar[indeks].status = "Sudah Diambil";
         daftar[indeks].lokasiDriver = { ...lokasiDriver };
+        if (!daftar[indeks].pesanChat) daftar[indeks].pesanChat = [];
         semuaData.daftarPesanan = daftar;
         if (await simpanData(semuaData)) {
             tampilkanPesananMasuk();
@@ -726,7 +918,7 @@ async function tampilkanRiwayatDriver() {
             <p><strong>Pelanggan:</strong> ${pes.nama}</p>
             <p><strong>Pesanan:</strong> ${pes.barang}</p>
             <p><strong>Waktu:</strong> ${pes.waktuPesan || '-'}</p>
-            <button onclick="bukaChat('${pes.hp}')" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-text"></i> Hubungi</button>
+            <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-text"></i> Lihat Pesan</button>
         </div>`;
     });
 }
@@ -752,6 +944,7 @@ window.onload = function() {
     cekLoginDriver();
     setInterval(ambilLokasiDriver, 4000);
     setInterval(tampilkanPesananMasuk, 3000);
+    setInterval(() => { if (resiChatAktif) muatRiwayatPesan(); }, 2000); // ✅ Auto muat pesan baru
 };
 </script>
 
