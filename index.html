@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-Delivery - Pelanggan</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,7 +13,8 @@
     <style>
         :root {
             --utama: #0F4C5C;
-            --hijau: #22C55E;
+            --hijau: #00B14F; 
+            --hijau-gelap: #008f40;
             --kuning: #F59E0B;
             --biru: #3B82F6;
             --abu: #6B7280;
@@ -27,16 +27,16 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
         body {
             background-color: var(--abu-terang);
             color: var(--teks);
             padding-bottom: 85px;
+            overflow-x: hidden;
         }
 
-        /* ✅ PERBAIKAN HEADER ALA ANDROID */
         .header {
             background: linear-gradient(135deg, #0F4C5C, #18778C);
             color: white;
@@ -51,7 +51,6 @@
         }
 
         .brand-title {
-            font-family: 'Poppins', sans-serif;
             font-size: 1.6rem;
             font-weight: 700;
             letter-spacing: 0.5px;
@@ -63,20 +62,50 @@
         }
 
         #judulHalaman {
-            font-family: 'Poppins', sans-serif;
             font-size: 0.9rem;
             font-weight: 400;
             opacity: 0.9;
             margin: 0;
         }
 
+        .btn-header-aksi {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(5px);
+        }
+        .btn-header-aksi.kanan { right: 15px; }
+        .btn-header-aksi:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* PERBAIKAN: Tombol Kembali Halaman Penuh */
+        .btn-kembali {
+            width: 38px; height: 38px; 
+            display: flex; align-items: center; justify-content: center; 
+            background: rgba(255,255,255,0.2); border-radius: 50%; 
+            cursor: pointer; border: none; color: white; 
+            transition: all 0.2s; flex-shrink: 0; backdrop-filter: blur(5px);
+        }
+        .btn-kembali:hover { background: rgba(255,255,255,0.3); }
+
         .container {
             padding: 1rem;
             max-width: 550px;
             margin: 0 auto;
+            width: 100%;
         }
 
-        /* Halaman Login */
         .halaman-login {
             display: flex;
             flex-direction: column;
@@ -90,9 +119,9 @@
             background: white;
             width: 100%;
             max-width: 400px;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 2rem;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
         .info-login {
@@ -102,56 +131,86 @@
             padding: 0.8rem;
             margin-bottom: 1.2rem;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #075985;
         }
+        .info-login ul { margin: 0.5rem 0 0 1.2rem; padding: 0; }
 
-        .info-login ul {
-            margin: 0.5rem 0 0 1.2rem;
-            padding: 0;
+        .info-pengguna {
+            background: white;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+        }
+        .info-pengguna-teks {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
+        }
+        .info-pengguna .btn-outline-danger {
+            width: auto;
+            padding: 0.3rem 0.8rem !important;
+            font-size: 0.8rem !important;
+            flex-shrink: 0;
         }
 
-        /* Banner */
         .banner-wadah {
             width: 100%;
             height: 160px;
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             background: #e9ecef;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        .banner-gambar { width: 100%; height: 100%; object-fit: cover; }
 
-        .banner-gambar {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .wadah-pencarian {
+            position: relative;
+            margin-bottom: 1.2rem;
         }
-
-        .banner-kosong {
+        .input-pencarian {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border-radius: 25px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            outline: none;
+            transition: all 0.3s;
+        }
+        .input-pencarian:focus {
+            border-color: var(--hijau);
+            box-shadow: 0 0 0 3px rgba(0, 177, 79, 0.1);
+        }
+        .ikon-cari {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
             color: var(--abu);
-            font-size: 0.9rem;
+            font-size: 1.1rem;
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
             padding: 1.2rem;
             margin-bottom: 1.2rem;
         }
-
-        .card h5 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+        .card h5 { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
 
         .filter-kategori {
             display: flex;
@@ -161,496 +220,205 @@
             margin-bottom: 1rem;
             -webkit-overflow-scrolling: touch;
         }
-
+        .filter-kategori::-webkit-scrollbar { height: 4px; }
+        .filter-kategori::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .tombol-kategori {
             border: 1px solid var(--utama);
             background: white;
             color: var(--utama);
             border-radius: 20px;
             padding: 0.4rem 1rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
             white-space: nowrap;
             cursor: pointer;
             transition: all 0.2s;
         }
+        .tombol-kategori.aktif { background: var(--utama); color: white; }
 
-        .tombol-kategori.aktif {
-            background: var(--utama);
-            color: white;
-        }
-
-        .grid-menu {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
+        .grid-menu { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        @media (max-width: 360px) {
+            .grid-menu { grid-template-columns: 1fr; }
         }
 
         .kartu-menu {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
             overflow: hidden;
             background: white;
-            transition: all 0.25s ease;
+            transition: all 0.3s ease;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        .kartu-menu:active { transform: scale(0.97); }
+        .gambar-menu { width: 100%; height: 130px; object-fit: cover; background: #f3f4f6; }
+        
+        .badge-kategori {
+            position: absolute;
+            top: 8px; left: 8px;
+            background: rgba(0, 177, 79, 0.9);
+            color: white; padding: 4px 10px;
+            border-radius: 20px; font-size: 0.7rem; font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+        
+        .btn-tambah-favorit {
+            position: absolute;
+            top: 8px; right: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #ef4444;
+            border: none;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            cursor: pointer;
         }
 
-        .kartu-menu:hover {
-            border-color: var(--utama);
-            box-shadow: 0 4px 12px rgba(15, 76, 92, 0.15);
-            transform: translateY(-3px);
-        }
-
-        .gambar-menu {
-            width: 100%;
-            height: 130px;
-            object-fit: cover;
-            background: #f3f4f6;
-        }
-
-        .info-menu {
-            padding: 0.9rem;
-        }
-
-        .nama-menu {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            line-height: 1.3;
-        }
-
-        .harga-menu {
+        .info-menu { padding: 0.8rem; }
+        .nama-menu { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+        .harga-menu { color: var(--hijau); font-weight: 700; font-size: 1rem; margin-top: 0.3rem; }
+        
+        .btn-tambah-keranjang-kecil {
+            background: #f0fdf4;
             color: var(--hijau);
-            font-weight: 700;
-            font-size: 1.05rem;
+            border: 1px solid #bbf7d0;
+            width: 100%;
+            padding: 0.4rem;
+            border-radius: 8px;
+            margin-top: 0.6rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
         }
+        .btn-tambah-keranjang-kecil:hover { background: var(--hijau); color: white; }
 
-        .kosong {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--abu);
+        .keranjang-mengambang {
+            position: fixed;
+            bottom: 85px;
+            right: 20px;
+            left: auto;
+            transform: translateY(150%);
+            width: auto;
+            background: var(--hijau);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 5px 20px rgba(0, 177, 79, 0.4);
+            z-index: 98;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
         }
-
-        .kosong i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
+        .keranjang-mengambang.tampil { transform: translateY(0); }
+        .keranjang-info { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; }
 
         .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.65);
-            z-index: 999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            animation: fadeIn 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 999;
+            display: none; align-items: flex-end; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        .overlay.tampil { opacity: 1; }
 
         .popup-form {
             background: white;
             width: 100%;
-            max-width: 420px;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transform: scale(0.8);
-            opacity: 0;
-            transition: all 0.3s ease;
+            max-width: 500px;
+            border-radius: 24px 24px 0 0;
+            padding: 1.8rem 1.5rem;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-height: 90vh;
             overflow-y: auto;
-        }
-
-        .overlay.tampil .popup-form {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        .popup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .popup-header h5 {
-            margin: 0;
-            font-weight: 600;
-            color: var(--utama);
-        }
-
-        .tombol-tutup {
-            background: #f3f4f6;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: var(--abu);
-            transition: all 0.2s;
-        }
-
-        .tombol-tutup:hover {
-            background: #ef4444;
-            color: white;
-        }
-
-        .form-control {
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-size: 0.95rem;
-            width: 100%;
-        }
-
-        .form-control:focus {
-            border-color: var(--utama);
-            box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.2);
-            outline: none;
-        }
-
-        .btn {
-            border-radius: 8px;
-            padding: 0.75rem;
-            font-weight: 600;
-            width: 100%;
-            border: none;
-            font-size: 0.95rem;
-        }
-
-        .btn-hijau {
-            background: var(--hijau);
-            color: white;
-        }
-
-        .btn-hijau:hover {
-            background: #16a34a;
-            color: white;
-        }
-
-        .btn-abu {
-            background: #9CA3AF;
-            color: white;
-            cursor: not-allowed;
-        }
-
-        .btn-outline-danger {
-            border: 1px solid #ef4444 !important;
-            color: #ef4444 !important;
-            background: #fff !important;
-            padding: 0.4rem 0.9rem !important;
-            font-size: 0.85rem !important;
-            border-radius: 8px !important;
-            font-weight: 500 !important;
-            transition: all 0.2s ease !important;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
-        }
-        .btn-outline-danger:hover {
-            background: #ef4444 !important;
-            color: #fff !important;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
-        }
-
-        .info-pengguna {
-            background: white;
-            padding: 0.9rem 1rem;
-            border-radius: 10px;
-            margin-bottom: 1.2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-            border: 1px solid #f1f5f9;
-        }
-
-        .info-akurasi {
-            font-size: 0.85rem;
-            color: #dc2626;
-            text-align: center;
-            margin: 0.5rem 0;
-            display: none;
-        }
-
-        #peta {
-            width: 100%;
-            height: 450px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            margin-bottom: 1rem;
-            z-index: 1;
-        }
-
-        .tombol-posisi-saya {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-        }
-
-        .tombol-posisi-saya i {
-            font-size: 1.1rem;
-            color: var(--utama);
-        }
-
-        .info-peta {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            font-size: 0.95rem;
-        }
-
-        .status-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: white;
-            white-space: nowrap;
-        }
-
-        .pesanan-item {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .nav-bawah {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-around;
-            padding: 0.8rem 0;
-            z-index: 99;
-        }
-
-        .nav-item {
-            text-align: center;
-            color: var(--abu);
-            font-size: 0.85rem;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .nav-item.aktif {
-            color: var(--utama);
-            font-weight: 500;
-        }
-
-        .nav-item i {
-            font-size: 1.3rem;
-            display: block;
-            margin-bottom: 0.2rem;
-        }
-
-        .halaman {
-            display: none;
-        }
-
-        .halaman.aktif {
-            display: block;
-        }
-
-        /* GAYA POPUP CHAT */
-        .popup-chat {
-            background: white;
-            width: 100%;
-            max-width: 400px;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-            transform: scale(0.8);
-            opacity: 0;
-            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
-            max-height: 85vh;
         }
+        .overlay.tampil .popup-form { transform: translateY(0); }
+        
+        .garis-tarik { width: 40px; height: 5px; background: #e5e7eb; border-radius: 10px; margin: 0 auto 1.5rem auto; }
 
-        .overlay.tampil .popup-chat {
-            transform: scale(1);
-            opacity: 1;
-        }
+        .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+        .popup-header h5 { margin: 0; font-weight: 600; color: var(--utama); }
+        .tombol-tutup { background: #f3f4f6; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--abu); }
 
-        .header-chat {
-            background: var(--utama);
-            color: white;
-            padding: 0.9rem 1.2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-chat h6 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .wadah-pesan {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            max-height: 450px;
-            background: #fafafa;
-        }
-
-        .pesan-pengirim {
-            background: var(--utama);
-            color: white;
-            padding: 0.6rem 0.9rem;
-            border-radius: 16px 16px 4px 16px;
-            margin-left: auto;
-            margin-bottom: 0.8rem;
-            max-width: 85%;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        .pesan-pengirim .nama {
-            font-size: 0.75rem;
-            opacity: 0.85;
-            margin-bottom: 0.2rem;
-            display: block;
-        }
-
-        .pesan-driver {
-            background: #e2e8f0;
-            color: var(--teks);
-            padding: 0.6rem 0.9rem;
-            border-radius: 16px 16px 16px 4px;
-            margin-right: auto;
-            margin-bottom: 0.8rem;
-            max-width: 85%;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        .pesan-driver .nama {
-            font-size: 0.75rem;
-            color: #475569;
-            margin-bottom: 0.2rem;
-            display: block;
-        }
-
-        .form-kirim-chat {
-            display: flex;
-            gap: 0.6rem;
-            padding: 0.8rem 1rem;
-            border-top: 1px solid #e5e7eb;
-            background: white;
-        }
-
-        .input-chat {
-            flex: 1;
-            border: 1px solid #d1d5db;
-            border-radius: 20px;
-            padding: 0.6rem 1rem;
-            outline: none;
-            font-size: 0.9rem;
-        }
-
-        .input-chat:focus {
-            border-color: var(--utama);
-            box-shadow: 0 0 0 2px rgba(15, 76, 92, 0.15);
-        }
-
-        .btn-kirim-chat {
-            background: var(--utama);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .btn-kirim-chat:hover {
-            background: #0d3d4a;
-        }
-
-        .popup-notif-chat {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            width: 300px;
-            background: white;
+        .list-keranjang-form {
+            background: #f8fafc;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-            border-left: 5px solid var(--biru);
             padding: 1rem;
-            transform: translateX(400px);
-            opacity: 0;
-            transition: all 0.4s ease;
-            cursor: pointer;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+            max-height: 180px;
+            overflow-y: auto;
         }
+        .item-keranjang-form {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 0.6rem; margin-bottom: 0.6rem; border-bottom: 1px dashed #cbd5e1;
+        }
+        .item-keranjang-form:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .qty-kontrol { display: flex; align-items: center; gap: 10px; }
+        .btn-qty { background: white; border: 1px solid #cbd5e1; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--utama); font-weight: bold; cursor: pointer; }
+        .btn-qty.hapus { color: #ef4444; border-color: #fca5a5; }
 
-        .popup-notif-chat.tampil {
-            transform: translateX(0);
-            opacity: 1;
-        }
+        .form-control { border: 1px solid #d1d5db; border-radius: 12px; padding: 0.8rem; font-size: 0.95rem; width: 100%; background: #f9fafb; }
+        .form-control:focus { background: white; border-color: var(--hijau); box-shadow: 0 0 0 3px rgba(0, 177, 79, 0.15); outline: none; }
 
-        .notif-chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
+        .btn { border-radius: 12px; padding: 0.8rem; font-weight: 600; width: 100%; border: none; font-size: 0.95rem; transition: all 0.2s; }
+        .btn-hijau { background: var(--hijau); color: white; }
+        .btn-hijau:hover { background: var(--hijau-gelap); color: white; box-shadow: 0 4px 12px rgba(0,177,79,0.3); transform: translateY(-2px); }
+        .btn-abu { background: #9CA3AF; color: white; cursor: not-allowed; }
 
-        .notif-chat-header h6 {
-            margin: 0;
-            color: var(--biru);
-            font-weight: 600;
-        }
+        #peta { width: 100%; height: 55vh; min-height: 350px; max-height: 500px; z-index: 1; background: #e5e7eb; }
 
-        .tombol-tutup-notif {
-            background: none;
-            border: none;
-            font-size: 1rem;
-            color: var(--abu);
-            cursor: pointer;
+        .pesanan-item { border: 1px solid #e5e7eb; border-radius: 14px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.03); background: #fff; }
+        .btn-cetak { background: #f8fafc; border: 1px dashed #cbd5e1; color: #475569; border-radius: 8px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: 600; transition: all 0.2s; }
+        .btn-cetak:hover { background: var(--hijau); color: white; border-color: var(--hijau); }
+        .btn-wa-driver { background: #ECFCCB; color: #4D7C0F; border: 1px solid #BEF264; border-radius: 8px; padding: 0.3rem 0.8rem; font-size: 0.8rem; font-weight: 600; text-decoration: none; display: inline-block; }
+
+        .nav-bawah { position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -4px 15px rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 0.8rem 0; z-index: 1001; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+        .nav-item { text-align: center; color: var(--abu); font-size: 0.8rem; cursor: pointer; flex: 1; transition: color 0.3s; }
+        .nav-item.aktif { color: var(--hijau); font-weight: 600; }
+        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 0.2rem; }
+
+        .halaman { display: none; animation: fadeIn 0.3s ease; }
+        .halaman.aktif { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .halaman-penuh {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--abu-terang); z-index: 1050;
+            display: none; flex-direction: column;
+            transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
+        .halaman-penuh.tampil { transform: translateX(0); display: flex; }
+        
+        .header-halaman-penuh { background: var(--utama); color: white; padding: 1.2rem; display: flex; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header-halaman-penuh h6 { margin: 0; font-weight: 600; font-size: 1.1rem; }
+        
+        /* PERBAIKAN CHAT: Flex Column & Fit Content untuk presisi antar perangkat */
+        .wadah-pesan { flex: 1; padding: 1rem; overflow-y: auto; background: #e5ddd5; display: flex; flex-direction: column; }
+        .form-kirim-chat { display: flex; gap: 0.8rem; padding: 1rem; border-top: 1px solid #e5e7eb; background: white; align-items: center; }
+        .input-chat { flex: 1; border: 1px solid #d1d5db; border-radius: 25px; padding: 0.8rem 1.2rem; outline: none; font-size: 0.95rem; background: #f9fafb; transition: all 0.2s; }
+        .input-chat:focus { border-color: var(--hijau); background: white; box-shadow: 0 0 0 3px rgba(0, 177, 79, 0.1); }
+        .btn-kirim-chat {
+            background: var(--hijau); color: white; border: none; border-radius: 50%;
+            width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; font-size: 1.2rem; flex-shrink: 0;
+        }
+        
+        /* PERBAIKAN BUBBLE CHAT: align-self, width fit-content, dan word-break */
+        .pesan-pengirim, .pesan-driver { padding: 0.6rem 1rem; font-size: 0.95rem; line-height: 1.4; margin-bottom: 0.8rem; max-width: 85%; width: fit-content; word-break: break-word; }
+        .pesan-pengirim { background: #dcf8c6; color: #111; border-radius: 16px 16px 4px 16px; align-self: flex-end; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .pesan-driver { background: white; color: var(--teks); border-radius: 16px 16px 16px 4px; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .nama { font-size: 0.7rem; font-weight: 600; margin-bottom: 0.2rem; display: block; opacity: 0.7; }
+        
+        .indikator-baru { font-size: 0.6rem; padding: 0.2rem 0.4rem; transform: translateY(-2px); }
+
     </style>
 </head>
 <body>
@@ -658,30 +426,30 @@
 <div class="header">
     <div class="brand-title"><i class="bi bi-box-seam-fill text-warning"></i> K-Delivery</div>
     <p id="judulHalaman">Pesan Makanan</p>
+    <button class="btn-header-aksi kanan" onclick="bukaHalamanFavorit()"><i class="bi bi-heart-fill"></i></button>
 </div>
 
 <div class="container">
     <div class="halaman aktif" id="halaman-login">
         <div class="halaman-login">
             <div class="card-login">
-                <h4 class="mb-3">Masuk Sebagai Pelanggan</h4>
+                <h4 class="mb-3 text-start fw-bold">Selamat Datang 👋</h4>
                 
                 <div class="info-login">
                     <strong>📝 Ketentuan Masuk:</strong>
                     <ul>
-                        <li>Gunakan nama lengkap Anda</li>
-                        <li>Nomor HP yang aktif dan benar</li>
-                        <li>Riwayat pesanan akan tersimpan sesuai nomor HP</li>
-                        <li>Bisa masuk di perangkat lain dengan data yang sama</li>
+                        <li>Gunakan nama lengkap yang benar</li>
+                        <li>Nomor HP yang aktif (Bisa untuk WA)</li>
+                        <li>Riwayat pesanan aman di nomor ini</li>
                     </ul>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Nama Lengkap</label>
-                    <input type="text" id="inputNama" class="form-control" placeholder="Contoh: Budi Santoso" required>
+                <div class="mb-3 text-start">
+                    <label class="form-label text-muted small fw-bold">Nama Lengkap</label>
+                    <input type="text" id="inputNama" class="form-control" placeholder="Contoh: Andi Farid Aris" required>
                 </div>
-                <div class="mb-4">
-                    <label class="form-label">Nomor HP</label>
+                <div class="mb-4 text-start">
+                    <label class="form-label text-muted small fw-bold">Nomor HP</label>
                     <input type="tel" id="inputHp" class="form-control" placeholder="Contoh: 08123456789" required>
                 </div>
                 <button onclick="login()" class="btn btn-hijau">Masuk & Mulai Pesan</button>
@@ -691,19 +459,24 @@
 
     <div class="halaman" id="halaman-beranda">
         <div class="info-pengguna">
-            <div>
-                <span class="text-muted">Halo👋</span>
-                <strong id="namaPengguna">-</strong>
+            <div class="info-pengguna-teks">
+                <span class="text-muted small">Halo, selamat datang</span><br>
+                <strong id="namaPengguna" class="fs-6">-</strong>
             </div>
-            <button onclick="logout()" class="btn btn-sm btn-outline-danger">Keluar</button>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Keluar</button>
         </div>
 
         <div class="banner-wadah" id="wadahBanner">
             <div class="banner-kosong">Belum ada banner</div>
         </div>
 
-        <div class="card">
-            <h5><i class="bi bi-egg-fried text-success"></i> Daftar Menu</h5>
+        <div class="wadah-pencarian">
+            <i class="bi bi-search ikon-cari"></i>
+            <input type="text" id="inputPencarian" class="input-pencarian" placeholder="Kamu mau pesan apa? (Misal: Bakso Farid...)" onkeyup="tampilkanMenu()">
+        </div>
+
+        <div class="card border-0">
+            <h5 id="judulKatalogMenu"><i class="bi bi-egg-fried" style="color: var(--hijau);"></i> Katalog Menu</h5>
             <div id="wadahKategori" class="filter-kategori"></div>
             <div id="daftarMenu" class="grid-menu"></div>
         </div>
@@ -711,98 +484,171 @@
 
     <div class="halaman" id="halaman-riwayat">
         <div class="info-pengguna">
-            <div>
-                <span class="text-muted">Masuk sebagai:</span>
+            <div class="info-pengguna-teks">
+                <span class="text-muted small">Masuk sebagai:</span><br>
                 <strong id="namaPengguna2">-</strong>
             </div>
-            <button onclick="logout()" class="btn btn-sm btn-outline-danger">Keluar</button>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Keluar</button>
         </div>
-        <div class="card">
-            <h5><i class="bi bi-list-check text-success"></i> Riwayat Pesanan Saya</h5>
+        <div class="card border-0 bg-transparent shadow-none px-0">
+            <h5 class="px-2"><i class="bi bi-list-check" style="color: var(--hijau);"></i> Riwayat Pesanan Saya</h5>
             <div id="daftarRiwayat"></div>
         </div>
     </div>
 
     <div class="halaman" id="halaman-peta">
         <div class="info-pengguna">
-            <div>
-                <span class="text-muted">Masuk sebagai:</span>
+            <div class="info-pengguna-teks">
+                <span class="text-muted small">Masuk sebagai:</span><br>
                 <strong id="namaPengguna3">-</strong>
             </div>
-            <button onclick="logout()" class="btn btn-sm btn-outline-danger">Keluar</button>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Keluar</button>
         </div>
-        <div class="card">
-            <h5><i class="bi bi-map text-primary"></i> Peta Pelacakan</h5>
-            <div style="position: relative;">
+        <div class="card border-0">
+            <h5><i class="bi bi-map" style="color: var(--hijau);"></i> Peta Pelacakan</h5>
+            <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; margin-bottom: 1rem;">
                 <div id="peta"></div>
-                <button class="tombol-posisi-saya" onclick="kembaliKePosisiSaya()">
-                    <i class="bi bi-geo-alt-fill"></i> Posisi Saya
+                <button class="tombol-posisi-saya" onclick="kembaliKePosisiSaya()" style="position: absolute; bottom: 15px; right: 15px; z-index: 400; background: white; border: none; border-radius: 50%; width: 45px; height: 45px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-geo-alt-fill text-success fs-5"></i>
                 </button>
             </div>
-            <div class="info-peta">
+            <div class="info-peta p-3 bg-light rounded text-sm">
                 <p class="mb-1"><strong>Posisi Anda:</strong> <span id="infoPosisiSaya">-</span></p>
                 <p class="mb-1"><strong>Posisi Driver:</strong> <span id="infoPosisiDriver">-</span></p>
                 <p class="mb-0"><strong>Jarak:</strong> <span id="infoJarak">-</span></p>
             </div>
         </div>
     </div>
+
+    <div class="halaman" id="halaman-lainnya">
+        <div class="info-pengguna">
+            <div class="info-pengguna-teks">
+                <span class="text-muted small">Masuk sebagai:</span><br>
+                <strong id="namaPengguna4">-</strong>
+            </div>
+            <button onclick="logout()" class="btn btn-sm btn-outline-danger"><i class="bi bi-box-arrow-right"></i> Keluar</button>
+        </div>
+        
+        <div class="card border-0 mt-3 p-3 shadow-sm" style="border-radius: 16px;">
+            <h6 class="mb-3 fw-bold"><i class="bi bi-grid-fill text-success"></i> Menu Utama Lainnya</h6>
+            
+            <div class="d-flex flex-column gap-3">
+                <button onclick="bukaHalamanFavorit()" class="btn w-100 text-start d-flex align-items-center p-3 shadow-sm" style="background: #fff0f0; border: 1px solid #ffcaca; border-radius: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">
+                        <i class="bi bi-heart-fill fs-5"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="m-0 fw-bold text-dark">Menu Favorit</h6>
+                        <small class="text-muted">Lihat makanan yang kamu sukai</small>
+                    </div>
+                    <i class="bi bi-chevron-right text-muted"></i>
+                </button>
+                
+                <button onclick="bukaPopupCheckout()" class="btn w-100 text-start d-flex align-items-center p-3 shadow-sm" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--hijau); color: white; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">
+                        <i class="bi bi-cart-fill fs-5"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="m-0 fw-bold text-dark">Keranjang Saya</h6>
+                        <small class="text-muted">Cek pesanan yang belum dibayar</small>
+                    </div>
+                    <i class="bi bi-chevron-right text-muted"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="keranjang-mengambang" id="btnKeranjangFloating" onclick="bukaPopupCheckout()">
+    <div class="keranjang-info">
+        <i class="bi bi-cart3 fs-4"></i>
+        <span id="teksJumlahKeranjang">0</span>
+    </div>
+    <div class="fw-bold d-flex align-items-center">
+        <span id="teksTotalKeranjang">Rp 0</span>
+    </div>
 </div>
 
 <div class="overlay" id="popupOverlay">
-    <div class="popup-form">
-        <div class="popup-header">
-            <h5><i class="bi bi-pencil-square"></i> Form Pemesanan</h5>
+    <div class="popup-form" id="popupCheckout">
+        <div class="garis-tarik"></div>
+        <div class="popup-header mb-2">
+            <h5><i class="bi bi-bag-check-fill text-success"></i> Detail Pesanan</h5>
             <button class="tombol-tutup" onclick="tutupPopup()">&times;</button>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Menu Dipilih</label>
-            <input type="text" id="barang" class="form-control" readonly>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Alamat Lengkap</label>
-            <textarea id="alamat" class="form-control" rows="3" placeholder="Contoh: Jl. Mawar No.12"></textarea>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Catatan (Opsional)</label>
-            <input type="text" id="catatan" class="form-control" placeholder="Contoh: Jangan terlalu pedas">
-        </div>
-        <div id="infoAkurasi" class="info-akurasi text-warning">Mencari lokasi perangkat Anda...</div>
-        <button onclick="kirimPesanan()" id="tombolKirim" class="btn btn-hijau btn-abu" disabled>Kirim Pesanan Sekarang</button>
-    </div>
+        
+        <div class="list-keranjang-form" id="listKeranjangCheckout"></div>
 
-    <div class="popup-chat" id="popupChat">
-        <div class="header-chat">
-            <h6 id="judulChat">Chat dengan Driver</h6>
-            <button class="tombol-tutup" onclick="tutupPopupChat()">&times;</button>
+        <div class="d-flex justify-content-between fw-bold mb-3 px-2">
+            <span>Total Harga:</span>
+            <span id="totalHargaCheckout" class="text-success">Rp 0</span>
         </div>
-        <div class="wadah-pesan" id="wadahPesan"></div>
-        <div class="form-kirim-chat">
-            <input type="text" id="inputPesanChat" class="input-chat" placeholder="Ketik pesan...">
-            <button onclick="kirimPesanChat()" class="btn-kirim-chat"><i class="bi bi-send-fill"></i></button>
+
+        <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Alamat Pengiriman</label>
+            <textarea id="alamat" class="form-control" rows="2" placeholder="Contoh: Jl. Poros Kolaka No.12, Pagar Hijau"></textarea>
         </div>
+        <div class="mb-4">
+            <label class="form-label text-muted small fw-bold">Catatan (Opsional)</label>
+            <input type="text" id="catatan" class="form-control" placeholder="Contoh: Jangan terlalu pedas, kuah dipisah">
+        </div>
+        
+        <div id="infoAkurasi" class="text-danger small text-center mb-2" style="display:none;">Mencari lokasi akurat Anda...</div>
+        <button onclick="kirimPesanan()" id="tombolKirim" class="btn btn-hijau py-3 shadow-sm">Pesan Sekarang</button>
     </div>
 </div>
 
-<div class="popup-notif-chat" id="notifPesanBaru" onclick="bukaChatDariNotif()">
-    <div class="notif-chat-header">
-        <h6><i class="bi bi-chat-dots"></i> Pesan Baru</h6>
-        <button class="tombol-tutup-notif" onclick="tutupNotifPesan(event)">&times;</button>
+<div class="halaman-penuh" id="halaman-chat">
+    <div class="header-halaman-penuh" style="gap: 12px;">
+        <button class="btn-kembali" onclick="tutupHalamanPenuh('halaman-chat')"><i class="bi bi-arrow-left fs-5"></i></button>
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-circle fs-3"></i>
+            <h6 id="judulChat" class="m-0 fw-bold">Driver</h6>
+        </div>
     </div>
-    <p class="mb-0 small" id="teksNotifPesan">Ada pesan baru dari Driver</p>
+    <div class="wadah-pesan" id="wadahPesan"></div>
+    <div class="form-kirim-chat">
+        <input type="text" id="inputPesanChat" class="input-chat" placeholder="Ketik pesan untuk driver...">
+        <button onclick="kirimPesanChat()" class="btn-kirim-chat"><i class="bi bi-send-fill"></i></button>
+    </div>
+</div>
+
+<div class="halaman-penuh" id="halaman-favorit">
+    <div class="header-halaman-penuh" style="gap: 12px;">
+        <button class="btn-kembali" onclick="tutupHalamanPenuh('halaman-favorit')"><i class="bi bi-arrow-left fs-5"></i></button>
+        <h6 class="m-0"><i class="bi bi-heart-fill text-danger me-2"></i> Menu Favorit Saya</h6>
+    </div>
+    <div class="p-3 overflow-auto" style="flex:1; background: var(--abu-terang);">
+        <div id="daftarMenuFavorit" class="grid-menu"></div>
+    </div>
+</div>
+
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 10000; transform: translateX(400px); transition: 0.4s;" id="notifPesanBaru">
+    <div class="toast show bg-white shadow-lg border-0 border-start border-success border-5">
+        <div class="toast-header bg-transparent border-0">
+            <strong class="me-auto text-success"><i class="bi bi-chat-dots"></i> Pesan Baru</strong>
+            <button type="button" class="btn-close" onclick="document.getElementById('notifPesanBaru').style.transform = 'translateX(400px)'"></button>
+        </div>
+        <div class="toast-body small" id="teksNotifPesan">Ada pesan dari driver.</div>
+    </div>
 </div>
 
 <div class="nav-bawah">
     <div class="nav-item" onclick="bukaHalaman('beranda')">
-        <i class="bi bi-house"></i>
+        <i class="bi bi-house-door-fill"></i>
         <span>Beranda</span>
     </div>
     <div class="nav-item" onclick="bukaHalaman('riwayat')">
-        <i class="bi bi-list-check"></i>
+        <i class="bi bi-receipt"></i>
         <span>Riwayat</span>
     </div>
     <div class="nav-item" onclick="bukaHalaman('peta')">
-        <i class="bi bi-map"></i>
+        <i class="bi bi-geo-alt-fill"></i>
         <span>Peta</span>
+    </div>
+    <div class="nav-item" onclick="bukaHalaman('lainnya')">
+        <i class="bi bi-grid-fill"></i>
+        <span>Lainnya</span>
     </div>
 </div>
 
@@ -810,9 +656,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-// ==========================================
-// KONFIGURASI FIREBASE
-// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
   authDomain: "dok123-1bd6f.firebaseapp.com",
@@ -823,167 +666,126 @@ const firebaseConfig = {
   appId: "1:664523539322:web:61c0adedc67fee015dccc3"
 };
 
-// Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refData = db.ref("data");
 
 let peta;
-let penandaSaya, penandaDriver;
-let garisRute;
+let penandaSaya, penandaDriver, garisRute;
 let lokasiSaya = { lat: -5.1477, lon: 119.4327, akurasi: 9999 };
-let pesananAktif = null;
 let kategoriTerpilih = "semua";
 let penggunaSaatIni = null;
 let resiChatAktif = null;
+
+let keranjang = [];
+let daftarFavorit = [];
 let pesanTerakhirDilihat = {};
 
 async function bacaSemuaData() {
-    try {
-        const snapshot = await refData.once("value");
-        return snapshot.val() || {};
-    } catch (err) {
-        console.warn("Gagal membaca data:", err);
-        return {};
+    try { const snap = await refData.once("value"); return snap.val() || {}; } 
+    catch (err) { return {}; }
+}
+async function simpanSemuaData(data) {
+    try { await refData.set(data); return true; } 
+    catch (err) { alert("Gagal mengirim! Cek koneksi."); return false; }
+}
+
+async function simpanStateKeFirebase() {
+    if (!penggunaSaatIni) return;
+    const data = await bacaSemuaData();
+    let daftar = data.daftarPengguna || [];
+    let idx = daftar.findIndex(p => p.hp === penggunaSaatIni.hp);
+    if (idx !== -1) {
+        daftar[idx].keranjang = keranjang;
+        daftar[idx].favorit = daftarFavorit;
+        data.daftarPengguna = daftar;
+        await simpanSemuaData(data);
     }
 }
 
-async function simpanSemuaData(dataBaru) {
-    try {
-        await refData.set(dataBaru);
-        return true;
-    } catch (err) {
-        console.error("Gagal menyimpan data:", err);
-        alert("Gagal mengirim data! Cek koneksi internet.");
-        return false;
-    }
-}
-
-function cekKeamananPerangkat() {
-    if (navigator.userAgent.match(/root|su|superuser|emulator/i)) {
-        alert("❌ Perangkat terdeteksi sudah di-root atau menggunakan emulator! Aplikasi tidak dapat digunakan.");
-        localStorage.removeItem("PENGGUNA_SAAT_INI");
-        location.reload();
-        return false;
-    }
-    return true;
-}
-
-async function login() {
+function login() {
     const nama = document.getElementById("inputNama").value.trim();
     const hp = document.getElementById("inputHp").value.trim();
-    
-    if (!nama) return alert("⚠️ Nama lengkap tidak boleh kosong!");
-    if (!hp) return alert("⚠️ Nomor HP tidak boleh kosong!");
-    if (hp.length < 10 || hp.length > 14) return alert("⚠️ Nomor HP tidak valid!");
+    if (!nama || !hp) return alert("⚠️ Isi Nama dan No HP!");
+    if (hp.length < 10) return alert("⚠️ No HP tidak valid!");
 
-    const semuaData = await bacaSemuaData();
-    const daftarPengguna = semuaData.daftarPengguna || [];
-    const cariPengguna = daftarPengguna.find(p => p.hp === hp);
-
-    if (!cariPengguna) {
-        const penggunaBaru = {
-            nama: nama,
-            hp: hp,
-            waktuDaftar: new Date().toLocaleString('id-ID')
-        };
-        daftarPengguna.push(penggunaBaru);
-        semuaData.daftarPengguna = daftarPengguna;
-        await simpanSemuaData(semuaData);
-        penggunaSaatIni = penggunaBaru;
-    } else {
-        penggunaSaatIni = cariPengguna;
-        if (cariPengguna.nama !== nama) {
-            cariPengguna.nama = nama;
-            semuaData.daftarPengguna = daftarPengguna;
-            await simpanSemuaData(semuaData);
+    bacaSemuaData().then(data => {
+        const daftar = data.daftarPengguna || [];
+        let user = daftar.find(p => p.hp === hp);
+        if (!user) {
+            user = { nama, hp, keranjang: [], favorit: [], waktuDaftar: new Date().toLocaleString('id-ID') };
+            daftar.push(user);
+            data.daftarPengguna = daftar;
+            simpanSemuaData(data);
+        } else if (user.nama !== nama) {
+            user.nama = nama;
+            data.daftarPengguna = daftar;
+            simpanSemuaData(data);
         }
-    }
-
-    localStorage.setItem("PENGGUNA_SAAT_INI", JSON.stringify(penggunaSaatIni));
-    bukaHalaman('beranda');
-    ambilLokasiSaya();
+        
+        penggunaSaatIni = user;
+        keranjang = user.keranjang || [];
+        daftarFavorit = user.favorit || [];
+        
+        localStorage.setItem("PENGGUNA_SAAT_INI", JSON.stringify({nama: user.nama, hp: user.hp}));
+        bukaHalaman('beranda');
+        ambilLokasiSaya();
+        renderKeranjangFloating();
+    });
 }
 
 function logout() {
-    if (!confirm("Yakin ingin keluar dari akun?")) return;
+    if (!confirm("Yakin keluar?")) return;
     localStorage.removeItem("PENGGUNA_SAAT_INI");
-    penggunaSaatIni = null;
+    penggunaSaatIni = null; keranjang = []; daftarFavorit = []; renderKeranjangFloating();
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
     document.getElementById("halaman-login").classList.add("aktif");
 }
 
-function cekLogin() {
-    const data = localStorage.getItem("PENGGUNA_SAAT_INI");
-    if (data) {
-        penggunaSaatIni = JSON.parse(data);
-        bukaHalaman('beranda');
-    } else {
-        document.getElementById("halaman-login").classList.add("aktif");
+async function cekLogin() {
+    const dataLocal = localStorage.getItem("PENGGUNA_SAAT_INI");
+    if (dataLocal) { 
+        const usr = JSON.parse(dataLocal);
+        penggunaSaatIni = usr; 
+        
+        const data = await bacaSemuaData();
+        const dbUser = (data.daftarPengguna || []).find(p => p.hp === usr.hp);
+        if(dbUser) {
+            keranjang = dbUser.keranjang || [];
+            daftarFavorit = dbUser.favorit || [];
+            renderKeranjangFloating();
+        }
+        bukaHalaman('beranda'); 
+        ambilLokasiSaya(); 
     }
 }
 
 function ambilLokasiSaya() {
-    if (!navigator.geolocation) {
-        alert("❌ Perangkat Anda tidak mendukung fitur lokasi!");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            lokasiSaya.lat = pos.coords.latitude;
-            lokasiSaya.lon = pos.coords.longitude;
-            lokasiSaya.akurasi = pos.coords.accuracy;
-
-            if (!cekKeamananPerangkat()) return;
-
-            if (penandaSaya) penandaSaya.setLatLng([lokasiSaya.lat, lokasiSaya.lon]);
-            document.getElementById("infoPosisiSaya").textContent = 
-                `${lokasiSaya.lat.toFixed(6)}, ${lokasiSaya.lon.toFixed(6)} (Akurasi: ${lokasiSaya.akurasi.toFixed(1)} m)`;
-
-            cekStatusTombolPesan();
-        },
-        (err) => {
-            console.warn("Izin lokasi belum aktif:", err);
-        },
-        { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
-    );
-}
-
-// ✅ KELONGGARAN AKURASI: Cukup ada kordinat GPS perangkat saja
-function cekStatusTombolPesan() {
-    const tombol = document.getElementById("tombolKirim");
-    const info = document.getElementById("infoAkurasi");
-    
-    // Syarat cukup tidak menggunakan nilai default (-5.1477)
-    if (lokasiSaya.lat !== -5.1477) {
-        tombol.classList.remove("btn-abu");
-        tombol.disabled = false;
-        info.style.display = "none";
-    } else {
-        tombol.classList.add("btn-abu");
-        tombol.disabled = true;
-        info.style.display = "block";
-    }
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos => {
+        lokasiSaya = { lat: pos.coords.latitude, lon: pos.coords.longitude, akurasi: pos.coords.accuracy };
+        if (penandaSaya) penandaSaya.setLatLng([lokasiSaya.lat, lokasiSaya.lon]);
+        document.getElementById("infoPosisiSaya").textContent = "Lokasi Akurat Ditemukan";
+        const btnPesan = document.getElementById("tombolKirim");
+        btnPesan.disabled = false; btnPesan.classList.remove("btn-abu");
+        document.getElementById("infoAkurasi").style.display = "none";
+    }, err => {}, { enableHighAccuracy: true });
 }
 
 function bukaHalaman(nama) {
     document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
     document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("aktif"));
+    if (!penggunaSaatIni) { document.getElementById("halaman-login").classList.add("aktif"); return; }
 
-    if (!penggunaSaatIni) {
-        document.getElementById("halaman-login").classList.add("aktif");
-        return;
-    }
+    document.querySelector(".btn-header-aksi.kanan").style.display = "none";
 
     if (nama === "beranda") {
         document.getElementById("halaman-beranda").classList.add("aktif");
         document.querySelector(".nav-item:nth-child(1)").classList.add("aktif");
         document.getElementById("judulHalaman").textContent = "Beranda";
         document.getElementById("namaPengguna").textContent = penggunaSaatIni.nama;
-        tampilkanBanner();
-        tampilkanKategori();
-        tampilkanMenu();
+        document.querySelector(".btn-header-aksi.kanan").style.display = "flex";
+        tampilkanBanner(); tampilkanKategori(); tampilkanMenu();
     } else if (nama === "riwayat") {
         document.getElementById("halaman-riwayat").classList.add("aktif");
         document.querySelector(".nav-item:nth-child(2)").classList.add("aktif");
@@ -993,398 +795,397 @@ function bukaHalaman(nama) {
     } else if (nama === "peta") {
         document.getElementById("halaman-peta").classList.add("aktif");
         document.querySelector(".nav-item:nth-child(3)").classList.add("aktif");
-        document.getElementById("judulHalaman").textContent = "Peta Pelacakan";
+        document.getElementById("judulHalaman").textContent = "Peta";
         document.getElementById("namaPengguna3").textContent = penggunaSaatIni.nama;
-        setTimeout(() => {
-            if (peta) peta.invalidateSize();
-            kembaliKePosisiSaya();
-            perbaruiDataPeta();
-        }, 100);
+        setTimeout(() => { if (!peta) inisialisasiPeta(); peta.invalidateSize(); kembaliKePosisiSaya(); perbaruiDataPeta(); }, 200);
+    } else if (nama === "lainnya") {
+        document.getElementById("halaman-lainnya").classList.add("aktif");
+        document.querySelector(".nav-item:nth-child(4)").classList.add("aktif");
+        document.getElementById("judulHalaman").textContent = "Lainnya";
+        document.getElementById("namaPengguna4").textContent = penggunaSaatIni.nama;
     }
 }
 
-async function tampilkanBanner() {
-    const wadah = document.getElementById("wadahBanner");
-    const semuaData = await bacaSemuaData();
-    const daftarBanner = semuaData.daftarBanner || [];
-    if (daftarBanner.length > 0) {
-        wadah.innerHTML = `<img src="${daftarBanner[0].link}" alt="Banner Promo" class="banner-gambar" loading="lazy">`;
-    } else {
-        wadah.innerHTML = `<div class="banner-kosong">Belum ada banner yang diatur</div>`;
-    }
+function bukaHalamanPenuh(idHalaman) {
+    document.getElementById(idHalaman).classList.add("tampil");
+}
+function tutupHalamanPenuh(idHalaman) {
+    document.getElementById(idHalaman).classList.remove("tampil");
+    if(idHalaman === 'halaman-chat') resiChatAktif = null;
 }
 
-async function tampilkanKategori() {
-    const semuaData = await bacaSemuaData();
-    const daftarKategori = semuaData.daftarKategori || [];
-    const wadah = document.getElementById("wadahKategori");
-    wadah.innerHTML = `<button class="tombol-kategori aktif" onclick="pilihKategori('semua')">Semua</button>`;
-    daftarKategori.forEach((kat) => {
-        wadah.innerHTML += `<button class="tombol-kategori" onclick="pilihKategori(${kat.id})">${kat.nama}</button>`;
+function setFavorit(idMenu, event) {
+    event.stopPropagation();
+    const idx = daftarFavorit.indexOf(idMenu);
+    if(idx === -1) daftarFavorit.push(idMenu); else daftarFavorit.splice(idx, 1);
+    
+    simpanStateKeFirebase(); 
+    tampilkanMenu();
+}
+
+async function bukaHalamanFavorit() {
+    await renderHalamanFavorit();
+    bukaHalamanPenuh('halaman-favorit');
+}
+
+async function renderHalamanFavorit() {
+    const data = await bacaSemuaData();
+    let menuAll = data.daftarMenu || [];
+    let menuFav = menuAll.filter(m => daftarFavorit.includes(m.nama));
+    const wadah = document.getElementById("daftarMenuFavorit");
+    
+    if (menuFav.length === 0) {
+        wadah.innerHTML = `<div class="text-center p-4 text-muted mt-5"><i class="bi bi-heart fs-1"></i><p>Belum ada menu favorit</p></div>`;
+        return;
+    }
+    
+    wadah.innerHTML = "";
+    menuFav.forEach(item => {
+        const kat = (data.daftarKategori||[]).find(k => k.id == item.idKategori);
+        const namaKat = kat ? kat.nama : 'Menu'; 
+        
+        wadah.innerHTML += `
+        <div class="kartu-menu" onclick="tambahKeKeranjang('${item.nama}', ${item.harga})">
+            <div class="badge-kategori">${namaKat}</div>
+            <button class="btn-tambah-favorit" onclick="setFavorit('${item.nama}', event); setTimeout(renderHalamanFavorit, 300);">
+                <i class="bi bi-heart-fill text-danger"></i>
+            </button>
+            <img src="${item.gambar}" class="gambar-menu" loading="lazy">
+            <div class="info-menu">
+                <h6 class="nama-menu">${item.nama}</h6>
+                <div class="harga-menu">Rp ${Number(item.harga).toLocaleString('id-ID')}</div>
+                <button class="btn-tambah-keranjang-kecil">+ Tambah</button>
+            </div>
+        </div>`;
     });
 }
 
+async function tampilkanKategori() {
+    const data = await bacaSemuaData();
+    const wadah = document.getElementById("wadahKategori");
+    wadah.innerHTML = `<button class="tombol-kategori aktif" onclick="pilihKategori('semua')">Semua</button>`;
+    (data.daftarKategori || []).forEach(kat => {
+        wadah.innerHTML += `<button class="tombol-kategori" onclick="pilihKategori(${kat.id})">${kat.nama}</button>`;
+    });
+}
 function pilihKategori(id) {
     kategoriTerpilih = id;
-    document.querySelectorAll(".tombol-kategori").forEach(btn => btn.classList.remove("aktif"));
+    document.querySelectorAll(".tombol-kategori").forEach(b => b.classList.remove("aktif"));
     event.target.classList.add("aktif");
     tampilkanMenu();
 }
 
+async function tampilkanBanner() {
+    const data = await bacaSemuaData();
+    const wadah = document.getElementById("wadahBanner");
+    if(data.daftarBanner && data.daftarBanner.length > 0) {
+        wadah.innerHTML = `<img src="${data.daftarBanner[0].link}" class="banner-gambar">`;
+    }
+}
+
 async function tampilkanMenu() {
-    const semuaData = await bacaSemuaData();
-    const daftarMenu = semuaData.daftarMenu || [];
-    const daftarKategori = semuaData.daftarKategori || [];
+    const data = await bacaSemuaData();
+    let menu = data.daftarMenu || [];
+    const pencarian = document.getElementById("inputPencarian").value.toLowerCase();
+    
+    if(pencarian) menu = menu.filter(m => m.nama.toLowerCase().includes(pencarian));
+    if (kategoriTerpilih !== "semua") menu = menu.filter(m => m.idKategori == kategoriTerpilih);
+
     const wadah = document.getElementById("daftarMenu");
-    let menuTampil = daftarMenu;
-    if (kategoriTerpilih !== "semua") {
-        menuTampil = daftarMenu.filter(m => m.idKategori == kategoriTerpilih);
-    }
-    if (menuTampil.length === 0) {
-        wadah.innerHTML = `<div class="kosong p-4" style="grid-column: 1 / -1;"><i class="bi bi-clipboard-x"></i><p>Menu tidak tersedia</p></div>`;
-        return;
-    }
+    if (menu.length === 0) { wadah.innerHTML = `<div class="text-center p-4 w-100 text-muted" style="grid-column: 1/-1;"><i class="bi bi-search fs-1"></i><p>Menu tidak ditemukan</p></div>`; return; }
+    
     wadah.innerHTML = "";
-    menuTampil.forEach((item) => {
-        const namaKat = daftarKategori.find(k => k.id == item.idKategori)?.nama || "Lainnya";
-        wadah.innerHTML += `<div class="kartu-menu" onclick="bukaPopup(${daftarMenu.indexOf(item)})">
-            <img src="${item.gambar}" alt="${item.nama}" class="gambar-menu" loading="lazy">
+    menu.forEach(item => {
+        const isFav = daftarFavorit.includes(item.nama);
+        
+        const kat = (data.daftarKategori||[]).find(k => k.id == item.idKategori);
+        const namaKat = kat ? kat.nama : 'Menu';
+
+        wadah.innerHTML += `
+        <div class="kartu-menu" onclick="tambahKeKeranjang('${item.nama}', ${item.harga})">
+            <div class="badge-kategori">${namaKat}</div>
+            <button class="btn-tambah-favorit" onclick="setFavorit('${item.nama}', event)">
+                <i class="bi ${isFav ? 'bi-heart-fill text-danger' : 'bi-heart text-muted'}"></i>
+            </button>
+            <img src="${item.gambar}" class="gambar-menu" loading="lazy">
             <div class="info-menu">
-                <span class="badge bg-primary text-white px-2 py-1 rounded-pill small">${namaKat}</span>
-                <h6 class="nama-menu mt-2">${item.nama}</h6>
+                <h6 class="nama-menu">${item.nama}</h6>
                 <div class="harga-menu">Rp ${Number(item.harga).toLocaleString('id-ID')}</div>
+                <button class="btn-tambah-keranjang-kecil">+ Tambah</button>
             </div>
         </div>`;
     });
 }
 
-function bukaPopup(indeks) {
-    const daftarMenu = JSON.parse(localStorage.getItem("DAFTAR_MENU_SEMENTARA") || "[]");
-    document.getElementById("barang").value = `${daftarMenu[indeks].nama} - Rp ${Number(daftarMenu[indeks].harga).toLocaleString('id-ID')}`;
+function tambahKeKeranjang(nama, harga) {
+    const itemAda = keranjang.find(k => k.nama === nama);
+    if(itemAda) itemAda.qty += 1;
+    else keranjang.push({ nama, harga, qty: 1 });
+    
+    renderKeranjangFloating();
+    simpanStateKeFirebase(); 
+}
+
+function ubahQtyKeranjang(index, delta) {
+    keranjang[index].qty += delta;
+    if(keranjang[index].qty <= 0) keranjang.splice(index, 1);
+    
+    renderKeranjangFloating();
+    renderListCheckout();
+    simpanStateKeFirebase(); 
+    
+    if(keranjang.length === 0) tutupPopup();
+}
+
+function renderKeranjangFloating() {
+    const btn = document.getElementById("btnKeranjangFloating");
+    if(keranjang.length === 0) {
+        btn.classList.remove("tampil"); return;
+    }
+    const totalQty = keranjang.reduce((sum, item) => sum + item.qty, 0);
+    const totalHarga = keranjang.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+    
+    document.getElementById("teksJumlahKeranjang").textContent = totalQty;
+    document.getElementById("teksTotalKeranjang").textContent = `Rp ${totalHarga.toLocaleString('id-ID')}`;
+    btn.classList.add("tampil");
+}
+
+function bukaPopupCheckout() {
+    if(keranjang.length === 0) return;
+    renderListCheckout();
     document.getElementById("popupOverlay").style.display = "flex";
-    document.getElementById("popupChat").style.display = "none";
     setTimeout(() => document.getElementById("popupOverlay").classList.add("tampil"), 10);
-    document.body.style.overflow = "hidden";
     ambilLokasiSaya();
+}
+
+function renderListCheckout() {
+    const wadah = document.getElementById("listKeranjangCheckout");
+    wadah.innerHTML = "";
+    let total = 0;
+    keranjang.forEach((k, i) => {
+        total += (k.harga * k.qty);
+        wadah.innerHTML += `
+        <div class="item-keranjang-form">
+            <div>
+                <div class="fw-bold text-dark" style="font-size:0.9rem">${k.nama}</div>
+                <div class="text-success small fw-bold">Rp ${(k.harga * k.qty).toLocaleString('id-ID')}</div>
+            </div>
+            <div class="qty-kontrol">
+                <button class="btn-qty ${k.qty===1?'hapus':''}" onclick="ubahQtyKeranjang(${i}, -1)"><i class="bi ${k.qty===1?'bi-trash':'bi-dash'}"></i></button>
+                <span class="fw-bold">${k.qty}</span>
+                <button class="btn-qty" onclick="ubahQtyKeranjang(${i}, 1)"><i class="bi bi-plus"></i></button>
+            </div>
+        </div>`;
+    });
+    document.getElementById("totalHargaCheckout").textContent = `Rp ${total.toLocaleString('id-ID')}`;
 }
 
 function tutupPopup() {
     document.getElementById("popupOverlay").classList.remove("tampil");
-    setTimeout(() => {
-        document.getElementById("popupOverlay").style.display = "none";
-        document.querySelector(".popup-form").style.display = "block";
-        document.getElementById("popupChat").style.display = "none";
-        document.body.style.overflow = "auto";
-        document.getElementById("alamat").value = "";
-        document.getElementById("catatan").value = "";
-    }, 300);
-}
-
-function tutupPopupChat() {
-    document.getElementById("popupOverlay").classList.remove("tampil");
-    setTimeout(() => {
-        document.getElementById("popupOverlay").style.display = "none";
-        document.querySelector(".popup-form").style.display = "block";
-        document.getElementById("popupChat").style.display = "none";
-        document.body.style.overflow = "auto";
-        resiChatAktif = null;
-        document.getElementById("inputPesanChat").value = "";
-    }, 300);
-}
-
-document.getElementById("popupOverlay").addEventListener("click", function(e) {
-    if (e.target === this) tutupPopup();
-});
-
-function inisialisasiPeta() {
-    if (!peta) {
-        peta = L.map('peta').setView([lokasiSaya.lat, lokasiSaya.lon], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(peta);
-        const ikonSaya = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [35, 35], iconAnchor: [17, 35] });
-        const ikonDriver = L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048315.png', iconSize: [35, 35], iconAnchor: [17, 35] });
-        penandaSaya = L.marker([lokasiSaya.lat, lokasiSaya.lon], { icon: ikonSaya }).addTo(peta).bindPopup("Posisi Anda");
-        penandaDriver = L.marker([0, 0], { icon: ikonDriver }).addTo(peta).setOpacity(0);
-        garisRute = L.polyline([], { color: '#22C55E', weight: 4 }).addTo(peta);
-    }
-}
-
-function kembaliKePosisiSaya() {
-    if (peta && lokasiSaya.lat && lokasiSaya.lon) peta.setView([lokasiSaya.lat, lokasiSaya.lon], 16);
-}
-
-function hitungJarak(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-async function perbaruiDataPeta() {
-    const semuaData = await bacaSemuaData();
-    const daftar = semuaData.daftarPesanan || [];
-    pesananAktif = daftar.find(p => p.hp === penggunaSaatIni.hp && p.status !== "Selesai");
-    if (pesananAktif && pesananAktif.lokasiDriver) {
-        const posDriver = [pesananAktif.lokasiDriver.lat, pesananAktif.lokasiDriver.lon];
-        penandaDriver.setLatLng(posDriver).setOpacity(1);
-        garisRute.setLatLngs([posDriver, [lokasiSaya.lat, lokasiSaya.lon]]);
-        const jarak = hitungJarak(pesananAktif.lokasiDriver.lat, pesananAktif.lokasiDriver.lon, lokasiSaya.lat, lokasiSaya.lon);
-        document.getElementById("infoPosisiDriver").textContent = `${pesananAktif.lokasiDriver.lat.toFixed(6)}, ${pesananAktif.lokasiDriver.lon.toFixed(6)}`;
-        document.getElementById("infoJarak").textContent = `${jarak.toFixed(2)} km`;
-    } else {
-        penandaDriver.setOpacity(0);
-        garisRute.setLatLngs([]);
-        document.getElementById("infoPosisiDriver").textContent = "-";
-        document.getElementById("infoJarak").textContent = "Belum ada pesanan aktif";
-    }
+    setTimeout(() => { document.getElementById("popupOverlay").style.display = "none"; }, 300);
 }
 
 async function kirimPesanan() {
-    const barang = document.getElementById("barang").value.trim();
+    if(keranjang.length === 0) return;
     const alamat = document.getElementById("alamat").value.trim();
     const catatan = document.getElementById("catatan").value.trim();
-
-    if (!barang || !alamat) return alert("❌ Lengkapi semua data yang wajib diisi!");
-    // ✅ Validasi > 50m Dihapus. Lolos asalkan ada latitude dari GPS.
-    if (!cekKeamananPerangkat()) return;
-
-    const semuaData = await bacaSemuaData();
-    const daftarPesanan = semuaData.daftarPesanan || [];
-
+    
+    if(!alamat) return alert("❌ Alamat pengiriman wajib diisi!");
+    
+    const barangString = keranjang.map(k => `${k.nama} (x${k.qty})`).join(", ");
+    const data = await bacaSemuaData();
+    const daftar = data.daftarPesanan || [];
+    
     const pesananBaru = {
         resi: "RESI-" + Math.floor(100000 + Math.random() * 900000),
-        barang: barang,
-        nama: penggunaSaatIni.nama,
-        hp: penggunaSaatIni.hp,
-        alamat: alamat,
-        catatan: catatan,
+        barang: barangString,
+        nama: penggunaSaatIni.nama, hp: penggunaSaatIni.hp,
+        alamat: alamat, catatan: catatan,
         lokasiTujuan: { lat: lokasiSaya.lat, lon: lokasiSaya.lon },
-        akurasi: lokasiSaya.akurasi,
-        lokasiDriver: null,
-        idDriver: null,
-        namaDriver: null,
-        status: "Menunggu",
-        waktuPesan: new Date().toLocaleString('id-ID'),
-        timestampMs: Date.now(), // ✅ Disimpan mempermudah hitungan timer chat
-        pesanChat: []
+        status: "Menunggu", waktuPesan: new Date().toLocaleString('id-ID'),
+        timestampMs: Date.now()
     };
-
-    daftarPesanan.push(pesananBaru);
-    semuaData.daftarPesanan = daftarPesanan;
-
-    if (await simpanSemuaData(semuaData)) {
-        alert(`✅ Pesanan berhasil dikirim!\nNomor Resi: ${pesananBaru.resi}`);
+    
+    daftar.push(pesananBaru);
+    data.daftarPesanan = daftar;
+    
+    if(await simpanSemuaData(data)) {
+        alert(`✅ Pesanan berhasil dikirim!\nSistem sedang mencari driver untukmu.`);
+        keranjang = []; 
+        simpanStateKeFirebase(); 
+        renderKeranjangFloating(); 
         tutupPopup();
+        bukaHalaman('riwayat');
+        document.getElementById("alamat").value = "";
+        document.getElementById("catatan").value = "";
     }
 }
 
-// ✅ FITUR CHAT SISA WAKTU 3 JAM DAN COUNTDOWN TIMER
 async function tampilkanRiwayat() {
     const wadah = document.getElementById("daftarRiwayat");
-    const semuaData = await bacaSemuaData();
-    const daftar = semuaData.daftarPesanan || [];
-    const pesananSaya = daftar.filter(p => p.hp === penggunaSaatIni.hp).reverse();
+    const data = await bacaSemuaData();
+    const pesananSaya = (data.daftarPesanan || []).filter(p => p.hp === penggunaSaatIni.hp).reverse();
     
     if (pesananSaya.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan</p></div>`;
-        return;
+        wadah.innerHTML = `<div class="text-center py-5 text-muted"><i class="bi bi-receipt fs-1 opacity-50"></i><p>Belum ada riwayat pesanan</p></div>`; return;
     }
 
     wadah.innerHTML = "";
     pesananSaya.forEach(pes => {
-        let warna = "#6B7280", teks = "Menunggu";
-        if (pes.status === "Sudah Diambil") { warna = "#22C55E"; teks = "Sudah Diambil"; }
+        let warna = "#6B7280", teks = "Mencari Driver";
+        if (pes.status === "Sudah Diambil") { warna = "#00B14F"; teks = "Sudah Diambil"; }
         else if (pes.status === "Sampai di Restoran") { warna = "#3B82F6"; teks = "Di Restoran"; }
-        else if (pes.status === "Dalam Perjalanan") { warna = "#F59E0B"; teks = "Dalam Perjalanan"; }
-        else if (pes.status === "Selesai") { warna = "#0F4C5C"; teks = "Selesai"; }
+        else if (pes.status === "Dalam Perjalanan") { warna = "#F59E0B"; teks = "Menuju Lokasimu"; }
+        else if (pes.status === "Selesai") { warna = "#0F4C5C"; teks = "Pesanan Selesai"; }
 
-        const infoDriver = pes.namaDriver ? `<p class="mb-1 text-primary"><strong>Driver:</strong> ${pes.namaDriver}</p>` : "";
-
-        let tombolChat = "";
-        let infoTimer = "";
-
-        // ✅ LOGIKA PENAMPILAN CHAT SELAMA 3 JAM SETELAH SELESAI
-        if (pes.idDriver) {
-            if (pes.status !== "Selesai") {
-                tombolChat = `<button onclick="bukaPopupChat('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>`;
-            } else if (pes.status === "Selesai") {
-                const batasWaktuMs = 3 * 60 * 60 * 1000; // 3 jam dalam milidetik
-                const waktuSelesaiMs = pes.timestampMs || Date.now(); 
-                const sisaWaktu = (waktuSelesaiMs + batasWaktuMs) - Date.now();
-                
-                if (sisaWaktu > 0) {
-                    tombolChat = `<button onclick="bukaPopupChat('${pes.resi}')" class="btn btn-sm btn-outline-success mt-2 w-100 btn-chat-selesai"><i class="bi bi-chat-dots"></i> Hubungi Driver</button>`;
-                    infoTimer = `<div class="text-center mt-1 small text-danger fw-bold timer-chat" data-expired="${waktuSelesaiMs + batasWaktuMs}">Batas chat: <span class="waktu-mundur">Menghitung...</span></div>`;
-                }
-            }
+        let btnWa = "";
+        if(pes.hpDriver) {
+            const noWaFormat = pes.hpDriver.startsWith('0') ? '62' + pes.hpDriver.substring(1) : pes.hpDriver;
+            btnWa = `<a href="https://wa.me/${noWaFormat}" target="_blank" class="btn-wa-driver ms-2"><i class="bi bi-whatsapp"></i> WA</a>`;
         }
 
-        wadah.innerHTML += `<div class="pesanan-item" id="pesanan-${pes.resi}">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">${pes.resi}</span>
-                <span class="status-badge" style="background:${warna}">${teks}</span>
+        const infoDriver = pes.namaDriver ? `<p class="mb-2 text-dark bg-light p-2 rounded small"><strong><i class="bi bi-person-fill text-success"></i> ${pes.namaDriver}</strong> ${btnWa}</p>` : "";
+        
+        const jumlahChatDriver = pes.pesanChat ? pes.pesanChat.length : 0;
+        const pesanTerakhir = pesanTerakhirDilihat[pes.resi] || 0;
+        const badgeChat = (jumlahChatDriver > pesanTerakhir) ? `<span class="badge bg-danger rounded-pill indikator-baru ms-2">Baru</span>` : "";
+
+        wadah.innerHTML += `
+        <div class="pesanan-item">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <span class="fw-bold small text-secondary">${pes.waktuPesan.split(' ')[0]}</span>
+                <span class="badge text-white rounded-pill px-3" style="background:${warna}">${teks}</span>
             </div>
-            <p class="mb-1"><strong>Pesanan:</strong> ${pes.barang}</p>
+            <div class="d-flex justify-content-between">
+                <h6 class="fw-bold mb-1">${pes.resi}</h6>
+                <button onclick="cetakStruk('${pes.resi}')" class="btn-cetak"><i class="bi bi-printer"></i> Struk</button>
+            </div>
+            <p class="mb-2 small"><strong>Menu:</strong> ${pes.barang}</p>
             ${infoDriver}
-            <p class="mb-1 text-muted"><i class="bi bi-geo-alt"></i> ${pes.alamat}</p>
-            <p class="mb-1 small text-muted"><i class="bi bi-clock"></i> ${pes.waktuPesan || '-'}</p>
-            ${pes.catatan ? `<p class="mb-0 small text-success"><i class="bi bi-chat-left-text"></i> ${pes.catatan}</p>` : ""}
-            ${tombolChat}
-            ${infoTimer}
+            <p class="mb-1 small text-muted"><i class="bi bi-geo-alt"></i> ${pes.alamat}</p>
+            
+            ${pes.idDriver ? `<button onclick="bukaHalamanChat('${pes.resi}')" class="btn btn-outline-success btn-sm w-100 mt-2 py-2 fw-bold"><i class="bi bi-chat-dots-fill"></i> Chat Driver ${badgeChat}</button>` : ""}
         </div>`;
-
-        if (!pesanTerakhirDilihat[pes.resi]) {
-            pesanTerakhirDilihat[pes.resi] = pes.pesanChat ? pes.pesanChat.length : 0;
-        }
+        
+        if (pesanTerakhirDilihat[pes.resi] === undefined) pesanTerakhirDilihat[pes.resi] = jumlahChatDriver;
     });
 }
 
-// ✅ GLOBAL INTERVAL UNTUK UPDATE HITUNG MUNDUR COUNTER TIMER CHAT
-setInterval(() => {
-    document.querySelectorAll(".timer-chat").forEach(el => {
-        const expired = parseInt(el.getAttribute("data-expired"));
-        const sisa = expired - Date.now();
-        
-        if (sisa <= 0) {
-            el.innerHTML = "Waktu chat telah habis";
-            el.classList.replace("text-danger", "text-muted");
-            const parent = el.closest(".pesanan-item");
-            const btn = parent.querySelector(".btn-chat-selesai");
-            if (btn) btn.style.display = "none";
-        } else {
-            const jam = Math.floor((sisa / (1000 * 60 * 60)) % 24);
-            const menit = Math.floor((sisa / 1000 / 60) % 60);
-            const detik = Math.floor((sisa / 1000) % 60);
-            el.querySelector(".waktu-mundur").textContent = `${jam}j ${menit}m ${detik}s`;
-        }
-    });
-}, 1000);
+async function cetakStruk(resi) {
+    const data = await bacaSemuaData();
+    const pes = data.daftarPesanan.find(p => p.resi === resi);
+    if (!pes) return;
 
-async function bukaPopupChat(resi) {
+    let htmlBarang = "";
+    pes.barang.split(", ").forEach(b => {
+        htmlBarang += `<tr><td style="padding:4px 0; border-bottom:1px dashed #ccc;">${b}</td></tr>`;
+    });
+
+    const win = window.open('', '', 'width=350,height=600');
+    win.document.write(`
+        <html><head><title>Struk ${pes.resi}</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+            body { font-family: 'Courier Prime', monospace; padding: 10px; width: 300px; margin: 0 auto; color: #000; }
+            .tengah { text-align: center; }
+            .garis { border-bottom: 2px dashed #000; margin: 10px 0; }
+            h2 { margin: 0 0 5px 0; font-size: 24px; }
+            p { margin: 3px 0; font-size: 13px; }
+            table { width: 100%; font-size: 13px; border-collapse: collapse; }
+        </style></head><body>
+            <div class="tengah">
+                <h2>K-DELIVERY</h2>
+                <p>Kolaka - Sulawesi Tenggara</p>
+                <div class="garis"></div>
+                <p><b>RESI: ${pes.resi}</b></p>
+                <p>${pes.waktuPesan}</p>
+            </div>
+            <div class="garis"></div>
+            <p><b>Pelanggan:</b> ${pes.nama}</p>
+            <p><b>No. HP:</b> ${pes.hp}</p>
+            <div class="garis"></div>
+            <p><b>PESANAN:</b></p>
+            <table>${htmlBarang}</table>
+            <div class="garis"></div>
+            <p><b>Alamat:</b> ${pes.alamat}</p>
+            ${pes.catatan ? `<p><b>Catatan:</b> ${pes.catatan}</p>` : ''}
+            <div class="garis"></div>
+            <p><b>Driver:</b> ${pes.namaDriver || '-'}</p>
+            <p><b>Status:</b> ${pes.status}</p>
+            <div class="tengah" style="margin-top:20px;">
+                <p>*** TERIMA KASIH ***</p>
+                <p>Layanan K-Delivery</p>
+            </div>
+            <script>setTimeout(() => { window.print(); window.close(); }, 500);<\/script>
+        </body></html>
+    `);
+    win.document.close();
+}
+
+async function bukaHalamanChat(resi) {
     resiChatAktif = resi;
-    const semuaData = await bacaSemuaData();
-    const pesanan = semuaData.daftarPesanan.find(p => p.resi === resi);
-    if (!pesanan) return;
+    const data = await bacaSemuaData();
+    const pesanan = data.daftarPesanan.find(p => p.resi === resi);
+    document.getElementById("judulChat").textContent = pesanan.namaDriver || "Driver";
+    
+    const wadah = document.getElementById("wadahPesan");
+    const pesan = pesanan.pesanChat || [];
+    wadah.innerHTML = pesan.length ? pesan.map(p => 
+        `<div class="${p.pengirim.includes('(Anda)') ? 'pesan-pengirim' : 'pesan-driver'}">
+            <span class="nama">${p.pengirim.replace(' (Anda)','')}</span>${p.teks}
+         </div>`).join('') : `<p class="text-center text-muted mt-5 small">Mulai obrolan dengan driver...</p>`;
+    
+    wadah.scrollTop = wadah.scrollHeight;
+    pesanTerakhirDilihat[resi] = pesan.length;
+    tampilkanRiwayat();
 
-    document.getElementById("judulChat").textContent = `Chat dengan ${pesanan.namaDriver || "Driver"}`;
-    const wadahPesan = document.getElementById("wadahPesan");
-    const daftarPesan = pesanan.pesanChat || [];
-
-    let isiPesan = "";
-    daftarPesan.forEach(p => {
-        if (p.pengirim.includes("(Anda)")) {
-            isiPesan += `<div class="pesan-pengirim">
-                            <span class="nama">${p.pengirim}</span>
-                            ${p.teks}
-                         </div>`;
-        } else {
-            isiPesan += `<div class="pesan-driver">
-                            <span class="nama">${p.pengirim}</span>
-                            ${p.teks}
-                         </div>`;
-        }
-    });
-
-    wadahPesan.innerHTML = isiPesan || `<p class="text-center text-muted mt-3">Belum ada pesan</p>`;
-    wadahPesan.scrollTop = wadahPesan.scrollHeight;
-
-    pesanTerakhirDilihat[resi] = daftarPesan.length;
-
-    document.getElementById("popupOverlay").style.display = "flex";
-    document.querySelector(".popup-form").style.display = "none";
-    document.getElementById("popupChat").style.display = "flex";
-    setTimeout(() => document.getElementById("popupOverlay").classList.add("tampil"), 10);
+    bukaHalamanPenuh('halaman-chat');
 }
 
 async function kirimPesanChat() {
     const teks = document.getElementById("inputPesanChat").value.trim();
     if (!teks || !resiChatAktif) return;
-
-    const semuaData = await bacaSemuaData();
-    const indeks = semuaData.daftarPesanan.findIndex(p => p.resi === resiChatAktif);
-    if (indeks === -1) return;
-
-    const pesanBaru = {
-        pengirim: penggunaSaatIni.nama + " (Anda)",
-        teks: teks,
-        waktu: new Date().toLocaleString('id-ID')
-    };
-
-    if (!semuaData.daftarPesanan[indeks].pesanChat) {
-        semuaData.daftarPesanan[indeks].pesanChat = [];
-    }
-    semuaData.daftarPesanan[indeks].pesanChat.push(pesanBaru);
-
-    if (await simpanSemuaData(semuaData)) {
-        document.getElementById("inputPesanChat").value = "";
-        bukaPopupChat(resiChatAktif);
-    }
-}
-
-async function cekPesanBaru() {
-    if (!penggunaSaatIni) return;
-    const semuaData = await bacaSemuaData();
-    const daftarPesanan = semuaData.daftarPesanan || [];
     
-    // Perbaikan: Sekarang juga ngecek yang statusnya selesai kalau masih ada tombol chat
-    const pesananSaya = daftarPesanan.filter(p => p.hp === penggunaSaatIni.hp);
-
-    pesananSaya.forEach(pes => {
-        const jumlahSekarang = pes.pesanChat ? pes.pesanChat.length : 0;
-        const jumlahDilihat = pesanTerakhirDilihat[pes.resi] || 0;
-
-        if (jumlahSekarang > jumlahDilihat) {
-            const pesanTerakhir = pes.pesanChat[jumlahSekarang - 1];
-            if (!pesanTerakhir.pengirim.includes("(Anda)")) {
-                tampilkanNotifPesan(pes.namaDriver || "Driver", pesanTerakhir.teks, pes.resi);
-                pesanTerakhirDilihat[pes.resi] = jumlahSekarang;
-            }
-        }
-    });
+    const data = await bacaSemuaData();
+    const idx = data.daftarPesanan.findIndex(p => p.resi === resiChatAktif);
+    if (!data.daftarPesanan[idx].pesanChat) data.daftarPesanan[idx].pesanChat = [];
+    
+    data.daftarPesanan[idx].pesanChat.push({ pengirim: penggunaSaatIni.nama + " (Anda)", teks: teks, waktu: new Date().toLocaleString() });
+    
+    if (await simpanSemuaData(data)) {
+        document.getElementById("inputPesanChat").value = "";
+        bukaHalamanChat(resiChatAktif); 
+    }
 }
 
-function tampilkanNotifPesan(namaPengirim, teksPesan, resi) {
-    const notif = document.getElementById("notifPesanBaru");
-    document.getElementById("teksNotifPesan").innerHTML = `<strong>${namaPengirim}:</strong> ${teksPesan}`;
-    notif.dataset.resi = resi;
-    notif.classList.add("tampil");
-
-    setTimeout(() => {
-        notif.classList.remove("tampil");
-    }, 8000);
+function inisialisasiPeta() {
+    if(!peta && document.getElementById('peta')) {
+        peta = L.map('peta').setView([lokasiSaya.lat, lokasiSaya.lon], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(peta);
+        penandaSaya = L.marker([lokasiSaya.lat, lokasiSaya.lon]).addTo(peta).bindPopup("Lokasi Kamu");
+        penandaDriver = L.marker([0,0], {icon: L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/1048/1048315.png', iconSize: [35,35]})}).addTo(peta).setOpacity(0);
+        garisRute = L.polyline([], { color: '#00B14F', weight: 4 }).addTo(peta);
+    }
 }
-
-function bukaChatDariNotif() {
-    const resi = document.getElementById("notifPesanBaru").dataset.resi;
-    tutupNotifPesan();
-    if (resi) bukaPopupChat(resi);
-}
-
-function tutupNotifPesan(e) {
-    if (e) e.stopPropagation();
-    document.getElementById("notifPesanBaru").classList.remove("tampil");
-}
-
-async function perbaruiDaftarMenuSementara() {
-    const semuaData = await bacaSemuaData();
-    localStorage.setItem("DAFTAR_MENU_SEMENTARA", JSON.stringify(semuaData.daftarMenu || []));
+function kembaliKePosisiSaya() { if(peta) peta.setView([lokasiSaya.lat, lokasiSaya.lon], 16); }
+async function perbaruiDataPeta() {
+    if(!peta) return;
+    const data = await bacaSemuaData();
+    const pes = (data.daftarPesanan||[]).find(p => p.hp === penggunaSaatIni.hp && p.status !== "Selesai" && p.lokasiDriver);
+    if(pes) {
+        penandaDriver.setLatLng([pes.lokasiDriver.lat, pes.lokasiDriver.lon]).setOpacity(1);
+        garisRute.setLatLngs([[pes.lokasiDriver.lat, pes.lokasiDriver.lon], [lokasiSaya.lat, lokasiSaya.lon]]);
+    } else {
+        penandaDriver.setOpacity(0); garisRute.setLatLngs([]);
+    }
 }
 
 window.onload = function() {
     cekLogin();
-    inisialisasiPeta();
-    perbaruiDaftarMenuSementara();
-
-    setInterval(tampilkanBanner, 5000);
     setInterval(tampilkanMenu, 5000);
-    setInterval(ambilLokasiSaya, 10000);
-    setInterval(perbaruiDataPeta, 4000);
-    setInterval(tampilkanRiwayat, 5000);
-    setInterval(cekPesanBaru, 3000); 
+    setInterval(tampilkanRiwayat, 6000);
+    setInterval(perbaruiDataPeta, 5000);
 };
 </script>
-
 </body>
 </html>
