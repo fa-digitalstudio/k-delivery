@@ -33,7 +33,6 @@
             padding-bottom: 85px;
         }
 
-        /* ✅ HEADER DIPERBAIKI LEBIH KEREN */
         .header {
             background: linear-gradient(135deg, #0F4C5C 0%, #16657a 100%);
             color: white;
@@ -212,6 +211,8 @@
             border-radius: 12px;
             margin-bottom: 1.2rem;
             box-shadow: 0 2px 6px rgba(34, 197, 94, 0.1);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .switch {
@@ -307,7 +308,6 @@
             color: #ef4444;
         }
 
-        /* ✅ Gaya untuk Popup Chat - DITAMBAH NAMA PENGIRIM */
         .overlay-chat {
             position: fixed;
             top: 0;
@@ -376,7 +376,6 @@
             background: #fafafa;
         }
 
-        /* ✅ Pesan Driver */
         .pesan-pengirim {
             background: var(--utama);
             color: white;
@@ -396,7 +395,6 @@
             display: block;
         }
 
-        /* ✅ Pesan Pelanggan / Costumer */
         .pesan-pelanggan {
             background: #e2e8f0;
             color: var(--teks);
@@ -458,7 +456,6 @@
             background: #0d3d4a;
         }
 
-        /* ✅ Info Lokasi Pelanggan */
         .info-pelanggan {
             margin-top: 1rem;
             padding: 0.8rem;
@@ -516,15 +513,22 @@
             <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
 
-        <div class="mode-switch">
-            <div>
-                <strong>Terima Pesanan Otomatis</strong>
-                <div class="text-muted small">Mencari pesanan terdekat</div>
+        <!-- Opsi Batas Jarak Baru -->
+        <div class="mode-switch d-flex flex-column align-items-start gap-2">
+            <div class="d-flex justify-content-between w-100 align-items-center">
+                <div>
+                    <strong>Terima Pesanan Otomatis</strong>
+                    <div class="text-muted small">Mencari pesanan terdekat</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="modeOtomatis" onchange="ubahModeOtomatis()">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <label class="switch">
-                <input type="checkbox" id="modeOtomatis" onchange="ubahModeOtomatis()">
-                <span class="slider"></span>
-            </label>
+            <div class="w-100 mt-2 border-top pt-2">
+                <label class="text-muted small fw-bold">Batas Maksimal Jarak Pesanan (KM)</label>
+                <input type="number" id="inputJarakMaks" class="form-control form-control-sm w-100" value="5" onchange="ubahJarakMaks()">
+            </div>
         </div>
 
         <div class="card">
@@ -542,7 +546,7 @@
             <button onclick="logoutDriver()" class="btn btn-sm btn-outline-danger">Keluar</button>
         </div>
         <div class="card">
-            <h5><i class="bi bi-clock-history"></i> Riwayat Pesanan Selesai</h5>
+            <h5><i class="bi bi-clock-history"></i> Riwayat Pesanan Antar</h5>
             <div id="daftarRiwayatDriver"></div>
         </div>
     </div>
@@ -568,6 +572,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <div class="nav-bawah">
@@ -595,7 +600,6 @@
     </div>
 </div>
 
-<!-- ✅ POPUP CHAT BARU -->
 <div id="overlayChat" class="overlay-chat">
     <div class="popup-chat">
         <div class="header-chat">
@@ -610,14 +614,10 @@
     </div>
 </div>
 
-<!-- ✅ PUSTAKA FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-// ==========================================
-// ✅ KONFIGURASI FIREBASE (SAMA DENGAN ADMIN)
-// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyAhVNZpZsHFB5xD-jp17RtjiV6Su3yftmI",
   authDomain: "dok123-1bd6f.firebaseapp.com",
@@ -628,7 +628,6 @@ const firebaseConfig = {
   appId: "1:664523539322:web:61c0adedc67fee015dccc3"
 };
 
-// Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refData = db.ref("data");
@@ -642,10 +641,8 @@ let modeOtomatisAktif = false;
 let intervalCariPesanan = null;
 let resiChatAktif = null;
 let pesananAktifSekarang = null;
+let jarakMaksPesanan = 5;
 
-// ==========================================
-// ✅ FUNGSI BACA & SIMPAN KE FIREBASE
-// ==========================================
 async function bacaData() {
     try {
         const snapshot = await refData.once("value");
@@ -667,7 +664,6 @@ async function simpanData(dataBaru) {
     }
 }
 
-// ✅ LOKASI TIDAK DIPAKSA AKURAT - BISA BERJALAN DENGAN AKURASI APA SAJA
 function ambilLokasiDriver() {
     if (!navigator.geolocation) {
         alert("Perangkat tidak mendukung fitur lokasi!");
@@ -730,8 +726,16 @@ function cekLoginDriver() {
     if (data) {
         dataDriverSaatIni = JSON.parse(data);
         bukaHalamanDriver("pesanan");
+        
         const statusOtomatis = localStorage.getItem("MODE_OTOMATIS") === "aktif";
         document.getElementById("modeOtomatis").checked = statusOtomatis;
+        
+        const simpanJarak = localStorage.getItem("JARAK_MAKS_DRIVER");
+        if(simpanJarak) {
+            jarakMaksPesanan = parseFloat(simpanJarak);
+            document.getElementById("inputJarakMaks").value = jarakMaksPesanan;
+        }
+
         ubahModeOtomatis();
     } else {
         document.querySelectorAll(".halaman").forEach(h => h.classList.remove("aktif"));
@@ -751,7 +755,7 @@ async function loginDriver() {
         return hpDriverBersih === hpBersih && d.status === "Aktif";
     });
 
-    if (!cari) return alert("Nomor HP tidak terdaftar atau belum diaktifkan Admin!");
+    if (!cari) return alert("Nomor HP tidak terdaftar, belum diaktifkan, atau diblokir oleh Admin!");
 
     dataDriverSaatIni = cari;
     localStorage.setItem("DRIVER_SAAT_INI", JSON.stringify(cari));
@@ -814,6 +818,14 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+function ubahJarakMaks() {
+    let inputVal = parseFloat(document.getElementById("inputJarakMaks").value);
+    if(isNaN(inputVal) || inputVal < 1) inputVal = 1;
+    jarakMaksPesanan = inputVal;
+    localStorage.setItem("JARAK_MAKS_DRIVER", jarakMaksPesanan);
+    tampilkanPesananMasuk();
+}
+
 function ubahModeOtomatis() {
     modeOtomatisAktif = document.getElementById("modeOtomatis").checked;
     localStorage.setItem("MODE_OTOMATIS", modeOtomatisAktif ? "aktif" : "mati");
@@ -838,7 +850,7 @@ async function cariDanAmbilPesananTerdekat() {
         if (jarak < jarakMin) { jarakMin = jarak; terdekat = pes; }
     });
 
-    if (terdekat && jarakMin <= 5) {
+    if (terdekat && jarakMin <= jarakMaksPesanan) {
         ambilPesanan(terdekat.resi);
         tampilkanNotif(terdekat);
     }
@@ -848,7 +860,7 @@ function tampilkanNotif(pesanan) {
     const notif = document.getElementById("popupNotif");
     const isi = document.getElementById("isiNotif");
     isi.innerHTML = `
-        <p class="mb-1"><strong>Resi:</strong> ${pesanan.resi}</p>
+        <p class="mb-1"><strong>ID:</strong> ${pesanan.resi}</p>
         <p class="mb-1"><strong>Pelanggan:</strong> ${pesanan.nama}</p>
         <p class="mb-0"><strong>Jarak:</strong> ${hitungJarak(lokasiDriver.lat, lokasiDriver.lon, pesanan.lokasiTujuan.lat, pesanan.lokasiTujuan.lon).toFixed(2)} km</p>
     `;
@@ -867,19 +879,25 @@ async function tampilkanPesananMasuk() {
     
     const urutanStatus = ["Menunggu", "Sudah Diambil", "Sampai di Restoran", "Dalam Perjalanan"];
     const pesananDiurut = daftar
-        .filter(p => 
-            (p.idDriver === dataDriverSaatIni.hp || !p.idDriver) 
-            && p.status !== "Selesai"
-        )
+        .filter(p => {
+            if (p.status === "Selesai" || p.status === "Dibatalkan") return false;
+            if (p.idDriver && p.idDriver !== dataDriverSaatIni.hp) return false;
+            
+            // Filter berdasarkan Batas Jarak Maksimal
+            if (!p.idDriver && p.status === "Menunggu" && p.lokasiTujuan && lokasiDriver.lat) {
+                const jarakKePelanggan = hitungJarak(lokasiDriver.lat, lokasiDriver.lon, p.lokasiTujuan.lat, p.lokasiTujuan.lon);
+                if (jarakKePelanggan > jarakMaksPesanan) return false;
+            }
+            return true;
+        })
         .sort((a, b) => urutanStatus.indexOf(a.status) - urutanStatus.indexOf(b.status));
 
-    // Simpan pesanan yang sedang dikerjakan
     pesananAktifSekarang = pesananDiurut.find(p => p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai") || null;
 
     if (pesananDiurut.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan tersedia atau sedang dikerjakan</p></div>`;
-        penandaPelanggan.setOpacity(0);
-        garisRute.setLatLngs([]);
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-inbox"></i><p>Tidak ada pesanan di sekitar Anda dalam jarak ${jarakMaksPesanan} KM</p></div>`;
+        if(penandaPelanggan) penandaPelanggan.setOpacity(0);
+        if(garisRute) garisRute.setLatLngs([]);
         lokasiPelanggan = null;
         return;
     }
@@ -906,24 +924,29 @@ async function tampilkanPesananMasuk() {
                 break;
         }
 
+        const infoOngkir = pes.ongkir !== undefined ? `<p class="mb-1"><strong>Ongkir:</strong> Rp ${pes.ongkir.toLocaleString('id-ID')} (${pes.jarak || 0} km)</p>` : '';
+        const infoTotal = pes.totalBayar !== undefined ? `<p class="mb-1"><strong>Total Terima:</strong> Rp ${pes.totalBayar.toLocaleString('id-ID')}</p>` : '';
+
         wadah.innerHTML += `<div class="pesanan-item">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">Resi: ${pes.resi}</span>
+                <span class="fw-bold text-success">ID TRANSAKSI: ${pes.resi}</span>
                 <span class="status-badge" style="background:${warnaStatus}">${pes.status}</span>
             </div>
             <p><strong>Pelanggan:</strong> ${pes.nama}</p>
             <p><strong>HP:</strong> ${pes.hp}</p>
             <p><strong>Alamat:</strong> ${pes.alamat}</p>
             <p><strong>Pesanan:</strong> ${pes.barang}</p>
+            ${infoOngkir}
+            ${infoTotal}
             <div class="d-flex gap-2 mt-3">
                 <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-outline-primary flex-grow-1"><i class="bi bi-chat-text"></i> Chat</button>
                 ${tombolAksi}
             </div>
+            <button onclick="ubahStatus('${pes.resi}', 'Dibatalkan')" class="btn btn-outline-danger mt-2 w-100 fw-bold">Batalkan Orderan</button>
         </div>`;
     });
 }
 
-// ✅ Buka Popup Chat - Menampilkan Nama Pelanggan
 async function bukaPopupChat(resi, namaPelanggan) {
     resiChatAktif = resi;
     document.getElementById("judulChat").textContent = `Chat dengan ${namaPelanggan}`;
@@ -938,7 +961,6 @@ function tutupPopupChat() {
     document.getElementById("inputPesanChat").value = "";
 }
 
-// ✅ Muat Riwayat Pesan - Menampilkan Nama Pengirim
 async function muatRiwayatPesan() {
     if (!resiChatAktif) return;
     const semuaData = await bacaData();
@@ -1017,6 +1039,9 @@ async function ubahStatus(resi, statusBaru) {
     const daftar = semuaData.daftarPesanan || [];
     const indeks = daftar.findIndex(p => p.resi === resi);
     if (indeks !== -1) {
+        if(statusBaru === 'Dibatalkan') {
+            if(!confirm("Yakin ingin membatalkan pesanan ini?")) return;
+        }
         daftar[indeks].status = statusBaru;
         semuaData.daftarPesanan = daftar;
         if (await simpanData(semuaData)) {
@@ -1031,25 +1056,30 @@ async function tampilkanRiwayatDriver() {
     const semuaData = await bacaData();
     const daftar = semuaData.daftarPesanan || [];
     const riwayat = daftar
-        .filter(p => p.idDriver === dataDriverSaatIni.hp && p.status === "Selesai")
+        .filter(p => p.idDriver === dataDriverSaatIni.hp && (p.status === "Selesai" || p.status === "Dibatalkan"))
         .reverse();
 
     if (riwayat.length === 0) {
-        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada pesanan yang selesai</p></div>`;
+        wadah.innerHTML = `<div class="kosong"><i class="bi bi-receipt"></i><p>Belum ada riwayat pesanan</p></div>`;
         return;
     }
 
     wadah.innerHTML = "";
     riwayat.forEach(pes => {
-        let warna = "#0F4C5C";
+        let warna = pes.status === "Dibatalkan" ? "#DC2626" : "#0F4C5C";
+
+        const infoOngkir = pes.ongkir !== undefined ? `<p class="mb-1"><strong>Ongkir:</strong> Rp ${pes.ongkir.toLocaleString('id-ID')} (${pes.jarak || 0} km)</p>` : '';
+        const infoTotal = pes.totalBayar !== undefined ? `<p class="mb-1"><strong>Total Bayar:</strong> Rp ${pes.totalBayar.toLocaleString('id-ID')}</p>` : '';
 
         wadah.innerHTML += `<div class="pesanan-item">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">Resi: ${pes.resi}</span>
-                <span class="status-badge" style="background:${warna}">Selesai</span>
+                <span class="fw-bold text-success">ID TRANSAKSI: ${pes.resi}</span>
+                <span class="status-badge" style="background:${warna}">${pes.status}</span>
             </div>
             <p><strong>Pelanggan:</strong> ${pes.nama}</p>
             <p><strong>Pesanan:</strong> ${pes.barang}</p>
+            ${infoOngkir}
+            ${infoTotal}
             <p><strong>Waktu:</strong> ${pes.waktuPesan || '-'}</p>
             <button onclick="bukaPopupChat('${pes.resi}', '${pes.nama}')" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-text"></i> Lihat Pesan</button>
         </div>`;
@@ -1062,7 +1092,7 @@ async function perbaruiPosisiDriverDiPesanan() {
     const daftar = semuaData.daftarPesanan || [];
     let adaPerubahan = false;
     daftar.forEach(p => {
-        if (p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai") {
+        if (p.idDriver === dataDriverSaatIni.hp && p.status !== "Selesai" && p.status !== "Dibatalkan") {
             p.lokasiDriver = { ...lokasiDriver };
             adaPerubahan = true;
         }
@@ -1073,7 +1103,6 @@ async function perbaruiPosisiDriverDiPesanan() {
     }
 }
 
-// ✅ CEK LOKASI PELANGGAN SECARA REAL-TIME
 async function perbaruiLokasiPelangganRealTime() {
     if (!pesananAktifSekarang || !peta) return;
     
@@ -1081,8 +1110,8 @@ async function perbaruiLokasiPelangganRealTime() {
     const pesanan = semuaData.daftarPesanan.find(p => p.resi === pesananAktifSekarang.resi);
     
     if (!pesanan || !pesanan.lokasiTujuan) {
-        penandaPelanggan.setOpacity(0);
-        garisRute.setLatLngs([]);
+        if(penandaPelanggan) penandaPelanggan.setOpacity(0);
+        if(garisRute) garisRute.setLatLngs([]);
         document.getElementById("lokasiPelangganSekarang").textContent = "-";
         document.getElementById("jarakKePelanggan").textContent = "-";
         lokasiPelanggan = null;
