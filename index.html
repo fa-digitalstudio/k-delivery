@@ -316,7 +316,6 @@
         .keranjang-mengambang.tampil { transform: translateY(0); }
         .keranjang-info { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; }
 
-        /* PERUBAHAN Z-INDEX DI SINI: z-index diubah menjadi 1002 agar menutupi menu bawah */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.5); z-index: 1002; 
@@ -401,8 +400,16 @@
         .header-halaman-penuh h6 { margin: 0; font-weight: 600; font-size: 1.1rem; }
         
         .wadah-pesan { flex: 1; padding: 1rem; overflow-y: auto; background: #e5ddd5; display: flex; flex-direction: column; }
-        .form-kirim-chat { display: flex; gap: 0.8rem; padding: 1rem; border-top: 1px solid #e5e7eb; background: white; align-items: center; }
-        .input-chat { flex: 1; border: 1px solid #d1d5db; border-radius: 25px; padding: 0.8rem 1.2rem; outline: none; font-size: 0.95rem; background: #f9fafb; transition: all 0.2s; }
+        
+        /* FIX CHAT BOX POTONG DI HP */
+        .form-kirim-chat { 
+            display: flex; gap: 0.8rem; padding: 1rem; border-top: 1px solid #e5e7eb; 
+            background: white; align-items: center; width: 100%; box-sizing: border-box; flex-shrink: 0; 
+        }
+        .input-chat { 
+            flex: 1; border: 1px solid #d1d5db; border-radius: 25px; padding: 0.8rem 1.2rem; 
+            outline: none; font-size: 0.95rem; background: #f9fafb; transition: all 0.2s; min-width: 0; 
+        }
         .input-chat:focus { border-color: var(--hijau); background: white; box-shadow: 0 0 0 3px rgba(0, 177, 79, 0.1); }
         .btn-kirim-chat {
             background: var(--hijau); color: white; border: none; border-radius: 50%;
@@ -577,9 +584,9 @@
         
         <div class="list-keranjang-form" id="listKeranjangCheckout"></div>
 
-        <div class="d-flex justify-content-between fw-bold mb-3 px-2">
-            <span>Total Harga:</span>
-            <span id="totalHargaCheckout" class="text-success">Rp 0</span>
+        <div class="d-flex justify-content-between fw-bold mb-3 px-2 align-items-end">
+            <span>Total Bayar:</span>
+            <div id="totalHargaCheckout" class="text-success text-end">Rp 0</div>
         </div>
 
         <div class="mb-3">
@@ -675,14 +682,33 @@ let kategoriTerpilih = "semua";
 let penggunaSaatIni = null;
 let resiChatAktif = null;
 
+let ongkirMinimal = 5000;
+let ongkirPerKm = 2000;
+
 let keranjang = [];
 let daftarFavorit = [];
 let pesanTerakhirDilihat = {};
+
+const restoLat = -4.05; 
+const restoLon = 121.61;
+
+function hitungJarakKm(lat1, lon1, lat2, lon2) {
+    if(!lat1 || !lon1 || !lat2 || !lon2) return 0;
+    const R = 6371; 
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
 
 async function bacaSemuaData() {
     try { const snap = await refData.once("value"); return snap.val() || {}; } 
     catch (err) { return {}; }
 }
+
 async function simpanSemuaData(data) {
     try { await refData.set(data); return true; } 
     catch (err) { alert("Gagal mengirim! Cek koneksi."); return false; }
@@ -708,6 +734,11 @@ function login() {
     if (hp.length < 10) return alert("⚠️ No HP tidak valid!");
 
     bacaSemuaData().then(data => {
+        if(data.pengaturan) {
+            if (data.pengaturan.ongkirMinimal !== undefined) ongkirMinimal = data.pengaturan.ongkirMinimal;
+            if (data.pengaturan.ongkirPerKm !== undefined) ongkirPerKm = data.pengaturan.ongkirPerKm;
+        }
+        
         const daftar = data.daftarPengguna || [];
         let user = daftar.find(p => p.hp === hp);
         if (!user) {
@@ -747,6 +778,11 @@ async function cekLogin() {
         penggunaSaatIni = usr; 
         
         const data = await bacaSemuaData();
+        if(data.pengaturan) {
+            if (data.pengaturan.ongkirMinimal !== undefined) ongkirMinimal = data.pengaturan.ongkirMinimal;
+            if (data.pengaturan.ongkirPerKm !== undefined) ongkirPerKm = data.pengaturan.ongkirPerKm;
+        }
+
         const dbUser = (data.daftarPengguna || []).find(p => p.hp === usr.hp);
         if(dbUser) {
             keranjang = dbUser.keranjang || [];
@@ -765,8 +801,10 @@ function ambilLokasiSaya() {
         if (penandaSaya) penandaSaya.setLatLng([lokasiSaya.lat, lokasiSaya.lon]);
         document.getElementById("infoPosisiSaya").textContent = "Lokasi Akurat Ditemukan";
         const btnPesan = document.getElementById("tombolKirim");
-        btnPesan.disabled = false; btnPesan.classList.remove("btn-abu");
-        document.getElementById("infoAkurasi").style.display = "none";
+        if(btnPesan) {
+            btnPesan.disabled = false; btnPesan.classList.remove("btn-abu");
+            document.getElementById("infoAkurasi").style.display = "none";
+        }
     }, err => {}, { enableHighAccuracy: true });
 }
 
@@ -895,7 +933,6 @@ async function tampilkanMenu() {
     wadah.innerHTML = "";
     menu.forEach(item => {
         const isFav = daftarFavorit.includes(item.nama);
-        
         const kat = (data.daftarKategori||[]).find(k => k.id == item.idKategori);
         const namaKat = kat ? kat.nama : 'Menu';
 
@@ -975,7 +1012,25 @@ function renderListCheckout() {
             </div>
         </div>`;
     });
-    document.getElementById("totalHargaCheckout").textContent = `Rp ${total.toLocaleString('id-ID')}`;
+    
+    const jarakKm = hitungJarakKm(restoLat, restoLon, lokasiSaya.lat, lokasiSaya.lon);
+    
+    // Perhitungan Ongkir Baru: Minimal Ongkir + Ongkir Per KM
+    let ongkir = ongkirMinimal;
+    if (jarakKm > 1) {
+        ongkir += Math.ceil(jarakKm - 1) * ongkirPerKm;
+    }
+
+    const totalBayar = total + ongkir;
+
+    document.getElementById("totalHargaCheckout").innerHTML = `
+        <div class="text-muted small fw-normal mb-1">Harga Menu: Rp ${total.toLocaleString('id-ID')}</div>
+        <div class="text-muted small fw-normal mb-1">Jarak: ${jarakKm.toFixed(1)} km</div>
+        <div class="text-muted small fw-normal mb-2">Ongkir: Rp ${ongkir.toLocaleString('id-ID')}</div>
+        <div class="fs-5">Rp ${totalBayar.toLocaleString('id-ID')}</div>
+    `;
+    
+    window.checkoutData = { jarakKm: jarakKm.toFixed(1), ongkir, totalBayar };
 }
 
 function tutupPopup() {
@@ -995,11 +1050,14 @@ async function kirimPesanan() {
     const daftar = data.daftarPesanan || [];
     
     const pesananBaru = {
-        resi: "RESI-" + Math.floor(100000 + Math.random() * 900000),
+        resi: "ID-" + Math.floor(100000 + Math.random() * 900000), 
         barang: barangString,
         nama: penggunaSaatIni.nama, hp: penggunaSaatIni.hp,
         alamat: alamat, catatan: catatan,
         lokasiTujuan: { lat: lokasiSaya.lat, lon: lokasiSaya.lon },
+        jarak: window.checkoutData.jarakKm,
+        ongkir: window.checkoutData.ongkir,
+        totalBayar: window.checkoutData.totalBayar,
         status: "Menunggu", waktuPesan: new Date().toLocaleString('id-ID'),
         timestampMs: Date.now()
     };
@@ -1035,6 +1093,7 @@ async function tampilkanRiwayat() {
         else if (pes.status === "Sampai di Restoran") { warna = "#3B82F6"; teks = "Di Restoran"; }
         else if (pes.status === "Dalam Perjalanan") { warna = "#F59E0B"; teks = "Menuju Lokasimu"; }
         else if (pes.status === "Selesai") { warna = "#0F4C5C"; teks = "Pesanan Selesai"; }
+        else if (pes.status === "Dibatalkan") { warna = "#DC2626"; teks = "Dibatalkan"; }
 
         let btnWa = "";
         if(pes.hpDriver) {
@@ -1055,10 +1114,12 @@ async function tampilkanRiwayat() {
                 <span class="badge text-white rounded-pill px-3" style="background:${warna}">${teks}</span>
             </div>
             <div class="d-flex justify-content-between">
-                <h6 class="fw-bold mb-1">${pes.resi}</h6>
+                <h6 class="fw-bold mb-1">ID TRANSAKSI: ${pes.resi}</h6>
                 <button onclick="cetakStruk('${pes.resi}')" class="btn-cetak"><i class="bi bi-printer"></i> Struk</button>
             </div>
             <p class="mb-2 small"><strong>Menu:</strong> ${pes.barang}</p>
+            ${pes.ongkir !== undefined ? `<p class="mb-1 small"><strong>Ongkir:</strong> Rp ${pes.ongkir.toLocaleString('id-ID')} (${pes.jarak || 0} km)</p>` : ''}
+            ${pes.totalBayar !== undefined ? `<p class="mb-2 small"><strong>Total:</strong> Rp ${pes.totalBayar.toLocaleString('id-ID')}</p>` : ''}
             ${infoDriver}
             <p class="mb-1 small text-muted"><i class="bi bi-geo-alt"></i> ${pes.alamat}</p>
             
@@ -1095,7 +1156,7 @@ async function cetakStruk(resi) {
                 <h2>K-DELIVERY</h2>
                 <p>Kolaka - Sulawesi Tenggara</p>
                 <div class="garis"></div>
-                <p><b>RESI: ${pes.resi}</b></p>
+                <p><b>ID TRANSAKSI: ${pes.resi}</b></p>
                 <p>${pes.waktuPesan}</p>
             </div>
             <div class="garis"></div>
@@ -1106,6 +1167,8 @@ async function cetakStruk(resi) {
             <table>${htmlBarang}</table>
             <div class="garis"></div>
             <p><b>Alamat:</b> ${pes.alamat}</p>
+            ${pes.ongkir ? `<p><b>Ongkir:</b> Rp ${pes.ongkir.toLocaleString('id-ID')}</p>` : ''}
+            ${pes.totalBayar ? `<p><b>Total Bayar:</b> Rp ${pes.totalBayar.toLocaleString('id-ID')}</p>` : ''}
             ${pes.catatan ? `<p><b>Catatan:</b> ${pes.catatan}</p>` : ''}
             <div class="garis"></div>
             <p><b>Driver:</b> ${pes.namaDriver || '-'}</p>
@@ -1169,7 +1232,7 @@ function kembaliKePosisiSaya() { if(peta) peta.setView([lokasiSaya.lat, lokasiSa
 async function perbaruiDataPeta() {
     if(!peta) return;
     const data = await bacaSemuaData();
-    const pes = (data.daftarPesanan||[]).find(p => p.hp === penggunaSaatIni.hp && p.status !== "Selesai" && p.lokasiDriver);
+    const pes = (data.daftarPesanan||[]).find(p => p.hp === penggunaSaatIni.hp && p.status !== "Selesai" && p.status !== "Dibatalkan" && p.lokasiDriver);
     if(pes) {
         penandaDriver.setLatLng([pes.lokasiDriver.lat, pes.lokasiDriver.lon]).setOpacity(1);
         garisRute.setLatLngs([[pes.lokasiDriver.lat, pes.lokasiDriver.lon], [lokasiSaya.lat, lokasiSaya.lon]]);
